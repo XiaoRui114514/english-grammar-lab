@@ -668,11 +668,28 @@ details.explanation-panel .explain {
   }
   .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }
 }
-/* 题卡底纹：截图、录屏、打印都带作者署名 */
-.qbox {
-  background-image: var(--egl-tile, none);
-  background-repeat: repeat; background-size: 420px 262px;
+/* 题卡底纹：截图、录屏、打印都带作者署名。
+   用普通文本排版，不用图片透明通道 —— 个别机型浏览器会把 SVG 背景图的低透明度
+   渲染成实心白，水印糊在题干与选项上（“水印太厚”）；文本 + rgba 与页面其余
+   内容走同一条渲染路径，各机型表现一致，打印时也保留。 */
+.qbox { position: relative; z-index: 0; }
+.egl-tile {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: -1;
+  overflow: hidden; border-radius: inherit; pointer-events: none;
+  color: rgba(255, 255, 255, 0.042);
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  -webkit-user-select: none; user-select: none;
 }
+.egl-tile i {
+  position: absolute; display: block; width: 420px; height: 262px;
+  font-style: normal; line-height: 1;
+  transform: rotate(-24deg); transform-origin: 50% 50%;
+}
+.egl-tile i span { position: absolute; display: block; white-space: nowrap; }
+.egl-tile i .t { left: 20px; top: 84px; font-size: 28.5px; font-weight: 700; letter-spacing: 3px; }
+.egl-tile i .l { left: 21px; font-size: 10.5px; font-weight: 400; }
+.egl-tile i .l1 { top: 130px; letter-spacing: 1.5px; }
+.egl-tile i .l2 { top: 151px; letter-spacing: 1.1px; }
 /* 卡片角标 */
 .learn-head, .score-hero, .sq-card { position: relative; }
 .learn-head { padding-bottom: 22px; }
@@ -716,6 +733,7 @@ details.explanation-panel .explain {
 @media print {
   .egl-seal { display: none; }
   .learn-head::after, .score-hero::after, .sq-card::after { color: #222; opacity: 0.75; }
+  .egl-tile { color: rgba(30, 34, 56, 0.2); }
   .egl-foot { color: #333; }
 }
 /*__BRAND_CSS_END__*/

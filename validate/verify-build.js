@@ -13,7 +13,7 @@ const checks = [
   ['EGL.u exports $$', '$$: $$'],
   ['genLog still present', 'id="genLog"'],
   ['授权弹窗入口已内联', 'data-egl-ok'],
-  ['品牌水印样式已内联', '--egl-tile'],
+  ['品牌水印样式已内联', '.egl-tile'],
   ['品牌 / 版权模块已内联', 'E.brand = {'],
   ['署名印章与展开署名已内联', 'egl-seal-panel'],
   ['页脚版本号已内联', 'egl-foot-ver'],
