@@ -42,4 +42,4 @@ npm run test:build  # 检查成品文件完整性
 
 个人免费自学使用，禁止任何商业用途——培训机构或补课班授课、付费课程与讲义、付费社群引流、二次售卖都不行；转发请保留署名、水印和授权说明。完整条款见 [LICENSE](LICENSE)，也可以点页面右下角的印章或页脚「版权与使用授权」查看。
 
-题库、方法课和解析都是原创整理的，引用请注明出处（Hison · 抖音 XRuiiiiii · 小红书 xiaoruiaaa520）。题目或解析有问题、想提改进建议，欢迎开 Issue；想动手改代码可以先看 [CONTRIBUTING.md](CONTRIBUTING.md)。
+题库、方法课和解析由作者整理与编排（部分内容借助 AI 生成后经人工筛选、修改与组织），引用请注明出处（Hison · 抖音 XRuiiiiii · 小红书 xiaoruiuaa520）。题目或解析有问题、想提改进建议，欢迎开 Issue；想动手改代码可以先看 [CONTRIBUTING.md](CONTRIBUTING.md)。
