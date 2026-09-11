@@ -1,7 +1,8 @@
 /* ============================================================
  * brand.js — 作者品牌 · 版权保护层（署名 / 水印 / 授权协议 / 自愈守护）
  * ------------------------------------------------------------
- * 1) 可见水印：全页纹理层、题卡纹理、卡片角标、右下角印章、页脚署名
+ * 1) 可见署名：卡片角标（含题卡）、右下角印章、页脚署名、首页品牌标签
+ *    （不在题卡上铺底纹：部分机型浏览器会把低透明度墨迹提亮成实心白）
  * 2) 隐形指纹：零宽字符编码，随文本复制而传播，可在控制台反查来源
  * 3) 版权与使用授权（免责声明）：首次访问自动提示，之后页脚/印章随时打开
  * 4) 自愈守护：水印节点被删除、改名、隐藏都会被自动重建（含样式）
@@ -135,11 +136,6 @@
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
   var VER = '__EGL_VER__';
   if (VER.charAt(0) === '_') VER = '';
-  // 题卡底纹：用普通文本节点平铺（不用图片透明通道）
-  // 起因：个别机型把 SVG 背景图的低透明度当成实心白渲染，水印会糊住题干与选项；
-  // 文本 + rgba 颜色与页面其余内容走同一条渲染路径，各机型表现一致。
-  var TILE = 'eglTile';
-  var TILE_W = 420, TILE_H = 262;
   var _guardTimer = null;
 
   function doc() { return W.document || null; }
@@ -167,52 +163,6 @@
   function drop(id) {
     var el = doc() && doc().getElementById ? doc().getElementById(id) : null;
     if (el && el.parentNode && el.parentNode.removeChild) el.parentNode.removeChild(el);
-  }
-
-  // 底纹：署名 + 两个平台账号，斜向平铺（单元格 420×262，与旧版 SVG 尺寸一致）
-  // 按题卡实际尺寸铺满；尺寸没变就一个字都不写（避免自愈守护反复触发）
-  function fillTile(box, id) {
-    if (!box || !box.appendChild || !box.getAttribute) return;
-    var w = box.clientWidth || box.offsetWidth || 0;
-    var h = box.clientHeight || box.offsetHeight || 0;
-    if (w < 40 || h < 40) return;
-    var cols = Math.max(1, Math.ceil(w / TILE_W));
-    var rows = Math.max(1, Math.ceil(h / TILE_H));
-    var sig = cols + 'x' + rows;
-    // 只认自己造的底纹层（被顶替/改名当不存在）；多余的副本清掉
-    var kids = box.children || [], k, layer = null;
-    for (k = 0; k < kids.length; k++) {
-      if (!kids[k].getAttribute || !kids[k].getAttribute('data-egl-tile')) continue;
-      if (layer) { if (kids[k].parentNode) kids[k].parentNode.removeChild(kids[k]); continue; }
-      layer = kids[k];
-    }
-    if (layer && layer.getAttribute('data-egl-tile') !== sig) {
-      if (layer.parentNode && layer.parentNode.removeChild) layer.parentNode.removeChild(layer);
-      layer = null;
-    }
-    if (layer) return;
-    var html = '', c, r;
-    for (r = 0; r < rows; r++) {
-      for (c = 0; c < cols; c++) {
-        html += '<i style="left:' + (c * TILE_W) + 'px;top:' + (r * TILE_H) + 'px">'
-          + '<span class="t">' + esc(id.tag) + '</span>'
-          + '<span class="l l1">' + esc(id.lab) + '</span>'
-          + '<span class="l l2">\u6296\u97f3 ' + esc(id.dy) + ' \uff5c \u5c0f\u7ea2\u4e66 ' + esc(id.xhs) + '</span>'
-          + '</i>';
-      }
-    }
-    layer = make('div', TILE, 'egl-tile');
-    if (layer.removeAttribute) layer.removeAttribute('id');
-    if (layer.setAttribute) { layer.setAttribute('data-egl-tile', sig); layer.setAttribute('aria-hidden', 'true'); }
-    layer.innerHTML = html;
-    box.insertBefore(layer, box.firstChild);
-  }
-
-  function ensureTile() {
-    var d = doc(), id = ident();
-    if (!d || !id || !d.querySelectorAll) return;
-    var boxes = d.querySelectorAll('.qbox');
-    for (var i = 0; i < boxes.length; i++) fillTile(boxes[i], id);
   }
 
   function injectCSS() {
@@ -412,7 +362,6 @@
     if (!body() || !ident()) return;
     try { injectCSS(); } catch (e) {}
     try { ensureNodes(); } catch (e) {}
-    try { ensureTile(); } catch (e) {}
     try { ensureChip(); } catch (e) {}
     try { harden(); } catch (e) {}
   }
@@ -437,7 +386,6 @@
     }
     if (typeof W.setInterval === 'function') W.setInterval(guardOnce, 2000);
     if (W.addEventListener) W.addEventListener('scroll', guardSoon, { passive: true });
-    if (W.addEventListener) W.addEventListener('resize', guardSoon, { passive: true });
     if (W.addEventListener) W.addEventListener('pageshow', guardSoon);
     var d = doc();
     if (d && d.addEventListener) d.addEventListener('visibilitychange', guardSoon);
@@ -537,7 +485,6 @@
     if (!ident()) return false;
     try { injectCSS(); } catch (e) {}
     try { ensureNodes(); } catch (e) {}
-    try { ensureTile(); } catch (e) {}
     try { ensureChip(); } catch (e) {}
     try { startGuard(); } catch (e) {}
     try { firstVisit(); } catch (e) {}
