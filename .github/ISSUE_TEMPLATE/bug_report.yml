@@ -1,0 +1,76 @@
+name: 🐞 Bug 反馈
+description: 报告功能异常、显示错位、数据丢失等问题
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！请尽量填完整，方便快速定位。
+        **注意：请不要粘贴你的 DeepSeek API Key 或任何请求头内容。**
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 发生了什么？你期望发生什么？
+      placeholder: 例如：交卷后点击“下一题”没有反应，期望进入下一题。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开 English-Grammar-Lab.html
+        2. 进入「专题学习 → 谓语动词 · 时态 01」
+        3. 答完 12 题后交卷
+        4. ……
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本号
+      description: 页面最下方「禁止商用」下面一行显示的版本号（如看不到，请写文件获取渠道）
+      placeholder: 例如 v1.0.0
+    validations:
+      required: false
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: 浏览器
+      options:
+        - Chrome / Edge（桌面）
+        - Safari（Mac / iPhone）
+        - 手机浏览器（Android）
+        - 微信内置浏览器
+        - 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及模块
+      options:
+        - 首页 / 学习记录
+        - 专题练习（句子级）
+        - 挑战卷 / 语篇练习
+        - 错题本 / 薄弱点
+        - AI 出题（DeepSeek）
+        - 解题方法课
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console 报错或截图
+      description: 按 F12 打开控制台，把红色报错或截图贴在这里
+    validations:
+      required: false

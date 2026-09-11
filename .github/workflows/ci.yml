@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: 构建与自测
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 自测（题库 / 引擎 / 流程 / DOM / AI）
+        run: npm test
+
+      - name: 重建单文件产物并与仓库比对
+        run: |
+          npm run build
+          git diff --exit-code -- English-Grammar-Lab.html
+
+      - name: 产物完整性检查
+        run: npm run test:build

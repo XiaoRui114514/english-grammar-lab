@@ -1,0 +1,25 @@
+{
+  "name": "english-grammar-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "初高中英语语法填空学习系统（推荐上海地区使用）：单文件 HTML 应用 + 内置题库 + DeepSeek AI 出题",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "english-grammar",
+    "cloze",
+    "shanghai",
+    "education",
+    "single-file-app",
+    "deepseek"
+  ],
+  "scripts": {
+    "build": "node build.js",
+    "test": "node validate/check.js && node validate/smoke.js && node validate/flow-test.js && node validate/dom-smoke.js && node validate/ai-flow-test.js && node validate/build-smoke.js",
+    "test:build": "node validate/verify-build.js",
+    "test:browser": "node validate/browser-smoke.js",
+    "probe": "node validate/probe.js"
+  }
+}

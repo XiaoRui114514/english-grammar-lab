@@ -1,0 +1,12 @@
+# 统一以 LF 存储与检出，避免跨平台换行差异导致“构建产物对不上”
+* text=auto eol=lf
+
+# 二进制资源不做行尾转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary

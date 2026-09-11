@@ -1,0 +1,41 @@
+name: 💡 功能建议
+description: 提出新功能、内容或体验上的改进想法
+title: "[建议] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么问题
+      description: 先描述痛点，再说方案
+      placeholder: 例如：每次错题复习都要手动翻专题，想按知识点一键筛。
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望的方案
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 你考虑过的其他做法
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 影响范围
+      options:
+        - 题库 / 课程内容
+        - 练习流程与判分
+        - 错题与统计
+        - AI 出题
+        - 界面与无障碍
+        - 其他
+    validations:
+      required: true
