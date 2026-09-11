@@ -617,7 +617,7 @@ details.explanation-panel .explain {
 
 
 /*__BRAND_CSS_START__*/
-/* ==================== 品牌署名 · 授权（Hison 原创） ====================
+/* ==================== 品牌署名 · 授权（Hison） ====================
    注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。
    删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */
 /* 右下角署名印章：平时是一枚小胶囊，悬停 / 点击后原地展开署名卡片（无弹窗） */
@@ -679,7 +679,7 @@ details.explanation-panel .explain {
 .sq-card { padding-bottom: 22px; }
 .score-hero { padding-bottom: 30px; }
 .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {
-  content: "__EGL_NM__ · 原创";
+  content: "by __EGL_NM__";
   position: absolute; right: 10px; bottom: 6px;
   font-size: 10px; letter-spacing: 1px; font-weight: 700;
   color: var(--ink-faint); opacity: 0.55;

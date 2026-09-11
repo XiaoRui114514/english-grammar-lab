@@ -184,7 +184,7 @@
     if (!el || !id) return;
     // 先是一枚小胶囊；悬停 / 聚焦 / 点击后在原地展开署名卡片（不用弹窗）
     if (!el.getAttribute || el.getAttribute('data-egl-face') !== id.n) {
-      el.innerHTML = '<span class="egl-seal-face">\u00a9 ' + esc(id.n) + ' \u00b7 \u539f\u521b</span>'
+      el.innerHTML = '<span class="egl-seal-face">by ' + esc(id.n) + '</span>'
         + '<span class="egl-seal-panel">'
         + '<span class="egl-seal-name">' + esc(id.tag) + '</span>'
         + '<span class="egl-seal-row"><i>\u6296\u97f3</i><b>' + esc(id.dy) + '</b></span>'
@@ -219,7 +219,7 @@
     return '<div class="egl-foot-main" data-egl-main="1">' + esc(id.lab) + ' \u00b7 ' + SUB + '\uff08' + REGION + '\uff09</div>'
       + '<div class="egl-foot-brand">\u00a9 2026 ' + esc(id.tag) + '\u3000\u00b7\u3000\u6296\u97f3 ' + esc(id.dy)
       + '\u3000\u00b7\u3000\u5c0f\u7ea2\u4e66 ' + esc(id.xhs)
-      + '\u3000\u00b7\u3000\u539f\u521b\u4f5c\u54c1\uff0c\u4ec5\u4f9b\u4e2a\u4eba\u514d\u8d39\u5b66\u4e60' + sig() + '</div>'
+      + '\u3000\u00b7\u3000\u4ec5\u4f9b\u4e2a\u4eba\u514d\u8d39\u5b66\u4e60' + sig() + '</div>'
       + '<div class="egl-foot-links">'
       + '<button class="egl-link" type="button" id="eglLicBtn">\ud83d\udcdc \u7248\u6743\u4e0e\u4f7f\u7528\u6388\u6743</button>'
       + '<span class="egl-tip">\u7981\u6b62\u5546\u7528</span>'
