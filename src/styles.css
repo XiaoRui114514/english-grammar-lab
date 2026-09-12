@@ -33,19 +33,28 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-html { -webkit-text-size-adjust: 100%; }
+/* 画布底色兜底：手机浏览器滚动 / 状态栏收放时，未绘制区域也不会露出白边 */
+html { -webkit-text-size-adjust: 100%; background-color: var(--bg1); color-scheme: dark; }
 
 body {
   font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
   color: var(--ink);
   line-height: 1.65;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* 背景光晕层：单独用 position: fixed 铺满可视区。
+   body 保持透明，底色由 html 兜底（z-index:-1 的层会被 body 自身的背景盖住）。
+   （不再给 body 用 background-attachment: fixed —— 手机上滚动到底部时
+     固定背景覆盖不到的区域会露出白色画布，形成底部白边。） */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
     radial-gradient(1100px 620px at 85% -10%, rgba(91, 140, 255, 0.22), transparent 60%),
     radial-gradient(900px 560px at -10% 110%, rgba(124, 107, 255, 0.20), transparent 55%),
     linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  overflow-x: hidden;
 }
 
 /* 玻璃卡片 */
@@ -73,12 +82,23 @@ body {
   display: flex; align-items: center; gap: 8px; white-space: nowrap;
 }
 .topbar .brand .logo {
-  width: 30px; height: 30px; border-radius: 9px; display: inline-flex;
+  width: 30px; height: 30px; border-radius: 9px; display: inline-flex; flex: 0 0 auto;
   align-items: center; justify-content: center; font-size: 16px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   box-shadow: 0 4px 14px rgba(91, 140, 255, 0.45);
 }
+/* 品牌文字：空间不足时收成 0 宽（保留图标），宽度变化带动效 */
+.topbar .brand .brand-text {
+  min-width: 0; max-width: 320px; overflow: hidden;
+  transition: max-width 0.34s var(--ease), opacity 0.26s ease, transform 0.34s var(--ease);
+}
+.topbar .brand .brand-text .nm { display: block; }
 .topbar .brand small { display: block; font-size: 10px; font-weight: 500; color: var(--ink-faint); letter-spacing: 0; }
+/* 竖屏（手机/窄窗口）只留图标；宽屏但空间不足时由 script 加 .mini */
+@media (orientation: portrait), (max-width: 860px) {
+  .topbar .brand .brand-text { max-width: 0; opacity: 0; transform: translateX(-8px); }
+}
+.topbar.mini .brand .brand-text { max-width: 0; opacity: 0; transform: translateX(-8px); }
 .topbar .nav { display: flex; gap: 4px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
 .topbar .nav::-webkit-scrollbar { display: none; }
 .nav-btn {
@@ -246,7 +266,6 @@ body {
   background: linear-gradient(120deg, #ffe082, #ffb84d);
   -webkit-background-clip: text; background-clip: text;
   border-bottom: 2px dashed #ffe082; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px;
-  box-shadow: 0 4px 12px rgba(255, 224, 130, 0.16);
 }
 .qtext .hint-p { color: var(--glow); font-size: 15px; font-weight: 700; }
 .qtext b.tok { color: var(--hl); font-weight: 800; }

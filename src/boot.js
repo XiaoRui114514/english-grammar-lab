@@ -77,6 +77,51 @@
     if (brand) brand.addEventListener('click', function () { go('home'); });
   }
 
+  /* 顶栏空间检测：竖屏 / 窄窗口 / 导航挤不下时，品牌文字收成 0 宽只留图标，
+     把右侧导航（首页 / 专题 / AI出题…）的空间让出来；恢复宽度时反向展开。 */
+  function fitTopbar() {
+    var bar = document.querySelector('.topbar');
+    if (!bar || !window.getComputedStyle || !document.documentElement) return;
+    var brand = bar.querySelector('.brand');
+    var text = bar.querySelector('.brand-text');
+    var nav = bar.querySelector('.nav');
+    if (!brand || !text || !nav) return;
+    var logo = bar.querySelector('.brand .logo');
+
+    function crowded() {
+      var cs = window.getComputedStyle(bar), bcs = window.getComputedStyle(brand), ncs = window.getComputedStyle(nav);
+      var pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+      var logoW = logo ? logo.offsetWidth : 0;
+      var textW = text.scrollWidth; // nowrap + overflow:hidden：收起后仍能读到自然宽度
+      var navW = 0, btns = nav.children;
+      for (var i = 0; i < btns.length; i++) navW += btns[i].offsetWidth;
+      if (btns.length > 1) navW += (parseFloat(ncs.columnGap || ncs.gap) || 0) * (btns.length - 1);
+      var need = pad + logoW + (parseFloat(bcs.columnGap || bcs.gap) || 0) + textW
+        + (parseFloat(cs.columnGap || cs.gap) || 0) + navW;
+      var room = document.documentElement.clientWidth || window.innerWidth || 0;
+      return need > room - 6;
+    }
+
+    function apply() { bar.classList.toggle('mini', crowded()); }
+    apply();
+
+    var raf = 0;
+    var nextFrame = window.requestAnimationFrame
+      ? function (cb) { return window.requestAnimationFrame(cb); }
+      : function (cb) { return window.setTimeout(cb, 60); };
+    function later() {
+      if (raf) return;
+      raf = nextFrame(function () { raf = 0; apply(); });
+    }
+    window.addEventListener('resize', later);
+    window.addEventListener('orientationchange', later);
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(orientation: portrait)');
+      if (mq.addEventListener) mq.addEventListener('change', later);
+      else if (mq.addListener) mq.addListener(later);
+    }
+  }
+
   function init() {
     // 署名 / 水印 / 版权层校验：品牌模块被摘除或篡改 → 拒绝启动（详见 src/brand.js）
     if (!(E.brand && E.brand.ok && E.brand.ok())) { blocked(); return; }
@@ -101,6 +146,7 @@
     // 任意自动保存 → 右上角“已自动保存”提示（节流，1.4s 后消失）
     if (E.setSaveListener && U.savedNotice) E.setSaveListener(U.savedNotice);
     bindTopbar();
+    fitTopbar();
     window.addEventListener('hashchange', onHashChange);
     render();
   }

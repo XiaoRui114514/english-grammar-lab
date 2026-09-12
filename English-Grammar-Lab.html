@@ -51,19 +51,28 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-html { -webkit-text-size-adjust: 100%; }
+/* 画布底色兜底：手机浏览器滚动 / 状态栏收放时，未绘制区域也不会露出白边 */
+html { -webkit-text-size-adjust: 100%; background-color: var(--bg1); color-scheme: dark; }
 
 body {
   font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
   color: var(--ink);
   line-height: 1.65;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* 背景光晕层：单独用 position: fixed 铺满可视区。
+   body 保持透明，底色由 html 兜底（z-index:-1 的层会被 body 自身的背景盖住）。
+   （不再给 body 用 background-attachment: fixed —— 手机上滚动到底部时
+     固定背景覆盖不到的区域会露出白色画布，形成底部白边。） */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
     radial-gradient(1100px 620px at 85% -10%, rgba(91, 140, 255, 0.22), transparent 60%),
     radial-gradient(900px 560px at -10% 110%, rgba(124, 107, 255, 0.20), transparent 55%),
     linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  overflow-x: hidden;
 }
 
 /* 玻璃卡片 */
@@ -91,12 +100,23 @@ body {
   display: flex; align-items: center; gap: 8px; white-space: nowrap;
 }
 .topbar .brand .logo {
-  width: 30px; height: 30px; border-radius: 9px; display: inline-flex;
+  width: 30px; height: 30px; border-radius: 9px; display: inline-flex; flex: 0 0 auto;
   align-items: center; justify-content: center; font-size: 16px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   box-shadow: 0 4px 14px rgba(91, 140, 255, 0.45);
 }
+/* 品牌文字：空间不足时收成 0 宽（保留图标），宽度变化带动效 */
+.topbar .brand .brand-text {
+  min-width: 0; max-width: 320px; overflow: hidden;
+  transition: max-width 0.34s var(--ease), opacity 0.26s ease, transform 0.34s var(--ease);
+}
+.topbar .brand .brand-text .nm { display: block; }
 .topbar .brand small { display: block; font-size: 10px; font-weight: 500; color: var(--ink-faint); letter-spacing: 0; }
+/* 竖屏（手机/窄窗口）只留图标；宽屏但空间不足时由 script 加 .mini */
+@media (orientation: portrait), (max-width: 860px) {
+  .topbar .brand .brand-text { max-width: 0; opacity: 0; transform: translateX(-8px); }
+}
+.topbar.mini .brand .brand-text { max-width: 0; opacity: 0; transform: translateX(-8px); }
 .topbar .nav { display: flex; gap: 4px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
 .topbar .nav::-webkit-scrollbar { display: none; }
 .nav-btn {
@@ -264,7 +284,6 @@ body {
   background: linear-gradient(120deg, #ffe082, #ffb84d);
   -webkit-background-clip: text; background-clip: text;
   border-bottom: 2px dashed #ffe082; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px;
-  box-shadow: 0 4px 12px rgba(255, 224, 130, 0.16);
 }
 .qtext .hint-p { color: var(--glow); font-size: 15px; font-weight: 700; }
 .qtext b.tok { color: var(--hl); font-weight: 800; }
@@ -746,7 +765,7 @@ details.explanation-panel .explain {
 <body>
 <header class="topbar">
   <div class="brand" id="brandHome"><span class="logo">🧪</span>
-    <div>上海初高语法填空<small>上海命题风格 · 全国通用 · 自学+训练+AI</small></div>
+    <div class="brand-text"><span class="nm">上海初高语法填空</span><small>上海命题风格 · 全国通用 · 自学+训练+AI</small></div>
   </div>
   <nav class="nav">
     <button class="nav-btn" data-nav="home">🏠 首页</button>
@@ -8146,7 +8165,7 @@ details.explanation-panel .explain {
   var CSS = "\n/* ==================== 品牌署名 · 授权（Hison） ====================\n   注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。\n   删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */\n/* 右下角署名印章：平时是一枚小胶囊，悬停 / 点击后原地展开署名卡片（无弹窗） */\n.egl-seal {\n  position: fixed; right: 12px; bottom: 12px; z-index: 46;\n  display: block; text-align: left; overflow: hidden;\n  padding: 6px 11px; border-radius: 13px; cursor: pointer;\n  font-family: inherit; color: rgba(238, 241, 251, 0.76);\n  background: rgba(10, 14, 30, 0.62);\n  border: 1px solid rgba(165, 194, 255, 0.26);\n  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);\n  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);\n  opacity: 0.88; transform-origin: 100% 100%;\n  transition: padding 0.34s var(--ease), border-radius 0.34s var(--ease),\n              background 0.3s, box-shadow 0.34s, opacity 0.24s, transform 0.34s var(--ease);\n}\n.egl-seal-face {\n  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;\n  font-size: 10.5px; font-weight: 700; letter-spacing: 0.6px;\n}\n.egl-seal-panel {\n  display: block; width: 0; max-height: 0; opacity: 0; margin-top: 0;\n  overflow: hidden; white-space: nowrap; transform: translateY(6px);\n  transition: width 0.34s var(--ease), max-height 0.34s var(--ease), opacity 0.26s ease,\n              transform 0.34s var(--ease), margin-top 0.34s var(--ease);\n}\n.egl-seal-name { display: block; font-size: 12.5px; font-weight: 800; letter-spacing: 0.4px; color: var(--ink); }\n.egl-seal-row { display: block; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }\n.egl-seal-row i { font-style: normal; color: var(--ink-faint); margin-right: 6px; }\n.egl-seal-row b { color: var(--hl); font-weight: 800; letter-spacing: 0.4px; }\n/* 展开态：键盘聚焦 / 点击（触摸） */\n.egl-seal:focus-visible,\n.egl-seal.on {\n  padding: 12px 15px 13px; border-radius: 18px;\n  background: rgba(10, 14, 30, 0.94);\n  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n  opacity: 1; transform: translateY(-2px);\n}\n.egl-seal:focus-visible .egl-seal-panel,\n.egl-seal.on .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n/* 有鼠标的设备：悬停即展开 */\n@media (hover: hover) {\n  .egl-seal:hover {\n    padding: 12px 15px 13px; border-radius: 18px;\n    background: rgba(10, 14, 30, 0.94);\n    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n    opacity: 1; transform: translateY(-2px);\n  }\n  .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n}\n/* 题卡底纹已撤掉：部分机型浏览器（如荣耀浏览器）会把低透明度的水印墨迹\n   （SVG 图片版、文本 rgba 版都试过）自动提亮成实心白，糊在题干与选项上。\n   署名改由各处角标承担：题卡左下角 + 其它卡片右下角各一行小字，浓淡是\n   固定色 + 固定 opacity，与页面其它文字一致，各机型都不会被提亮，\n   截图、打印都带署名。 */\n/* 卡片角标 */\n.learn-head, .score-hero, .sq-card, .qbox { position: relative; }\n.learn-head { padding-bottom: 22px; }\n.sq-card { padding-bottom: 22px; }\n.score-hero { padding-bottom: 30px; }\n.learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {\n  content: \"by __EGL_NM__\";\n  position: absolute; right: 10px; bottom: 6px;\n  font-size: 10px; letter-spacing: 1px; font-weight: 700;\n  color: var(--ink-faint); opacity: 0.55;\n  pointer-events: none; user-select: none;\n}\n/* 题卡角标放左下：右下是固定印章的位置，靠太近会叠在一起 */\n.qbox::after { right: auto; left: 12px; }\n/* 页脚署名 */\n.egl-foot { text-align: center; padding: 30px 14px 22px; color: var(--ink-faint); font-size: 12px; }\n.egl-foot .egl-foot-main { color: var(--ink-faint); }\n.egl-foot .egl-foot-brand { margin-top: 5px; color: var(--ink-dim); letter-spacing: 0.3px; line-height: 1.8; }\n.egl-foot .egl-foot-links { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }\n.egl-foot .egl-link {\n  border: 0; background: transparent; color: var(--accent); cursor: pointer;\n  font-family: inherit; font-size: 12px; padding: 3px 4px; text-decoration: underline;\n}\n.egl-foot .egl-tip { color: var(--ink-faint); font-size: 11px; }\n/* 页脚版本号（构建时由 package.json 注入） */\n.egl-foot .egl-foot-ver { margin-top: 4px; color: var(--ink-faint); font-size: 11px; letter-spacing: 0.6px; opacity: 0.8; }\n/* 首页品牌小标签 */\n.egl-chip {\n  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;\n  font-size: 11.5px; letter-spacing: 0.4px; color: var(--ink-faint);\n  border: 1px dashed rgba(165, 194, 255, 0.3); border-radius: 999px; padding: 3px 10px;\n}\n/* 首页副标题下的适用范围标签 */\n.hero-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }\n.hero-tags span {\n  font-size: 11px; letter-spacing: 0.4px; color: var(--ink-dim);\n  border: 1px solid rgba(165, 194, 255, 0.26); border-radius: 999px; padding: 2px 9px;\n}\n.hero-tags span.hot { color: var(--glow); border-color: rgba(255, 224, 130, 0.34); }\n/* 授权说明弹窗 */\n.egl-lic p { margin: 6px 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.7; }\n.egl-lic p b { color: var(--ink); }\n@media print {\n  .egl-seal { display: none; }\n  .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after { color: #222; opacity: 0.75; }\n  .egl-foot { color: #333; }\n}\n";
   // 版本号：构建时由 build.js 用 package.json 的 version 替换（单一来源，
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
-  var VER = "v1.3.1";
+  var VER = "v1.3.2";
   if (VER.charAt(0) === '_') VER = '';
   var _guardTimer = null;
 
@@ -12279,6 +12298,51 @@ details.explanation-panel .explain {
     if (brand) brand.addEventListener('click', function () { go('home'); });
   }
 
+  /* 顶栏空间检测：竖屏 / 窄窗口 / 导航挤不下时，品牌文字收成 0 宽只留图标，
+     把右侧导航（首页 / 专题 / AI出题…）的空间让出来；恢复宽度时反向展开。 */
+  function fitTopbar() {
+    var bar = document.querySelector('.topbar');
+    if (!bar || !window.getComputedStyle || !document.documentElement) return;
+    var brand = bar.querySelector('.brand');
+    var text = bar.querySelector('.brand-text');
+    var nav = bar.querySelector('.nav');
+    if (!brand || !text || !nav) return;
+    var logo = bar.querySelector('.brand .logo');
+
+    function crowded() {
+      var cs = window.getComputedStyle(bar), bcs = window.getComputedStyle(brand), ncs = window.getComputedStyle(nav);
+      var pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+      var logoW = logo ? logo.offsetWidth : 0;
+      var textW = text.scrollWidth; // nowrap + overflow:hidden：收起后仍能读到自然宽度
+      var navW = 0, btns = nav.children;
+      for (var i = 0; i < btns.length; i++) navW += btns[i].offsetWidth;
+      if (btns.length > 1) navW += (parseFloat(ncs.columnGap || ncs.gap) || 0) * (btns.length - 1);
+      var need = pad + logoW + (parseFloat(bcs.columnGap || bcs.gap) || 0) + textW
+        + (parseFloat(cs.columnGap || cs.gap) || 0) + navW;
+      var room = document.documentElement.clientWidth || window.innerWidth || 0;
+      return need > room - 6;
+    }
+
+    function apply() { bar.classList.toggle('mini', crowded()); }
+    apply();
+
+    var raf = 0;
+    var nextFrame = window.requestAnimationFrame
+      ? function (cb) { return window.requestAnimationFrame(cb); }
+      : function (cb) { return window.setTimeout(cb, 60); };
+    function later() {
+      if (raf) return;
+      raf = nextFrame(function () { raf = 0; apply(); });
+    }
+    window.addEventListener('resize', later);
+    window.addEventListener('orientationchange', later);
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(orientation: portrait)');
+      if (mq.addEventListener) mq.addEventListener('change', later);
+      else if (mq.addListener) mq.addListener(later);
+    }
+  }
+
   function init() {
     // 署名 / 水印 / 版权层校验：品牌模块被摘除或篡改 → 拒绝启动（详见 src/brand.js）
     if (!(E.brand && E.brand.ok && E.brand.ok())) { blocked(); return; }
@@ -12303,6 +12367,7 @@ details.explanation-panel .explain {
     // 任意自动保存 → 右上角“已自动保存”提示（节流，1.4s 后消失）
     if (E.setSaveListener && U.savedNotice) E.setSaveListener(U.savedNotice);
     bindTopbar();
+    fitTopbar();
     window.addEventListener('hashchange', onHashChange);
     render();
   }

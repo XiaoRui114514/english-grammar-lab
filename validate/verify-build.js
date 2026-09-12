@@ -17,6 +17,8 @@ const checks = [
   ['品牌 / 版权模块已内联', 'E.brand = {'],
   ['署名印章与展开署名已内联', 'egl-seal-panel'],
   ['页脚版本号已内联', 'egl-foot-ver'],
+  ['顶栏品牌文字可收起（竖屏/窄屏只留图标）', '.topbar .brand .brand-text'],
+  ['底部白边修复：固定背景层 + 画布底色', 'body::before {'],
 ];
 let failed = 0;
 for (const [name, needle] of checks) {
@@ -39,5 +41,10 @@ console.log((badDbg ? 'FAIL' : 'PASS') + '  no AI debug panel in build');
 const badVer = /__EGL_VER__/.test(s);
 if (badVer) failed++;
 console.log((badVer ? 'FAIL' : 'PASS') + '  version placeholder replaced');
+
+// 题干空格的“小框”已去掉，只保留虚线（回归：勿把 glow 阴影加回来）
+const blankGlow = /\.qtext \.blank\s*\{[^}]*box-shadow/.test(s);
+if (blankGlow) failed++;
+console.log((blankGlow ? 'FAIL' : 'PASS') + '  no box-shadow on .qtext .blank');
 
 if (failed) process.exitCode = 1;
