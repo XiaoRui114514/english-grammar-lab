@@ -768,9 +768,9 @@ details.explanation-panel .explain {
     /* 第三阶段 谓语与非谓语 */
     ['19','谓语还是非谓语',3],['20','to do',3],['21','doing',3],['22','done',3],['23','to do vs doing',3],
     ['24','doing vs done',3],['25','to do vs doing vs done',3],['26','非谓语综合',3],
-    /* 第四阶段 词类 */
-    ['27','名词单复数',4],['28','名词所有格',4],['29','形容词',4],['30','副词',4],['31','形容词 vs 副词',4],
-    ['32','名词/形容词/副词综合',4],
+    /* 第四阶段 形容词/副词比较等级（上海：有提示词不考词性转换，形副只考比较级/最高级） */
+    ['27','形容词比较级',4],['28','形容词最高级',4],['29','副词比较级与最高级',4],['30','不规则比较等级',4],
+    ['31','比较等级易错辨析',4],['32','形容词/副词比较等级综合',4],
     /* 第五阶段 虚词 */
     ['33','冠词 a/an/the',5],['34','零冠词',5],['35','介词',5],['36','常见介词搭配',5],['37','代词',5],
     ['38','情态动词',5],['39','助动词',5],['40','并列连词',5],['41','从属连词',5],
@@ -787,7 +787,7 @@ details.explanation-panel .explain {
     { no: 1, name: '第一阶段', sub: '谓语动词与时态' },
     { no: 2, name: '第二阶段', sub: '被动语态' },
     { no: 3, name: '第三阶段', sub: '谓语与非谓语' },
-    { no: 4, name: '第四阶段', sub: '词类' },
+    { no: 4, name: '第四阶段', sub: '形容词/副词比较等级' },
     { no: 5, name: '第五阶段', sub: '虚词' },
     { no: 6, name: '第六阶段', sub: '从句' },
     { no: 7, name: '第七阶段', sub: '特殊结构' },
@@ -815,8 +815,10 @@ details.explanation-panel .explain {
     { id: 'nonfinite',  no: 'C2', name: '非谓语动词',    icon: '🔗', color: '#7c6bff',
       desc: 'to do / doing / done / 完成式 / 被动式。先找真正的谓语，再判断非谓语。',
       core: true },
-    { id: 'transform',  no: 'C3', name: '词性转换',      icon: '🔧', color: '#f39c12',
-      desc: 'adj↔adv、比较最高级、名词单复数/后缀、否定前缀。看空格修饰谁、做什么成分。',
+    /* 上海卷有提示词不考词性转换：本大专题只收"形容词/副词比较级·最高级"。
+       id 仍用 'transform'，兼容历史统计与已保存的 AI 配置；对外名称已改为上海口径。 */
+    { id: 'transform',  no: 'C3', name: '形容词/副词比较等级', icon: '📈', color: '#f39c12',
+      desc: '只考比较级、最高级：看到 than → 比较级；看到 the / in,of + 范围 → 最高级。上海不考词性转换（adj↔adv、名词派生都不出现）。',
       core: true },
     { id: 'attrib',     no: 'C4', name: '定语从句',      icon: '🧩', color: '#16a085',
       desc: 'who/whom/which/that/whose/where/when/why。核心：从句内部缺不缺成分。',
@@ -936,7 +938,10 @@ details.explanation-panel .explain {
 
 /* ============================================================
  * data/method-course.js — 语法填空 · 解题方法课（上海命题风格，初高中通用）
- * 这是"自学课程"模块：不堆术语，先懂怎么做题，再进专题练。
+ * 上海卷 10 空 = 约 4 空有提示词 + 6 空无提示词：
+ *   · 有提示词只有两种任务：动词（谓语/非谓语）、形容词/副词（比较级/最高级），不考词性转换；
+ *   · 无提示词只有 5 类：连词 / 介词 / 冠词 / 代词 / 情态·助动词，每空 1 个单词。
+ * 这是"自学课程"模块：先把做题顺序学明白，再进专题练。
  * ============================================================ */
 (function () {
   'use strict';
@@ -945,83 +950,167 @@ details.explanation-panel .explain {
     id: 'method',
     title: '上海语法填空 · 解题方法课',
     icon: '🧭',
-    intro: '做题顺序比单点语法知识更重要。下面 5 步，先读一遍，再去做任何一篇 10 空语篇练习时照做。',
+    intro: '上海卷固定 10 空：约 4 空有提示词（括号给词）+ 6 空无提示词（纯空格）。先记住两条铁律——有提示词只考动词变形与形副比较等级，不考词性转换；无提示词跑不出"连词 / 介词 / 冠词 / 代词 / 情态·助动词"这 5 类，且每空只填 1 个单词。下面 5 步就是固定做题顺序。',
+
+    /* 上海卷结构速览（页面顶部卡片） */
+    facts: [
+      { k: '10 空结构', v: '约 4 空有提示词（括号给词）+ 6 空无提示词（纯空格），模考与真题都按这个配比出。' },
+      { k: '有提示词（两类任务）', v: '① 括号给动词 → 谓语（时态/语态/主谓一致）或非谓语（to do / doing / done）；② 括号给形容词/副词 → 只考比较级、最高级，原词性不变。' },
+      { k: '不考什么（重要）', v: '上海语法填空不考词性转换：不会给 care 让你写 carefully，也不考名词化、否定前缀、名词单复数变形。拿全国卷思路做上海题，第一步就会跑偏。' },
+      { k: '无提示词（5 类）', v: '候选池固定为：连词、介词、冠词、代词、情态动词/助动词。排查优先级：连词 > 介词 > 冠词 > 代词 > 情态，每空只填 1 个单词。' }
+    ],
+
     steps: [
       {
-        no: 1, title: '先通读全文（30秒）',
-        goal: '先确定：文章讲什么、时间背景在哪、叙述主体是谁、全文时态基调是什么。',
-        why: '上海卷经常不靠 yesterday/since/already 直给答案，而是靠整篇的时间线索。不看全文就填，最容易把时态判断错。',
+        no: 1, title: '先通读，数谓语（邪修地基）',
+        goal: '30 秒通读全文：搞清文章讲什么、时间背景在哪，并数清每个分句的谓语动词。',
+        why: '上海卷不靠 yesterday/since 直给答案，时态基调要从上下文推；而"这句话有几个谓语"直接决定后面所有判断：谓语出现 2 个以上就要考虑连词，本句已有谓语的空就只能填非谓语。谓语数错，后面全错。',
         do: [
-          '扫一眼首段和结尾，搞清主题与体裁（故事/说明文/议论文）。',
-          '圈出时间线索词（不只有 yesterday，还有 now/then/later/at that time/by 2005…）。',
-          '先不看空，把文章能读懂的部分读顺，让"语感基调"先建立。'
+          '扫一眼首段和结尾：主题是什么、讲的是谁、发生在什么时间。',
+          '逐句圈谓语：动词带时态变形（is / was / has done / will do…）才是谓语；to do / doing / done 都不算谓语。',
+          '圈时间线索：now / then / later / at that time / by 2005 / so far…，先定全文时态基调。',
+          '长难句用"剥壳法"：两个逗号中间的插入语先划掉，剩下的主干立刻清楚。'
         ],
-        example: '一篇回忆过去的小故事开头 usually 出现过去时基调；中间出现 today/now 才可能切回现在。',
-        tip: '时态基调不是每一句相同，但文章通常有一个主基调。'
+        example: '剥壳演示：The book, which was written in 1998, ______ (sell) well. 划掉插入语后只剩 The book ______ well：主语 book、本句缺谓语，再判时态与语态。',
+        tip: '一句口诀：动词带时态变形 = 谓语；to do / doing / done = 非谓语。'
       },
       {
-        no: 2, title: '遇到"给词空"：先问是不是要谓语',
-        goal: '检查这个分句是否已经有谓语。',
-        why: '上海填空第一大失分点：该用非谓语的地方填了谓语，或反之。判断顺序：先"谓语 or 非谓语"，再想形式。',
+        no: 2, title: '括号给动词：先问"本句有没有谓语"',
+        goal: '拿到括号动词，第一问不是时态，而是：这个分句已经有谓语了吗？',
+        why: '这是上海有提示词的最高频考点。先判断"谓语 or 非谓语"，再想具体形式；顺序反了，形式几乎一定错。',
         do: [
-          '找这个空所在分句的主语与谓语。',
-          '若分句已有一个真正的谓语（含 be 动词/实义动词），这个空一般不能再来一个谓语 → 非谓语（to do/doing/done…）。',
-          '若分句还没有谓语 → 考时态/语态/主谓一致。'
+          '本句没有谓语 → 填谓语：定时态（看全文基调与时态线索）+ 定语态（主动还是被动）+ 主谓一致。',
+          '上海高频谓语：一般过去、现在完成、过去完成、被动 be done。',
+          '本句已有谓语、又没有 and/but 等并列连词 → 填非谓语：to do（目的、将来）、doing（主动、伴随）、done（被动、完成）。',
+          '逗号后面选非谓语：主动用 doing、被动用 done；表目的优先 to do。'
         ],
-        example: 'The problem ______ (solve) at the meeting yesterday 中分句缺谓语 → was solved（被动+过去）。',
-        example2: 'The problem ______ (solve) at yesterday\u2019s meeting drew wide attention 中已有谓语 drew → 空处应填非谓语 solved（过去分词作后置定语）。',
-        tip: '一句话里"谓语只能有一个主干"——先数谓语，再决定空怎么填。'
+        example: 'The problem ______ (solve) at yesterday\u2019s meeting drew wide attention. 句中已有谓语 drew → 空处只能填非谓语；problem 与 solve 是被动关系 → solved（过去分词作后置定语）。',
+        example2: 'Look! The bridge ______ (build) by the workers now. 本句还没有谓语 → 现在进行时的被动 → is being built（被动语态别忘了变 be）。'
       },
       {
-        no: 3, title: '遇到"不给词空"：先问句子完整吗',
-        goal: '判断句子/从句缺不缺成分，决定填连接代词还是功能词。',
-        why: '无提示词空主要考：从句连接词、介词、冠词、代词、并列连词。最关键是判断"成分缺不缺"。',
+        no: 3, title: '括号给形容词/副词：只考比较级、最高级',
+        goal: '形/副提示词只有一个任务：判断填比较级还是最高级。',
+        why: '这是上海卷最容易踩坑的地方：有提示词不考词性转换。不会给 care 让你写 carefully，也不会让你加后缀变名词。拿到形/副，只看有没有比较信号，不要自己发明变形。',
         do: [
-          '把空前后读成一个分句。',
-          '分句缺主语/宾语/表语 → 考虑 what/which/who/whom（连接代词，自己在从句里充当成分）。',
-          '分句完整 → 考虑 that/whether/where/when/why/how（连接词，只连接不充当成分），或介词/冠词/代词/连词。'
+          '看到 than → 比较级：-er / more + 原级。',
+          '看到 the、in/of + 范围 → 最高级：the -est / the most + 原级。',
+          '没有比较信号 → 用原词（考点只是句意理解，不要硬变形）。',
+          '不规则变化直接背：good/well→better→best；bad/badly→worse→worst；many/much→more→most；little→less→least；far→farther/further→farthest/furthest。'
         ],
-        example: '缺成分：___ we need most is practice → what。',
-        example2: '不缺成分：The news ___ he won the prize excited us → that。',
-        tip: 'what=从句里缺东西；that=从句是完整的。这条几乎每次都能救命。'
+        example: 'Of all the students in our class, she works ______ (hard). → hardest。of + 范围 → 最高级；修饰动词用的是副词，但词性不变，还是 hard。',
+        example2: 'This book is much ______ (interesting) than that one. → more interesting。than → 比较级；much 修饰比较级。'
       },
       {
-        no: 4, title: '分析从句：缺不缺成分定关系词',
-        goal: '定语从句：关系代词 vs 关系副词，看从句内部。',
-        why: 'where/when/why 常被误用成 which/that，反之亦然。判断不看先行词，看从句里缺什么。',
+        no: 4, title: '无提示词：连词优先，再按 5 类排查',
+        goal: '把 6 个纯空格逐一锁定进"连词 / 介词 / 冠词 / 代词 / 情态·助动词"这 5 类。',
+        why: '上海纯空格不会跑出这 5 类，而且每空只填 1 个单词。邪修顺序：连词 > 介词 > 冠词 > 代词 > 情态——先把最高频的连词排除掉，再往下试。',
         do: [
-          '找到先行词与从句。',
-          '从句缺主语或宾语 → who/whom/which/that/whose。',
-          '从句不缺主宾、只缺地点/时间/原因状语 → where/when/why。',
-          '特别注意：有些"地点/时间"词后面从句不缺状语，仍要用 that/which（如 the hotel which she stayed at…里 at 在从句中作宾语）。'
+          '数这句话的谓语：出现 2 个及以上谓语（或空后跟的是一个从句）→ 优先填连词。',
+          '只有 1 个谓语、主干完整 → 看空格后面：+ 名词/动名词 → 优先试介词；+ 可数名词单数 → 试冠词；+ 动词原形 → 情态动词/助动词。',
+          '句子缺主语/宾语、指代上文名词 → 代词（it 常作形式主语、形式宾语）。',
+          '一类排除不掉再看下一类，不要跳步乱猜。'
         ],
-        example: 'This is the lab ___ we did the experiment → where（从句 we did the experiment 完整，缺地点状语）。',
-        example2: 'This is the lab ___ was built last year → which/that（从句缺主语）。',
-        tip: '别一看到 the place 就填 where——先还原从句看缺不缺成分。'
+        example: '缺成分：______ we need most is practice. → what（主语从句里缺 need 的宾语）。',
+        example2: '成分完整：The news ______ he won the prize excited us. → that（同位语从句不缺成分，只起连接作用）。'
       },
       {
-        no: 5, title: '最后检查 8 项',
-        goal: '填完后再快速复查，拦下低级失分。',
-        why: '很多 1 分丢在"忘了三单加 s / 忘了被动 / 冠词漏了 the"。',
+        no: 5, title: '填完通读，按清单复查',
+        goal: '填完全部 10 空，用下面的清单快速复查，把低级失分拦下来。',
+        why: '上海卷的坑很集中：忘了被动、忘了三单、逗号后用了 that、纯空格填了两个单词……复查一遍就能把这些分捡回来。',
+        do: [
+          '把全文再顺读一遍：语义通不通、逻辑顺不顺（并列/转折/因果）。',
+          '回头确认重点判断：谓语还是非谓语？主动还是被动？'
+        ],
         check: [
-          '时态与上下文基调一致？',
-          '语态：动作承受者做主语要被动？',
-          '主谓一致：三单加 s？',
-          '名词单复数与冠词（a/an/the/零冠词）配了吗？',
-          '词性：修饰名词用 adj，修饰动词/整句用 adv？',
-          '非谓语：主动/被动、完成/未完成，选对了吗？',
-          '介词与固定搭配对吗？',
-          '整句逻辑（并列/转折/因果）对吗？'
-        ]
+          '无提示词空：每空是不是只有 1 个单词？',
+          '有提示词空：答案还是同一个词（只是变形），没有换词性、换单词？',
+          '主谓一致：三单加 s、be 动词形式对吗？',
+          '被动语态：动作承受者做主语时，be + done 写全了吗？',
+          '非谓语：to do / doing / done 选对了吗（主动还是被动）？',
+          '从句：缺成分用 what/who/which，成分完整用 that/whether？逗号隔开、介词后面有没有误用 that？',
+          '抽象地点先行词 case/situation/point/scene/occasion：从句不缺主宾时填 where 了吗？',
+          '固定搭配：介词对吗（如 look forward to + doing）？',
+          '全文时态基调一致吗？'
+        ],
+        tip: '检查完每空只填 1 个单词，这道题才算做完。'
       }
     ],
+
+    /* 无提示词候选池（按邪修优先级排序） */
+    pool: [
+      {
+        prio: '优先级 1', name: '连词（最高频）',
+        when: '一句话出现 2 个及以上谓语，必须有连词把分句连起来；或者空格后面跟着的是一个从句。',
+        how: [
+          '并列连词：and / but / or / so——连接地位平等的两个句子或成分。',
+          '定语从句：先行词是人、从句缺主语/宾语 → who / that（缺宾语也可用 whom）；先行词是物、从句缺主语/宾语 → which / that；先行词表"……的"、后面接名词 → whose。',
+          '定语从句不缺主宾、缺状语，且先行词是抽象地点 case / situation / point / scene / occasion → 填 where（上海高频坑）。',
+          '名词性从句：从句缺主语/宾语（指物）→ what；从句语义完整 → that（无含义，只连接）；"是否" → whether（主语从句、介词后面不用 if）。',
+          '状语从句：when / if / because / while / though 等，看逻辑（时间、条件、原因、让步）。',
+          '禁忌：介词后面、逗号隔开的非限制性定语从句，绝对不能用 that。'
+        ],
+        example: 'This is a case ______ the rule does not work. 从句 the rule does not work 不缺主宾 → 填 where。'
+      },
+      {
+        prio: '优先级 2', name: '介词（第二高频）',
+        when: '句子主谓完整、不缺主干成分，空格后面是名词或动名词（doing）。',
+        how: [
+          '固定搭配优先：rely on / lead to / be responsible for / look forward to + doing…',
+          '语义介词：时间 in / on / at；方式 by；所属 of；伴随 with。'
+        ],
+        example: 'I am looking forward to ______ (hear) from you. → hearing（to 是介词，后面接 doing，不是 to do）。'
+      },
+      {
+        prio: '优先级 3', name: '冠词 a / an / the',
+        when: '空格后面是可数名词单数。',
+        how: [
+          '泛指、第一次出现：辅音音素前用 a，元音音素前用 an（看音素不看字母：an hour / a university）。',
+          '特指：上文提过、独一无二、有后置短语限定 → the。',
+          '不可数名词、复数名词泛指时不加冠词。'
+        ],
+        example: 'She is ______ honest girl. → an（honest 的 h 不发音，以元音音素开头）。'
+      },
+      {
+        prio: '优先级 4', name: '代词 it / they / that / those',
+        when: '句子缺主语或宾语，并且这个成分指代上文的某个名词。',
+        how: [
+          '指代上文单数事物 → it；复数 → they / them。',
+          'it 的高频特殊用法：形式主语 it is important to do…；形式宾语 find it + adj. + to do；强调句 it is … that …。'
+        ],
+        example: 'I find ______ hard to finish the work on time. → it（形式宾语，真正的宾语是 to finish the work on time）。'
+      },
+      {
+        prio: '优先级 5（低频）', name: '情态动词 / 助动词',
+        when: '空格后面是动词原形，句子主干已经完整。',
+        how: [
+          '情态动词：can / may / must / should，看语气是能力、许可、推测还是义务。',
+          '助动词：do / does / did，用于倒装和强调。'
+        ],
+        example: 'Not until then ______ he realize his mistake. → did（倒装，助动词提前）。'
+      }
+    ],
+
+    /* 快速排查流程（一句话版） */
+    quickFlow: [
+      '拿到无提示词空，先数这句话有几个谓语。',
+      '2 个及以上谓语（或空后是一个从句）→ 先按连词处理：并列连词 / 定语从句 / 名词性从句 / 状语从句。',
+      '只有 1 个谓语、主干完整 → 看空格后面：名词、动名词 → 先试介词；可数名词单数 → 试冠词。',
+      '空格后是动词原形 → 情态动词 / 助动词。',
+      '句子缺主语/宾语、指代上文 → 代词。',
+      '还是拿不准 → 按 连词 > 介词 > 冠词 > 代词 > 情态 逐个代入，读一遍语义通不通，填完再统一复查。'
+    ],
+
+    trapTitle: '上海卷高频坑（做题前必看）',
     fiveTrapTips: [
-      { id: 'verb-vs-nonfinite', name: '谓语 vs 非谓语', text: '先数谓语：分句已有谓语，空处再填谓语就是病句。给词空第一个问题永远是"这里要不要一个谓语"。' },
-      { id: 'what-vs-that', name: 'what vs that', text: 'what=从句里缺成分，that=从句完整。把空后从句还原读一遍就能分辨。' },
-      { id: 'context-tense', name: '语境时态', text: '别一看到 yesterday/ago 就机械用一般过去；如果强调"当时正在进行"或"到过去某点前已完成"，要选过去进行/过去完成。' },
-      { id: 'however', name: 'however 让步句', text: 'however 后接 adj/adv + 主语 + 谓语，表示"无论多么…"。不是"但是"的 however（那是连词，逗号后独立成句）。' },
-      { id: 'a-vs-an', name: 'a / an', text: '看音素不是看字母：an hour（h 不发音），a university（发 /juː/）。' },
-      { id: 'adj-vs-adv', name: 'adj vs adv', text: '看它修饰什么：修饰名词→形容词；修饰动词/形容词/副词/整句→副词。表语位置常要形容词。' }
+      { id: 'no-wordform', name: '拿全国卷思路做上海题（最大误区）', text: '看到形容词就想变副词？上海语法填空有提示词不考词性转换：给 care 不会让你写 carefully。有提示词只有两种任务——动词（谓语/非谓语）、形副（比较级/最高级）。' },
+      { id: 'verb-vs-nonfinite', name: '谓语 vs 非谓语', text: '先数谓语：分句已有谓语、又没有并列连词，空处再填谓语就是病句。给词空的第一问永远是"这里要不要谓语"。' },
+      { id: 'insertion', name: '插入语用剥壳法', text: '两个逗号中间的内容往往是插入语，直接划掉再看主干，长难句立刻变简单。' },
+      { id: 'abstract-where', name: '抽象地点先行词用 where', text: 'case / situation / point / scene / occasion 这类抽象地点先行词，从句不缺主语宾语、缺的是状语 → 填 where，不是 which。' },
+      { id: 'no-that-after-comma', name: '逗号后不能用 that', text: '逗号隔开的非限制性定语从句、以及介词后面，绝对不能用 that。' },
+      { id: 'passive', name: '忘记被动语态', text: '主语是动作的承受者，就必须用被动：be + done。别只改动词，忘了 be 的形式要随时态一起变。' },
+      { id: 'collocation', name: '固定搭配里的介词', text: 'look forward to 的 to 是介词，后面接 doing 不是 to do；介词搭配错一个，就是丢一分。' },
+      { id: 'what-vs-that', name: 'what vs that', text: 'what = 从句里缺成分；that = 从句完整、只起连接。把空后的从句还原读一遍就能分辨。' },
+      { id: 'a-vs-an', name: 'a / an', text: '看音素不是看字母：an hour（h 不发音），a university（发 /juː/）。' }
     ]
   };
 
@@ -8050,7 +8139,7 @@ details.explanation-panel .explain {
   var CSS = "\n/* ==================== 品牌署名 · 授权（Hison） ====================\n   注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。\n   删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */\n/* 右下角署名印章：平时是一枚小胶囊，悬停 / 点击后原地展开署名卡片（无弹窗） */\n.egl-seal {\n  position: fixed; right: 12px; bottom: 12px; z-index: 46;\n  display: block; text-align: left; overflow: hidden;\n  padding: 6px 11px; border-radius: 13px; cursor: pointer;\n  font-family: inherit; color: rgba(238, 241, 251, 0.76);\n  background: rgba(10, 14, 30, 0.62);\n  border: 1px solid rgba(165, 194, 255, 0.26);\n  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);\n  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);\n  opacity: 0.88; transform-origin: 100% 100%;\n  transition: padding 0.34s var(--ease), border-radius 0.34s var(--ease),\n              background 0.3s, box-shadow 0.34s, opacity 0.24s, transform 0.34s var(--ease);\n}\n.egl-seal-face {\n  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;\n  font-size: 10.5px; font-weight: 700; letter-spacing: 0.6px;\n}\n.egl-seal-panel {\n  display: block; width: 0; max-height: 0; opacity: 0; margin-top: 0;\n  overflow: hidden; white-space: nowrap; transform: translateY(6px);\n  transition: width 0.34s var(--ease), max-height 0.34s var(--ease), opacity 0.26s ease,\n              transform 0.34s var(--ease), margin-top 0.34s var(--ease);\n}\n.egl-seal-name { display: block; font-size: 12.5px; font-weight: 800; letter-spacing: 0.4px; color: var(--ink); }\n.egl-seal-row { display: block; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }\n.egl-seal-row i { font-style: normal; color: var(--ink-faint); margin-right: 6px; }\n.egl-seal-row b { color: var(--hl); font-weight: 800; letter-spacing: 0.4px; }\n/* 展开态：键盘聚焦 / 点击（触摸） */\n.egl-seal:focus-visible,\n.egl-seal.on {\n  padding: 12px 15px 13px; border-radius: 18px;\n  background: rgba(10, 14, 30, 0.94);\n  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n  opacity: 1; transform: translateY(-2px);\n}\n.egl-seal:focus-visible .egl-seal-panel,\n.egl-seal.on .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n/* 有鼠标的设备：悬停即展开 */\n@media (hover: hover) {\n  .egl-seal:hover {\n    padding: 12px 15px 13px; border-radius: 18px;\n    background: rgba(10, 14, 30, 0.94);\n    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n    opacity: 1; transform: translateY(-2px);\n  }\n  .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n}\n/* 题卡底纹已撤掉：部分机型浏览器（如荣耀浏览器）会把低透明度的水印墨迹\n   （SVG 图片版、文本 rgba 版都试过）自动提亮成实心白，糊在题干与选项上。\n   署名改由各处角标承担：题卡左下角 + 其它卡片右下角各一行小字，浓淡是\n   固定色 + 固定 opacity，与页面其它文字一致，各机型都不会被提亮，\n   截图、打印都带署名。 */\n/* 卡片角标 */\n.learn-head, .score-hero, .sq-card, .qbox { position: relative; }\n.learn-head { padding-bottom: 22px; }\n.sq-card { padding-bottom: 22px; }\n.score-hero { padding-bottom: 30px; }\n.learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {\n  content: \"by __EGL_NM__\";\n  position: absolute; right: 10px; bottom: 6px;\n  font-size: 10px; letter-spacing: 1px; font-weight: 700;\n  color: var(--ink-faint); opacity: 0.55;\n  pointer-events: none; user-select: none;\n}\n/* 题卡角标放左下：右下是固定印章的位置，靠太近会叠在一起 */\n.qbox::after { right: auto; left: 12px; }\n/* 页脚署名 */\n.egl-foot { text-align: center; padding: 30px 14px 22px; color: var(--ink-faint); font-size: 12px; }\n.egl-foot .egl-foot-main { color: var(--ink-faint); }\n.egl-foot .egl-foot-brand { margin-top: 5px; color: var(--ink-dim); letter-spacing: 0.3px; line-height: 1.8; }\n.egl-foot .egl-foot-links { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }\n.egl-foot .egl-link {\n  border: 0; background: transparent; color: var(--accent); cursor: pointer;\n  font-family: inherit; font-size: 12px; padding: 3px 4px; text-decoration: underline;\n}\n.egl-foot .egl-tip { color: var(--ink-faint); font-size: 11px; }\n/* 页脚版本号（构建时由 package.json 注入） */\n.egl-foot .egl-foot-ver { margin-top: 4px; color: var(--ink-faint); font-size: 11px; letter-spacing: 0.6px; opacity: 0.8; }\n/* 首页品牌小标签 */\n.egl-chip {\n  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;\n  font-size: 11.5px; letter-spacing: 0.4px; color: var(--ink-faint);\n  border: 1px dashed rgba(165, 194, 255, 0.3); border-radius: 999px; padding: 3px 10px;\n}\n/* 首页副标题下的适用范围标签 */\n.hero-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }\n.hero-tags span {\n  font-size: 11px; letter-spacing: 0.4px; color: var(--ink-dim);\n  border: 1px solid rgba(165, 194, 255, 0.26); border-radius: 999px; padding: 2px 9px;\n}\n.hero-tags span.hot { color: var(--glow); border-color: rgba(255, 224, 130, 0.34); }\n/* 授权说明弹窗 */\n.egl-lic p { margin: 6px 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.7; }\n.egl-lic p b { color: var(--ink); }\n@media print {\n  .egl-seal { display: none; }\n  .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after { color: #222; opacity: 0.75; }\n  .egl-foot { color: #333; }\n}\n";
   // 版本号：构建时由 build.js 用 package.json 的 version 替换（单一来源，
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
-  var VER = "v1.1.0";
+  var VER = "v1.2.0";
   if (VER.charAt(0) === '_') VER = '';
   var _guardTimer = null;
 
@@ -9380,28 +9469,29 @@ details.explanation-panel .explain {
     return [
       '一、命题总则（上海命题风格 · 初高中通用）',
       '1. 语篇必须完整、连贯、有明确主题（说明文/科普/议论文/叙事均可），语言地道自然；禁止把互不相关的句子拼成“文章”。',
-      '2. 语篇题每篇约 10 空：有提示词约 4-5 空（动词变形/词性转换等），无提示词约 5-6 空（介词/连词/冠词/代词/从句连接词等），整套练习保持接近这一比例（纯单句模式不受此条限制）。',
+      '2. 语篇题每篇约 10 空，按上海卷实际配比：有提示词约 4 空 + 无提示词约 6 空，整套练习保持这个比例（纯单句模式不受此条限制）。',
       '3. 难度来自语法结构与上下文逻辑，词汇限定在初高中课标范围：禁止生僻词、超纲词和陌生文化背景；禁止“时间词直给答案”的送分题，时态语态必须由上下文推断。',
-      '二、考点规则',
-      '4. 有提示词：时态、语态、主谓一致、非谓语（to do/doing/done/完成式/被动式）、词性转换（adj↔adv、名词单复数与派生、比较级最高级、否定前缀等）。',
-      '5. 无提示词：三大从句连接词（定语/名词性/状语从句）、what 与 that、介词、冠词、代词、并列与逻辑衔接词（and/but/or/so/however 等）。',
-      '6. 答案唯一：每个空有且只有一个正确答案，禁止“填 A 填 B 都说得通”的两可题；what 的从句必须缺成分、that 的从句必须完整，if/whether、which/where 等同理。',
-      '7. 非谓语必须真实需要判断：先看分句有没有谓语，再判断主动/被动与动作先后，禁止为覆盖 having done、to have done 等形式强行塞入。',
-      '8. however 只以 however + adj/adv + 主语 + 谓语 的让步结构自然出现，禁止硬凑。',
-      '9. 同一篇内考点要分散：相邻两空不考同一知识点，同一知识点全篇最多出现 2 次。',
+      '二、考点规则（上海专属，务必严格遵守）',
+      '4. 有提示词只有两种任务：①括号给动词——谓语（时态/语态/主谓一致，上海高频：一般过去、现在完成、过去完成、被动 be done）或非谓语（to do 目的/将来、doing 主动/伴随、done 被动/完成）；②括号给形容词/副词——只考比较级（有 than 等比较信号）或最高级（the / in,of + 范围）。',
+      '5. 禁止出全国卷式词性转换题：不给 care 让学生写 careful/carefully，不给名词派生形容词，不给形容词变副词、加否定前缀或名词后缀，也不考名词单复数变形。有提示词的答案必须还是同一个词：动词只做语法变形，形副只变比较等级（原词性不变）。',
+      '6. 无提示词只考 5 类：连词（并列连词 and/but/or/so；定语从句 who/which/that/whose/where；名词性从句 what/that/whether；状语从句 when/if/because/though 等）、介词（固定搭配与语义）、冠词（a/an/the/零冠词）、代词（it/they/that/those，含 it 形式主语/形式宾语）、情态动词与助动词（can/may/must/should；do/does/did）。每个无提示词空只能填 1 个单词。',
+      '7. 答案唯一：每个空有且只有一个正确答案，禁止“填 A 填 B 都说得通”的两可题；what 的从句必须缺成分、that 的从句必须完整，if/whether、which/where 等同理。',
+      '8. 非谓语必须真实需要判断：先看分句有没有谓语，再判断主动/被动与动作先后，禁止为覆盖 having done、to have done 等形式强行塞入。',
+      '9. 考点贴合上海高频坑：抽象地点先行词 case/situation/point/scene/occasion 后从句不缺主宾时用 where；逗号隔开的非限制性定语从句与介词后面不用 that；固定搭配注意 look forward to + doing 这类“to 是介词”的搭配。另外，however 只以 however + adj/adv + 主语 + 谓语 的让步结构自然出现，禁止硬凑。',
+      '10. 同一篇内考点要分散：相邻两空不考同一知识点，同一知识点全篇最多出现 2 次。',
       '三、解析规则',
-      '10. 每个空都要给出学生能看懂的中文解析，讲清三点：①为什么是这个答案（语法依据+语境线索）；②为什么不是其它形式（对比易错项）；③做题时如何一步步判断（找句子主干、看从句成分、联系上下文）。解析要具体，禁止“固定搭配”“语感如此”之类空话。',
+      '11. 每个空都要给出学生能看懂的中文解析，讲清三点：①为什么是这个答案（语法依据+语境线索）；②为什么不是其它形式（对比易错项）；③做题时如何一步步判断（数谓语定谓语/非谓语、看从句缺不缺成分、联系上下文）。解析要具体，禁止“固定搭配”“语感如此”之类空话。',
       '四、输出格式规则（违反会导致程序无法读取）',
-      '11. 只输出一个 JSON 对象：不要 Markdown、不要 ```json 代码块、不要任何解释、注释或前后说明，响应必须以 { 开头、以 } 结尾。',
-      '12. 正文中的每个空都用 4 个下划线 ____ 标出，____ 的个数必须与 blanks 数组长度完全一致；正文里绝对不能出现答案词，答案只写在 blanks 里。',
-      '13. 字段名与取值严格按下方 JSON 模板，不新增、不删减字段；字符串内不要出现未转义的引号，不要写尾逗号。'
+      '12. 只输出一个 JSON 对象：不要 Markdown、不要 ```json 代码块、不要任何解释、注释或前后说明，响应必须以 { 开头、以 } 结尾。',
+      '13. 正文中的每个空都用 4 个下划线 ____ 标出，____ 的个数必须与 blanks 数组长度完全一致；正文里绝对不能出现答案词，答案只写在 blanks 里。',
+      '14. 字段名与取值严格按下方 JSON 模板，不新增、不删减字段；字符串内不要出现未转义的引号，不要写尾逗号。'
     ].join('\n');
   }
 
   /* ---------- 专题分布动态描述 ---------- */
   function topicDistRule(topicId, catName) {
     if (!topicId || topicId === 'all') {
-      return '训练范围：全部大专题。按上海卷实际重要程度分布：谓语动词（时态/语态/主谓一致）、非谓语动词、三大从句（尤其名词性从句 what/that）、词性转换为主体，介词/冠词/代词/并列逻辑穿插出现；不要 10 空机械均分。';
+      return '训练范围：全部大专题。按上海卷实际重要程度分布：谓语动词（时态/语态/主谓一致）、非谓语动词、从句连接词（定语/名词性/状语从句）、介词、冠词、代词、并列逻辑、形副比较等级；语篇按“有提示词 4 空 + 无提示词 6 空”配比，不要机械均分，也不要出词性转换题。';
     }
     return '训练范围：以「' + catName + '」为大专题重点——该大专题下的不同知识点要占全部空数的一半以上，其余空用其它大专题作自然铺垫，保持句子/语篇自然连贯；同一形式不可连续重复。';
   }
@@ -9423,20 +9513,20 @@ details.explanation-panel .explain {
     lines.push('【本次命题配置】');
     lines.push('- 训练专题：' + catName);
     lines.push('- 题目结构：' + (structure === 'sentence' ? '纯单句题（无语篇）' : structure === 'passage' ? '纯语篇题（无单句）' : '单句题 + 语篇题'));
-    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇不超过 10 空）'));
+    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇不超过 10 空；满 10 空的语篇按“4 空有提示词 + 6 空无提示词”）'));
     lines.push('- 总空数：' + targetCount + '（整套练习的空数之和）');
     lines.push('');
     lines.push(topicDistRule(cfg.topicId, catName));
     lines.push('');
     lines.push(shanghaiRulesText());
     lines.push('');
-    lines.push('五、单句题规则（structure 含“单句”时必出）：每个单句都是独立完整的句子，句中给出一个高频动词原形（如 take / learn / tell / get / come / go / make / spend / leave / fail / feel / have 等），要求学生按句中的时间状语与语境改成正确形式——一般现在时、一般过去时、现在/过去进行时、现在/过去完成时、一般将来时、被动语态、非谓语（to do/doing/done）、词性转换等，覆盖时态/语态/主谓一致/非谓语；每句 1 个空（个别可 2 个空）；必须有明确语境线索（如 these days / at that time / by then / since / tomorrow 等）且答案唯一。单句正文只写 ____ 空标，不写括号原词；原词只放 givenWord 字段。');
+    lines.push('五、单句题规则（structure 含“单句”时必出）：每个单句都是独立完整的句子，句中给出一个提示词并要求学生按语境改成正确形式——动词（如 take / learn / tell / get / come / go / make / spend / leave / fail / feel / have 等）改成时态/语态/主谓一致/非谓语（to do/doing/done）形式；形容词/副词（如 hard / careful / interesting 等）改成比较级或最高级。禁止词性转换题。每句 1 个空（个别可 2 个空）；必须有明确语境线索（如 these days / at that time / by then / since / than / of all 等）且答案唯一。单句正文只写 ____ 空标，不写括号原词；原词只放 givenWord 字段。');
     if (structure === 'mixed') {
       lines.push('');
       lines.push('六、结构分配：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1-2 空），语篇 1~2 篇（每篇 5~10 空）。');
     }
     lines.push('');
-    lines.push('输出前自检（在心里过一遍，不要写出来）：空数是否为 ' + targetCount + '；____ 的个数是否与 blanks 数量一致；答案是否唯一；有没有 what/that 两可；非谓语是否真的需要判断；时态是否靠上下文；文章是否连贯；考点是否过度重复；解析是否三点齐全。');
+    lines.push('输出前自检（在心里过一遍，不要写出来）：空数是否为 ' + targetCount + '；____ 的个数是否与 blanks 数量一致；有提示词是否只有“动词/形副比较等级”两种情况、有没有混进词性转换；无提示词是否都落在连词/介词/冠词/代词/情态·助动词 5 类内、每空是否只有 1 个单词；答案是否唯一；有没有 what/that 两可；非谓语是否真的需要判断；时态是否靠上下文；文章是否连贯；考点是否过度重复；解析是否三点齐全。');
     if (cfg.qtype === 'input') {
       lines.push('');
       lines.push('七、输出题型：填空输入题（无选项）。每个空只给 answer 与 givenWord，不输出 options 字段。');
@@ -9445,7 +9535,7 @@ details.explanation-panel .explain {
       lines.push('七、输出题型：点选选择题（n 选 1，学生只点不打字），这是本组最关键的要求：');
       lines.push('  1. 每个空除 answer 外必须输出 options：选项个数由该考点自然能给出的合理干扰项决定，4~6 个（最少 3 个）；');
       lines.push('  2. options 中恰好 1 个与 answer 完全一致（忽略首尾空格与大小写），即正确项；');
-      lines.push('  3. 其余选项必须是针对该考点的典型错误：错误时态/语态/非谓语形式/词形变化/单复数、错误连接词、错误介词、冠词多漏误、代词误用、易混逻辑词等；');
+      lines.push('  3. 其余选项必须是针对该考点的典型错误：错误时态/语态/非谓语形式/主谓不一致、比较级最高级混用、错误连接词、错误介词、冠词多漏误、代词误用、易混逻辑词等；');
       lines.push('  4. 干扰项禁止与正确答案或彼此重复，禁止明显荒谬，禁止出现“两个都能说通”的选项；');
       lines.push('  5. 选项文本只写答案形式本身，不加任何解释。');
       lines.push('  空对象示例（本例 5 选 1）：{"answer":"has been built","options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时被动语态","category":"谓语动词","explanation":"主语 building 与 build 是被动关系；by 2025 说明动作到说话时已完成，所以用现在完成时的被动 has been built。has built 是主动、was built 是过去、is building 是进行，都与语境不符。判断步骤：先看主语与语态，再看时间关系，最后确定时态语态的组合形式。","difficulty":2}');
@@ -9464,9 +9554,9 @@ details.explanation-panel .explain {
               options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3', '干扰项4', '干扰项5'],
               givenWord: '有提示词时给原词，无提示词时为 null',
               isGivenWord: true,
-              type: 'nonfinite|tense|wordform|clause|prep|article|pronoun|conjunction|other',
+              type: 'nonfinite|tense|clause|prep|article|pronoun|conjunction|degree|other',
               knowledgePoint: '具体知识点，如 having done',
-              category: '谓语动词|非谓语动词|词性转换|定语从句|名词性从句|状语从句|介词|冠词|代词|并列与逻辑|其他/拓展',
+              category: '谓语动词|非谓语动词|形容词/副词比较等级|定语从句|名词性从句|状语从句|介词|冠词|代词|并列与逻辑|其他/拓展',
               explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从句子结构和上下文判断',
               difficulty: 1
             }
@@ -9484,9 +9574,9 @@ details.explanation-panel .explain {
               options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3', '干扰项4'],
               givenWord: '高频动词原形，如 take / learn / tell / get',
               isGivenWord: true,
-              type: 'tense|passive|nonfinite|wordform|agreement',
+              type: 'tense|passive|nonfinite|agreement|degree',
               knowledgePoint: '具体知识点，如 一般过去时 / 现在进行时 / 现在完成时被动',
-              category: '谓语动词|非谓语动词|词性转换',
+              category: '谓语动词|非谓语动词|形容词/副词比较等级',
               explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从时间状语或语境判断',
               difficulty: 1
             }
@@ -9905,7 +9995,7 @@ details.explanation-panel .explain {
     hero.innerHTML = '<span class="date">' + dateStr + '</span>'
       + '<h1><span class="en">English Grammar Lab</span><br>初高中语法填空学习系统</h1>'
       + '<div class="hero-tags"><span class="hot">初高中通用</span><span>推荐上海地区使用</span>'
-      + '<span>时态 · 从句 · 虚词 · 词性转换</span></div>'
+      + '<span>10 空 = 4 空给词 + 6 空纯空</span><span>有提示词不考词性转换</span></div>'
       + '<p>先懂方法 → 学专题 → 做句子级基础 → 练 10 空语篇 → 错题复盘 → AI 按薄弱点巩固</p>';
     v.appendChild(hero);
 
@@ -10063,7 +10153,7 @@ details.explanation-panel .explain {
     // 顶部：解题方法课 + AI 出题 快捷入口
     var topRow = U.el('div', 'grid cards2', '');
     topRow.style.marginBottom = '14px';
-    topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><div class="ic">🧭</div><h4>解题方法课</h4><p>先学语法填空 5 步做法与高频陷阱（上海题型），再开练。</p></button>'
+    topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><div class="ic">🧭</div><h4>解题方法课</h4><p>先学上海语法填空的做题顺序（数谓语 → 连词优先 → 5 类排查）与高频坑，再开练。</p></button>'
       + '<button class="mode-card glass" data-nav="ai"><div class="ic">🤖</div><h4>AI 出题</h4><p>按专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
     v.appendChild(topRow);
 
@@ -10517,6 +10607,19 @@ details.explanation-panel .explain {
     if (!m) { v.innerHTML = '<div class="empty"><span class="e">🧭</span>方法课内容缺失</div>'; return; }
     v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">🧭</span>' + esc(m.title) + '</div>'
       + '<div class="page-sub">' + esc(m.intro) + '</div>'));
+    // 上海卷 10 空结构速览
+    if (m.facts && m.facts.length) {
+      var fc = U.el('div', 'glass', '');
+      fc.style.padding = '14px 18px';
+      fc.style.marginTop = '14px';
+      fc.innerHTML = '<div class="sec-title" style="margin-top:0">上海卷 10 空速览</div>';
+      m.facts.forEach(function (f) {
+        var row = U.el('div', 'kblock', '');
+        row.innerHTML = '<div class="lb">' + esc(f.k) + '</div><p>' + esc(f.v) + '</p>';
+        fc.appendChild(row);
+      });
+      v.appendChild(fc);
+    }
     var heroC = U.el('div', 'glass kcard', '');
     heroC.style.padding = '18px';
     heroC.innerHTML = '<div class="sec-title" style="margin-top:0">做题总流程</div>';
@@ -10550,8 +10653,41 @@ details.explanation-panel .explain {
       v.appendChild(card);
     });
 
-    // 五大高频陷阱
-    var trapSec = U.el('div', 'sec-title', '上海卷五大高频陷阱（做题前必看）');
+    // 无提示词候选池（连词 > 介词 > 冠词 > 代词 > 情态）
+    if (m.pool && m.pool.length) {
+      v.appendChild(U.el('div', 'sec-title', '无提示词候选池：只有 5 类（按排查优先级排序）'));
+      m.pool.forEach(function (p) {
+        var pc = U.el('div', 'glass', '');
+        pc.style.padding = '16px 18px';
+        pc.style.marginTop = '10px';
+        var ph = '<div class="sec-title" style="margin-top:0">' + esc(p.prio) + ' · ' + esc(p.name) + '</div>'
+          + '<div class="kblock"><div class="lb">什么时候选它</div><p>' + esc(p.when) + '</p></div>';
+        if (p.how && p.how.length) {
+          ph += '<div class="kblock"><div class="lb">怎么做</div><ul>';
+          p.how.forEach(function (x) { ph += '<li>' + esc(x) + '</li>'; });
+          ph += '</ul></div>';
+        }
+        if (p.example) ph += '<div class="kblock"><div class="lb">示例</div><p class="hl">' + esc(p.example) + '</p></div>';
+        pc.innerHTML = ph;
+        v.appendChild(pc);
+      });
+    }
+
+    // 快速排查流程（一句话版）
+    if (m.quickFlow && m.quickFlow.length) {
+      v.appendChild(U.el('div', 'sec-title', '拿不准？快速排查流程（一句话版）'));
+      var qc = U.el('div', 'glass', '');
+      qc.style.padding = '16px 18px';
+      var qflow = U.el('ol', 'ex-flow');
+      m.quickFlow.forEach(function (s) {
+        qflow.appendChild(U.el('li', '', '<b>' + esc(s) + '</b>'));
+      });
+      qc.appendChild(qflow);
+      v.appendChild(qc);
+    }
+
+    // 高频坑（最高频陷阱排前面）
+    var trapSec = U.el('div', 'sec-title', m.trapTitle || '上海卷高频陷阱（做题前必看）');
     v.appendChild(trapSec);
     var tc = U.el('div', 'glass', '');
     tc.style.padding = '12px 16px';
@@ -11737,7 +11873,7 @@ details.explanation-panel .explain {
       + '<button type="button" data-struct="sentence" class="' + stS + '">🔠 纯单句</button>'
       + '<button type="button" data-struct="passage" class="' + stP + '">📄 纯语篇</button>'
       + '</div>'
-      + '<div class="form-hint">「单句」= 每题给一个高频动词(如 take/learn/tell/get)按语境改成过去时/现在进行时/完成时/被动/非谓语等形式；「语篇」= 整篇连贯文章挖空。</div>'
+      + '<div class="form-hint">「单句」= 每题给一个提示词（动词按语境改成过去时/完成时/被动/非谓语等；形容词、副词改成比较级或最高级）；「语篇」= 整篇连贯文章挖空，满 10 空按“4 空给词 + 6 空纯空”配比。</div>'
       + '</div>';
 
     var key = _keyCache || cfg.apiKey || '';

@@ -1,6 +1,6 @@
 {
   "name": "english-grammar-lab",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "初高中英语语法填空学习系统（推荐上海地区使用）：单文件 HTML 应用 + 内置题库 + DeepSeek AI 出题",
   "license": "SEE LICENSE IN LICENSE",

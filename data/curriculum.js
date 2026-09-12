@@ -14,8 +14,10 @@
     { id: 'nonfinite',  no: 'C2', name: '非谓语动词',    icon: '🔗', color: '#7c6bff',
       desc: 'to do / doing / done / 完成式 / 被动式。先找真正的谓语，再判断非谓语。',
       core: true },
-    { id: 'transform',  no: 'C3', name: '词性转换',      icon: '🔧', color: '#f39c12',
-      desc: 'adj↔adv、比较最高级、名词单复数/后缀、否定前缀。看空格修饰谁、做什么成分。',
+    /* 上海卷有提示词不考词性转换：本大专题只收"形容词/副词比较级·最高级"。
+       id 仍用 'transform'，兼容历史统计与已保存的 AI 配置；对外名称已改为上海口径。 */
+    { id: 'transform',  no: 'C3', name: '形容词/副词比较等级', icon: '📈', color: '#f39c12',
+      desc: '只考比较级、最高级：看到 than → 比较级；看到 the / in,of + 范围 → 最高级。上海不考词性转换（adj↔adv、名词派生都不出现）。',
       core: true },
     { id: 'attrib',     no: 'C4', name: '定语从句',      icon: '🧩', color: '#16a085',
       desc: 'who/whom/which/that/whose/where/when/why。核心：从句内部缺不缺成分。',

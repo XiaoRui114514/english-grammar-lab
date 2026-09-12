@@ -247,7 +247,7 @@
       + '<button type="button" data-struct="sentence" class="' + stS + '">🔠 纯单句</button>'
       + '<button type="button" data-struct="passage" class="' + stP + '">📄 纯语篇</button>'
       + '</div>'
-      + '<div class="form-hint">「单句」= 每题给一个高频动词(如 take/learn/tell/get)按语境改成过去时/现在进行时/完成时/被动/非谓语等形式；「语篇」= 整篇连贯文章挖空。</div>'
+      + '<div class="form-hint">「单句」= 每题给一个提示词（动词按语境改成过去时/完成时/被动/非谓语等；形容词、副词改成比较级或最高级）；「语篇」= 整篇连贯文章挖空，满 10 空按“4 空给词 + 6 空纯空”配比。</div>'
       + '</div>';
 
     var key = _keyCache || cfg.apiKey || '';

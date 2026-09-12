@@ -58,7 +58,7 @@ const SAMPLE = JSON.stringify({
       { answer: 'works', givenWord: 'work', isGivenWord: true, type: 'tense', knowledgePoint: '一般现在时', category: '谓语动词', explanation: '三单加s', difficulty: 1 },
       { answer: 'Although', givenWord: null, isGivenWord: false, type: 'conjunction', knowledgePoint: '让步连词', category: '并列与逻辑', explanation: '虽然…但', difficulty: 1 },
       { answer: 'the', givenWord: null, isGivenWord: false, type: 'article', knowledgePoint: '冠词', category: '冠词', explanation: '特指', difficulty: 1 },
-      { answer: 'happily', givenWord: 'happy', isGivenWord: true, type: 'wordform', knowledgePoint: 'adj→adv', category: '词性转换', explanation: '修饰动词用副词', difficulty: 1 }
+      { answer: 'hardest', givenWord: 'hard', isGivenWord: true, type: 'degree', knowledgePoint: '副词最高级', category: '形容词/副词比较等级', explanation: 'of all + 范围 → 最高级', difficulty: 1 }
     ] }]
 });
 

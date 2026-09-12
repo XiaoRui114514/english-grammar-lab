@@ -46,7 +46,7 @@
     hero.innerHTML = '<span class="date">' + dateStr + '</span>'
       + '<h1><span class="en">English Grammar Lab</span><br>初高中语法填空学习系统</h1>'
       + '<div class="hero-tags"><span class="hot">初高中通用</span><span>推荐上海地区使用</span>'
-      + '<span>时态 · 从句 · 虚词 · 词性转换</span></div>'
+      + '<span>10 空 = 4 空给词 + 6 空纯空</span><span>有提示词不考词性转换</span></div>'
       + '<p>先懂方法 → 学专题 → 做句子级基础 → 练 10 空语篇 → 错题复盘 → AI 按薄弱点巩固</p>';
     v.appendChild(hero);
 
@@ -204,7 +204,7 @@
     // 顶部：解题方法课 + AI 出题 快捷入口
     var topRow = U.el('div', 'grid cards2', '');
     topRow.style.marginBottom = '14px';
-    topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><div class="ic">🧭</div><h4>解题方法课</h4><p>先学语法填空 5 步做法与高频陷阱（上海题型），再开练。</p></button>'
+    topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><div class="ic">🧭</div><h4>解题方法课</h4><p>先学上海语法填空的做题顺序（数谓语 → 连词优先 → 5 类排查）与高频坑，再开练。</p></button>'
       + '<button class="mode-card glass" data-nav="ai"><div class="ic">🤖</div><h4>AI 出题</h4><p>按专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
     v.appendChild(topRow);
 
@@ -658,6 +658,19 @@
     if (!m) { v.innerHTML = '<div class="empty"><span class="e">🧭</span>方法课内容缺失</div>'; return; }
     v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">🧭</span>' + esc(m.title) + '</div>'
       + '<div class="page-sub">' + esc(m.intro) + '</div>'));
+    // 上海卷 10 空结构速览
+    if (m.facts && m.facts.length) {
+      var fc = U.el('div', 'glass', '');
+      fc.style.padding = '14px 18px';
+      fc.style.marginTop = '14px';
+      fc.innerHTML = '<div class="sec-title" style="margin-top:0">上海卷 10 空速览</div>';
+      m.facts.forEach(function (f) {
+        var row = U.el('div', 'kblock', '');
+        row.innerHTML = '<div class="lb">' + esc(f.k) + '</div><p>' + esc(f.v) + '</p>';
+        fc.appendChild(row);
+      });
+      v.appendChild(fc);
+    }
     var heroC = U.el('div', 'glass kcard', '');
     heroC.style.padding = '18px';
     heroC.innerHTML = '<div class="sec-title" style="margin-top:0">做题总流程</div>';
@@ -691,8 +704,41 @@
       v.appendChild(card);
     });
 
-    // 五大高频陷阱
-    var trapSec = U.el('div', 'sec-title', '上海卷五大高频陷阱（做题前必看）');
+    // 无提示词候选池（连词 > 介词 > 冠词 > 代词 > 情态）
+    if (m.pool && m.pool.length) {
+      v.appendChild(U.el('div', 'sec-title', '无提示词候选池：只有 5 类（按排查优先级排序）'));
+      m.pool.forEach(function (p) {
+        var pc = U.el('div', 'glass', '');
+        pc.style.padding = '16px 18px';
+        pc.style.marginTop = '10px';
+        var ph = '<div class="sec-title" style="margin-top:0">' + esc(p.prio) + ' · ' + esc(p.name) + '</div>'
+          + '<div class="kblock"><div class="lb">什么时候选它</div><p>' + esc(p.when) + '</p></div>';
+        if (p.how && p.how.length) {
+          ph += '<div class="kblock"><div class="lb">怎么做</div><ul>';
+          p.how.forEach(function (x) { ph += '<li>' + esc(x) + '</li>'; });
+          ph += '</ul></div>';
+        }
+        if (p.example) ph += '<div class="kblock"><div class="lb">示例</div><p class="hl">' + esc(p.example) + '</p></div>';
+        pc.innerHTML = ph;
+        v.appendChild(pc);
+      });
+    }
+
+    // 快速排查流程（一句话版）
+    if (m.quickFlow && m.quickFlow.length) {
+      v.appendChild(U.el('div', 'sec-title', '拿不准？快速排查流程（一句话版）'));
+      var qc = U.el('div', 'glass', '');
+      qc.style.padding = '16px 18px';
+      var qflow = U.el('ol', 'ex-flow');
+      m.quickFlow.forEach(function (s) {
+        qflow.appendChild(U.el('li', '', '<b>' + esc(s) + '</b>'));
+      });
+      qc.appendChild(qflow);
+      v.appendChild(qc);
+    }
+
+    // 高频坑（最高频陷阱排前面）
+    var trapSec = U.el('div', 'sec-title', m.trapTitle || '上海卷高频陷阱（做题前必看）');
     v.appendChild(trapSec);
     var tc = U.el('div', 'glass', '');
     tc.style.padding = '12px 16px';
