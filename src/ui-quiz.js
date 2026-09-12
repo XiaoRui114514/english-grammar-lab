@@ -803,14 +803,14 @@
           E.quiz.startAI(S._aiQuestions, S._aiMeta || { mode: S.mode });
         } else if (E.aiUI && E.aiUI.resumeTraining) {
           E.aiUI.resumeTraining(S.mode);
-        } else { E.ui.go('ai'); }
+        } else { E.ui.go('ai', true); }
       }
       else startMixed(modeNow);
     });
     var back = el('button', 'btn ghost', '🗂 返回列表');
-    back.addEventListener('click', function () { E.ui.go('topics'); });
+    back.addEventListener('click', function () { E.ui.go('topics', true); });
     var home = el('button', 'btn ghost', '🏠 首页');
-    home.addEventListener('click', function () { E.ui.go('home'); });
+    home.addEventListener('click', function () { E.ui.go('home', true); });
     foot.appendChild(again);
     // 核心整轮结束后：始终提供"再练5题(新题)"（需求§24）
     if (kindNow === 'core' && S.topicId !== 'challenge') {
@@ -833,7 +833,7 @@
       });
     });
     $$('[data-topic]', v).forEach(function (b) {
-      b.addEventListener('click', function () { E.ui.go('topic/' + b.dataset.topic); });
+      b.addEventListener('click', function () { E.ui.go('topic/' + b.dataset.topic, true); });
     });
     v.scrollIntoView({ block: 'start' });
   }
@@ -858,7 +858,7 @@
       }
       S = null;
       E.ui.quizActive = false;
-      if (kind === 'ai') E.ui.go('ai'); else E.ui.go('topics');
+      if (kind === 'ai') E.ui.go('ai', true); else E.ui.go('topics', true);
     });
   }
 

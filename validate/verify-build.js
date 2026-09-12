@@ -21,6 +21,7 @@ const checks = [
   ['底部白边修复：固定背景层 + 画布底色', 'body::before {'],
   ['题干空位只有一条虚线（无下划线字符）', '<span class="blank"></span>'],
   ['编号空位只有一条虚线（无下划线字符）', '<i class="pb-u"></i>'],
+  ['同路由导航不再整页重绘（首页点图标不抽搐）', 'function go(route, force)'],
 ];
 let failed = 0;
 for (const [name, needle] of checks) {

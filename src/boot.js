@@ -49,9 +49,16 @@
       + '请回到作者发布渠道获取完整版本，并保留署名与授权说明。</p></div></div>';
   }
 
-  function go(route) {
-    if (location.hash === '#/' + route) { render(); return; }
-    location.hash = '#/' + route;
+  // 已在该路由时不再整页重绘（首页点左上角图标原来会重建整个视图 + 跳回顶部，
+  // 手机上看起来就是“抽搐”）。练习页 / 成绩页退出等确实需要同路由重绘的场景，
+  // 调用处显式传 force = true。
+  function go(route, force) {
+    var want = '#/' + route;
+    if (location.hash === want) {
+      if (force) render();
+      return;
+    }
+    location.hash = want;
   }
 
   function onHashChange() {

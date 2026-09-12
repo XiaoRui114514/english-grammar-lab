@@ -481,7 +481,7 @@
   }
   function regenerateLast(mode) {
     var cached = E.ai.readCachedSession();
-    if (!cached || !cached.cfg) { E.ui.go('ai'); return; }
+    if (!cached || !cached.cfg) { E.ui.go('ai', true); return; }
     E.quiz.startAI(cached.questions, {
       mode: mode || 'normal',
       title: (cached.meta && cached.meta.title) || 'AI 出题训练',
@@ -492,7 +492,7 @@
     var cfg = loadCfg();
     if (catId) cfg.topicId = catId;
     saveCfg(cfg);
-    E.ui.go('ai');
+    E.ui.go('ai', true); // 可能已在 AI 页：同路由也要重绘以套用新配置
   }
 
   E.aiUI = {
