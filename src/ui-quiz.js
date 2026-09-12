@@ -564,7 +564,7 @@
 
   function lastQ() { return S.idx >= S.questions.length - 1; }
 
-  /* ---------- 单题统计落库（AI 题含来源/年级/阶段/大专题标记） ---------- */
+  /* ---------- 单题统计落库（AI 题含来源/大专题标记） ---------- */
   function commitStats(q, entry) {
     var isAI = !!(q.isAI || q.source === 'ai');
     var meta = q.aiMeta || {};
@@ -576,7 +576,7 @@
     E.recordTag(tid, tag, entry.ok);
     if (!entry.ok) {
       var corText = q.type === 'choice' ? q.options[q.answerIndex] : (q.answerText || (q.accepted && q.accepted[0]));
-      var topicTitle = isAI ? ((meta.gradeName || 'AI') + ' · ' + (meta.catName || 'AI出题')) : (E.bank()[S.topicId] ? E.bank()[S.topicId].title : S.title);
+      var topicTitle = isAI ? ('AI · ' + (meta.catName || '语法填空')) : (E.bank()[S.topicId] ? E.bank()[S.topicId].title : S.title);
       E.addWrong({
         topicId: tid,
         topicTitle: topicTitle,
@@ -587,8 +587,6 @@
         correctAnswer: corText,
         wrongType: q.wrongType || 'CONTEXT_ERROR',
         source: isAI ? 'ai' : 'bank',
-        grade: meta.gradeName || '',
-        stage: meta.stage || '',
         catId: meta.catId || '',
         explText: isAI ? (q.explanation ? q.explanation.why : '') : '',
         kp: meta.knowledgePoint || tag

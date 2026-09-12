@@ -141,11 +141,11 @@ ok(Array.isArray(EGL.availableTopicIds()) && EGL.availableTopicIds().length === 
 const rec = EGL.recommendNext();
 ok(rec && rec.type, 'recommendNext 返回推荐');
 
-// ---- 课程体系（大专题/年级） ----
+// ---- 课程体系（大专题） ----
 console.log('[6] 课程体系（curriculum/method）');
 const cur = sb.window.__EGL_CURRICULUM__;
 ok(cur && cur.categories.length === 11, '大专题 11 个');
-ok(cur && cur.grades.length === 3 && cur.grades[0].key === 'g1', '年级：高一/高二/高三');
+ok(cur && !cur.grades && typeof cur.gradeDef === 'undefined', '专题体系不再按年级分类');
 ok(sb.window.__EGL_METHOD_COURSE__ && sb.window.__EGL_METHOD_COURSE__.steps.length === 5, '解题方法课 5 步');
 ok(EGL.catOfTopicId('tense06') === 'verb', 'tense06 → 谓语动词');
 ok(EGL.catOfTopicId('ai:nonfinite') === 'nonfinite', 'ai:nonfinite → 非谓语');
@@ -154,11 +154,11 @@ ok(typeof EGL.categoryStats() === 'object' && Array.isArray(EGL.categoryStats())
 // ---- AI 引擎（无网络，仅逻辑层） ----
 console.log('[7] AI 逻辑层（prompt/JSON/校验/转换）');
 ok(typeof EGL.ai === 'object', 'EGL.ai 存在');
-const cfg = { gradeKey: 'g1', gradeName: '高一', stage: '1', topicId: 'nonfinite', count: 10, apiKey: 'sk-x' };
+const cfg = { topicId: 'nonfinite', count: 10, apiKey: 'sk-x' };
 const prompt = EGL.ai.buildPrompt(cfg);
-ok(typeof prompt === 'string' && prompt.indexOf('高一') >= 0 && prompt.indexOf('非谓语动词') >= 0, 'buildPrompt 包含年级与专题');
+ok(typeof prompt === 'string' && prompt.indexOf('非谓语动词') >= 0 && prompt.indexOf('高一') < 0, 'buildPrompt 只含专题、不再含年级');
+ok(prompt.indexOf('____') >= 0 && prompt.toLowerCase().indexOf('json') >= 0, 'buildPrompt 含空标规则与 JSON 输出约束');
 const goodJSON = JSON.stringify({
-  grade: '高一',
   papers: [{ title: 'T', passage: 'Tom ____ (work) hard. ____ he plays a lot.', blanks: [
     { answer: 'works', givenWord: 'work', isGivenWord: true, type: 'tense', knowledgePoint: '一般现在时', category: '谓语动词', explanation: '三单加s', difficulty: 1 },
     { answer: 'Though', givenWord: null, isGivenWord: false, type: 'conjunction', knowledgePoint: '让步连词', category: '并列与逻辑', explanation: '句意让步', difficulty: 1 }
@@ -169,7 +169,7 @@ ok(parsed && parsed.papers, 'extractJSON 正常');
 const fenced = '```json\n' + goodJSON + '\n```';
 ok(EGL.ai.extractJSON(fenced).papers, 'extractJSON 去代码块');
 ok(EGL.ai.extractJSON('说明文字 ' + goodJSON + ' 结尾文字').papers, 'extractJSON 提取主体');
-const cfgSmall = { gradeKey: 'g1', gradeName: '高一', stage: '1', topicId: 'nonfinite', count: 2, apiKey: 'sk-x' };
+const cfgSmall = { topicId: 'nonfinite', count: 2, apiKey: 'sk-x' };
 const badRaw = EGL.ai.validateAndNormalize(parsed, cfgSmall);
 ok(badRaw && badRaw.length >= 1, 'validateAndNormalize 通过样例');
 let threw = false;

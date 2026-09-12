@@ -570,12 +570,6 @@ details.explanation-panel .explain {
 .passage-blank { color: var(--accent); font-weight: 800; border-bottom: 2px dashed rgba(91,140,255,0.6); margin: 0 2px; white-space: nowrap; }
 .passage-blank.cur { color: var(--warn); border-bottom-color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 0 3px; }
 
-/* 年级切换 Tab */
-.grade-tabs { display: flex; gap: 8px; margin: 14px 0 8px; flex-wrap: wrap; }
-.grade-tabs .gt { border: 1.5px solid var(--stroke); background: rgba(255,255,255,0.05); color: var(--ink-dim);
-  border-radius: 12px; padding: 10px 16px; font-weight: 800; cursor: pointer; font-size: 14px; font-family: inherit; }
-.grade-tabs .gt.on { border-color: var(--accent); color: var(--hl); background: rgba(91,140,255,0.16); }
-
 /* 大专题卡片 */
 .cat-card { padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--c, var(--accent)); }
 .cat-card h4 { font-size: 16px; display:flex; align-items:center; gap:8px; }

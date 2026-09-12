@@ -16,11 +16,11 @@
   var API_URL = 'https://api.deepseek.com/chat/completions';
   // UI 显示名与真实 API model id 映射（避免硬编码不存在的 id）
   var MODELS = [
-    { ui: 'DeepSeek V4 Flash（默认·快）', id: 'deepseek-chat', note: '对应 deepseek-chat' },
-    { ui: 'DeepSeek Reasoner（强推理·更慢更贵）', id: 'deepseek-reasoner', note: '对应 deepseek-reasoner' }
+    { ui: 'DeepSeek V4 Flash（默认·快）', id: 'deepseek-flash', note: '对应 deepseek-flash' },
+    { ui: 'DeepSeek V4 Pro（强推理·更慢更贵）', id: 'deepseek-v4-pro', note: '对应 deepseek-v4-pro' }
   ];
-  // 推理等级：本 API 无独立 reasoning 参数，用模型选择映射；不发送不存在的参数
-  var REASON = { low: 'deepseek-chat', medium: 'deepseek-chat', high: 'deepseek-reasoner' };
+  // 推理等级：低=Flash（快）、高=V4 Pro（强推理），与 UI 的两个选择一一对应
+  var REASON = { low: 'deepseek-flash', medium: 'deepseek-flash', high: 'deepseek-v4-pro' };
 
   // 真实 model id：优先用 UI 显式选择的模型，其次按推理等级映射（不发送不存在的参数）
   function modelIdOf(cfg) {
@@ -68,7 +68,7 @@
   function sanitizeCfg(cfg) {
     var c = {};
     if (!cfg) return c;
-    ['gradeKey', 'gradeName', 'stage', 'topicId', 'count', 'customCount', 'reasoning', 'qtype', 'structure', 'mode'].forEach(function (k) {
+    ['topicId', 'count', 'customCount', 'reasoning', 'qtype', 'structure', 'mode'].forEach(function (k) {
       if (cfg[k] !== undefined) c[k] = cfg[k];
     });
     return c;
@@ -80,12 +80,11 @@
       id: 'ai_' + nowId(),
       ts: nowTs(),
       date: todayStr(),
-      gradeName: meta && meta.gradeName ? meta.gradeName : (cfg.gradeName || ''),
       topicLabel: meta && meta.title ? meta.title : '',
       count: (papers || []).reduce(function (s, p) { return s + (p.blanks ? p.blanks.length : 0); }, 0),
       papersCount: (papers || []).length,
       cfg: sanitizeCfg(cfg),
-      meta: { title: (meta && meta.title) || 'AI 出题', gradeName: (meta && meta.gradeName) || (cfg.gradeName || '') },
+      meta: { title: (meta && meta.title) || 'AI 出题' },
       papers: papers,       // 语篇原文（保留 blanks，便于以后转存题库/重排）
       questions: questions  // 已转换的题目，可直接进入做题
     };
@@ -125,40 +124,32 @@
   /* ---------- Prompt 规则文本（稳定部分，动态部分在 buildPrompt 拼接） ---------- */
   function shanghaiRulesText() {
     return [
-      '一、语法填空命题规则（上海命题风格 · 初高中通用）：',
-      '1. 每篇语篇约 10 空；约 4-5 空为有提示词（多为动词变形/词性转换），约 5-6 空为无提示词（介/连/冠/代/从句连接词等）。',
-      '2. 全部空必须嵌入自然、连贯、有主题的完整语篇（说明文/议论文/科普/叙事）。禁止孤立单句堆题。',
-      '3. 难度主要来自语法结构与上下文语境，禁止用生僻词/超纲词/怪文化背景制造难度。',
-      '4. 禁止时间词直给答案式题目；时态题要靠语境判断，不机械用 yesterday/since/already。',
-      '二、有提示词规则：主要考时态/语态/主谓一致/非谓语/词性转换。若是非谓语，必须符合真实句法（分句是否已有谓语、主动被动、先后完成），禁止为覆盖 having done/to have done 等强行塞入。',
-      '三、无提示词规则：主要考定语从句/名词性从句/状语从句连接词、介词、冠词、代词、并列连词、whether/that/what/however 等。',
-      '四、what vs that：若答案 what，其从句必须缺成分；若答案 that，从句必须完整；不许出两可题。',
-      '五、however：仅以 however+adj/adv+主语+谓语 的让步结构出现，且语境自然；不许硬凑。',
-      '六、答案必须唯一；每个空都必须给出学生能看懂的中文解析（为什么是这个形式、为什么不是别的、句子主干/从句成分如何判断）。',
-      '七、输出必须为严格合法 JSON（不要 Markdown、不要 ``` 围栏、不要前后说明文字）。'
+      '一、命题总则（上海命题风格 · 初高中通用）',
+      '1. 语篇必须完整、连贯、有明确主题（说明文/科普/议论文/叙事均可），语言地道自然；禁止把互不相关的句子拼成“文章”。',
+      '2. 语篇题每篇约 10 空：有提示词约 4-5 空（动词变形/词性转换等），无提示词约 5-6 空（介词/连词/冠词/代词/从句连接词等），整套练习保持接近这一比例（纯单句模式不受此条限制）。',
+      '3. 难度来自语法结构与上下文逻辑，词汇限定在初高中课标范围：禁止生僻词、超纲词和陌生文化背景；禁止“时间词直给答案”的送分题，时态语态必须由上下文推断。',
+      '二、考点规则',
+      '4. 有提示词：时态、语态、主谓一致、非谓语（to do/doing/done/完成式/被动式）、词性转换（adj↔adv、名词单复数与派生、比较级最高级、否定前缀等）。',
+      '5. 无提示词：三大从句连接词（定语/名词性/状语从句）、what 与 that、介词、冠词、代词、并列与逻辑衔接词（and/but/or/so/however 等）。',
+      '6. 答案唯一：每个空有且只有一个正确答案，禁止“填 A 填 B 都说得通”的两可题；what 的从句必须缺成分、that 的从句必须完整，if/whether、which/where 等同理。',
+      '7. 非谓语必须真实需要判断：先看分句有没有谓语，再判断主动/被动与动作先后，禁止为覆盖 having done、to have done 等形式强行塞入。',
+      '8. however 只以 however + adj/adv + 主语 + 谓语 的让步结构自然出现，禁止硬凑。',
+      '9. 同一篇内考点要分散：相邻两空不考同一知识点，同一知识点全篇最多出现 2 次。',
+      '三、解析规则',
+      '10. 每个空都要给出学生能看懂的中文解析，讲清三点：①为什么是这个答案（语法依据+语境线索）；②为什么不是其它形式（对比易错项）；③做题时如何一步步判断（找句子主干、看从句成分、联系上下文）。解析要具体，禁止“固定搭配”“语感如此”之类空话。',
+      '四、输出格式规则（违反会导致程序无法读取）',
+      '11. 只输出一个 JSON 对象：不要 Markdown、不要 ```json 代码块、不要任何解释、注释或前后说明，响应必须以 { 开头、以 } 结尾。',
+      '12. 正文中的每个空都用 4 个下划线 ____ 标出，____ 的个数必须与 blanks 数组长度完全一致；正文里绝对不能出现答案词，答案只写在 blanks 里。',
+      '13. 字段名与取值严格按下方 JSON 模板，不新增、不删减字段；字符串内不要出现未转义的引号，不要写尾逗号。'
     ].join('\n');
   }
 
-  /* ---------- 年级/专题动态描述 ---------- */
-  function gradeRule(gradeKey) {
-    var map = {
-      g1: '高一（初高中过渡+基础建立）：句子主干明显，从句数量少，词汇为高中基础词。有提示词以基础时态（一般现在/过去/将来/进行/现在完成）、基础被动、主谓一致、to do/doing/done、adj↔adv、名词单复数为重点；无提示词以基础定语从句(which/who/where/when)、简单状语从句、简单名词性从句、基础介词/冠词/代词/并列连词为限。高频易错：现在完成vs一般过去、adj/adv、a/an、基础从句连接词。',
-      g2: '高二（真正高中综合）：句子变长、允许从句与结构嵌套。有提示词加入过去完成、时态语态综合、上下文时态、having done/to have done/being done/to be done、非谓语作定语状语、比较级最高级、否定前缀；无提示词加入三大从句综合、what/that、however让步、介词语义、抽象名词具体化等。重点训练拆句子主干。',
-      g3: '高三（完全综合冲刺，对标春考/秋考/一模/二模）：全时态全语态、隐蔽主谓一致、全套非谓语含完成被动式、复杂词性转换；无提示词做三大从句深度综合、从句嵌套、what/that/whose/where、复杂介词、抽象名词具体化、代词指代、并列逻辑。即使单句看懂也不一定做对，必须结合全文逻辑。'
-    };
-    return map[gradeKey] || map.g1;
-  }
-
-  function topicDistRule(topicId, gradeKey) {
+  /* ---------- 专题分布动态描述 ---------- */
+  function topicDistRule(topicId, catName) {
     if (!topicId || topicId === 'all') {
-      var weights = gradeKey === 'g3'
-        ? '谓语动词/非谓语/从句/词性/虚词都要有，但按高考实际占比安排：非谓语、谓语时态语态、三大从句(尤其名词性从句 what/that)、词性转换是主体；介词、冠词、代词、连词穿插。不要 10 空机械均分。'
-        : gradeKey === 'g2'
-          ? '以谓语时态语态综合、非谓语、三大从句、词性转换为主体，介词/冠词/代词/连词穿插，what/that 与 however 可适量出现。'
-          : '以时态、基础非谓语、简单词性转换、基础从句与虚词为主体，按上海实际重要程度分配，不要机械均分。';
-      return '训练范围：全部（自动按上海实际重要程度 + 年级难度合理分布）。' + weights;
+      return '训练范围：全部大专题。按上海卷实际重要程度分布：谓语动词（时态/语态/主谓一致）、非谓语动词、三大从句（尤其名词性从句 what/that）、词性转换为主体，介词/冠词/代词/并列逻辑穿插出现；不要 10 空机械均分。';
     }
-    return '训练范围：主要围绕「' + topicId + '」这一专题出题；同一语篇内该专题考点应有多个知识点分布，并结合谓语/从句等作自然背景，保持语篇自然；不可 10 空全是同一形式。';
+    return '训练范围：以「' + catName + '」为大专题重点——该大专题下的不同知识点要占全部空数的一半以上，其余空用其它大专题作自然铺垫，保持句子/语篇自然连贯；同一形式不可连续重复。';
   }
 
   /* ---------- buildPrompt：动态组装（§四十三） ---------- */
@@ -171,48 +162,43 @@
     }
     var targetCount = Math.max(1, cfg.count || 10);
     var papersN = Math.max(1, Math.ceil(targetCount / 10));
-    var finalCount = targetCount;
     var structure = cfg.structure || 'mixed';
     var lines = [];
-    lines.push('你是一名熟悉上海地区英语考试命题特点的英语教师和语法填空命题者（初高中通用）。');
+    lines.push('你是一位熟悉上海地区英语考试（初高中通用）命题风格的英语教研员，请命制一套可直接给学生练习的语法填空题，并严格按 JSON 输出。');
     lines.push('');
-    lines.push('任务：根据以下配置生成符合上海命题风格的语法填空题（难度按所选年级调节）：');
-    lines.push('- 年级：' + (cfg.gradeName || '高一'));
-    lines.push('- 专题：' + catName);
-    lines.push('- 结构：' + (structure === 'sentence' ? '纯单句题（无语篇）' : structure === 'passage' ? '纯语篇题（无单句）' : '单句题 + 语篇题（推荐，仿上海高一作业：几个句子 + 一篇文章）'));
-    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（本批共约 ' + finalCount + ' 空，每篇不超过 10 空）'));
-    lines.push('- 总空数：' + finalCount);
+    lines.push('【本次命题配置】');
+    lines.push('- 训练专题：' + catName);
+    lines.push('- 题目结构：' + (structure === 'sentence' ? '纯单句题（无语篇）' : structure === 'passage' ? '纯语篇题（无单句）' : '单句题 + 语篇题'));
+    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇不超过 10 空）'));
+    lines.push('- 总空数：' + targetCount + '（整套练习的空数之和）');
     lines.push('');
-    lines.push(topicDistRule(cfg.topicId, cfg.gradeKey));
-    lines.push('');
-    lines.push('年级难度要求：' + gradeRule(cfg.gradeKey));
+    lines.push(topicDistRule(cfg.topicId, catName));
     lines.push('');
     lines.push(shanghaiRulesText());
     lines.push('');
-    lines.push('九、单句题规则（structure 含“单句”时必出）：每个单句是独立的完整句子，句中给出一个高频动词（如 take / learn / tell / get / come / go / make / spend / leave / fail / feel / have 等），要求学生根据该句的时间状语/语境把该词改成正确形式——一般现在时、一般过去时、现在/过去进行时、现在/过去完成时、一般将来时、被动语态、非谓语(to do/doing/done)、词性转换等，覆盖时态/语态/主谓一致/非谓语；每句 1 个空（个别可 2 个空）；必须有明确语境线索（如 these days / at that time / by then / since / tomorrow / look! 等）且答案唯一。单句正文只写 ____ 空标，不要写括号原词；原词只放 givenWord 字段，违者仅保留一份。');
-    if (structure !== 'sentence') {
+    lines.push('五、单句题规则（structure 含“单句”时必出）：每个单句都是独立完整的句子，句中给出一个高频动词原形（如 take / learn / tell / get / come / go / make / spend / leave / fail / feel / have 等），要求学生按句中的时间状语与语境改成正确形式——一般现在时、一般过去时、现在/过去进行时、现在/过去完成时、一般将来时、被动语态、非谓语（to do/doing/done）、词性转换等，覆盖时态/语态/主谓一致/非谓语；每句 1 个空（个别可 2 个空）；必须有明确语境线索（如 these days / at that time / by then / since / tomorrow 等）且答案唯一。单句正文只写 ____ 空标，不写括号原词；原词只放 givenWord 字段。');
+    if (structure === 'mixed') {
       lines.push('');
-      lines.push('十、结构分配（structure=mixed 时）：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1-2 空），语篇 1~2 篇（每篇约 5-10 空）。');
+      lines.push('六、结构分配：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1-2 空），语篇 1~2 篇（每篇 5~10 空）。');
     }
-    lines.push('自检要求（输出前在心里过一遍）：答案唯一；无 what/that 两可；非谓语真需要判断；时态靠上下文；however 只按让步结构且自然；文章自然连贯有主题；难度与年级匹配；10 空分布接近 4-5 有提示词 + 5-6 无提示词；同一考点不过度重复。');
     lines.push('');
-    lines.push('【关键】正文 passage 里每一个空必须用 ____（恰好 4 个下划线）标出，下划线数量必须与 blanks 数量一致；禁止把答案词写进正文——正文里只出现下划线，答案只能写在 blanks.answer / options 里。');
+    lines.push('输出前自检（在心里过一遍，不要写出来）：空数是否为 ' + targetCount + '；____ 的个数是否与 blanks 数量一致；答案是否唯一；有没有 what/that 两可；非谓语是否真的需要判断；时态是否靠上下文；文章是否连贯；考点是否过度重复；解析是否三点齐全。');
     if (cfg.qtype === 'input') {
       lines.push('');
-      lines.push('八、输出题型：填空输入题（无选项）。每个空只给 answer 与 givenWord，不输出 options 字段。');
+      lines.push('七、输出题型：填空输入题（无选项）。每个空只给 answer 与 givenWord，不输出 options 字段。');
     } else {
       lines.push('');
-      lines.push('八、输出题型：选择题（点选，n 选 1；学生不做任何打字）。这是本组最关键的要求：');
-      lines.push('  1. 每个空除 answer 外，必须再输出 options：选项个数由你按该考点自然能给出几个“合理干扰项”自行决定——4~6 个均可（不必固定 6 个，3 个也可但尽量 ≥4）；');
-      lines.push('  2. options 中恰好 1 个与 answer 完全一致（比较时 trim 掉首尾空格且忽略大小写），即正确项；');
-      lines.push('  3. 其余选项必须是“真实常见、看似合理”的干扰项——针对该考点的典型错误（错误时态/语态/非谓语形式/词形/单复数、错误连接词、介词、冠词多漏误、代词误用、易混逻辑词等）；');
+      lines.push('七、输出题型：点选选择题（n 选 1，学生只点不打字），这是本组最关键的要求：');
+      lines.push('  1. 每个空除 answer 外必须输出 options：选项个数由该考点自然能给出的合理干扰项决定，4~6 个（最少 3 个）；');
+      lines.push('  2. options 中恰好 1 个与 answer 完全一致（忽略首尾空格与大小写），即正确项；');
+      lines.push('  3. 其余选项必须是针对该考点的典型错误：错误时态/语态/非谓语形式/词形变化/单复数、错误连接词、错误介词、冠词多漏误、代词误用、易混逻辑词等；');
       lines.push('  4. 干扰项禁止与正确答案或彼此重复，禁止明显荒谬，禁止出现“两个都能说通”的选项；');
-      lines.push('  5. 选项文本只写答案形式本身（不加解释）。');
-      lines.push('  空对象示例（本空给 5 个选项，即 5 选 1）：{"answer":"has been built","options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时被动语态","category":"谓语动词","explanation":"主语是 building，与 build 是被动关系；by 2025 提示到说话时已完成，故用现在完成时被动 has been built。","difficulty":2}');
+      lines.push('  5. 选项文本只写答案形式本身，不加任何解释。');
+      lines.push('  空对象示例（本例 5 选 1）：{"answer":"has been built","options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时被动语态","category":"谓语动词","explanation":"主语 building 与 build 是被动关系；by 2025 说明动作到说话时已完成，所以用现在完成时的被动 has been built。has built 是主动、was built 是过去、is building 是进行，都与语境不符。判断步骤：先看主语与语态，再看时间关系，最后确定时态语态的组合形式。","difficulty":2}');
     }
     lines.push('');
-    lines.push('输出 JSON 结构（严格按此，不要输出任何其它文字）：');
-    var schema = { grade: '高一' };
+    lines.push('八、输出 JSON 模板（严格按此结构，字段一个不少、一个不多）：');
+    var schema = {};
     if (structure !== 'sentence') {
       schema.papers = [
         {
@@ -227,7 +213,7 @@
               type: 'nonfinite|tense|wordform|clause|prep|article|pronoun|conjunction|other',
               knowledgePoint: '具体知识点，如 having done',
               category: '谓语动词|非谓语动词|词性转换|定语从句|名词性从句|状语从句|介词|冠词|代词|并列与逻辑|其他/拓展',
-              explanation: '面向高一学生、能看懂的中文解析：为什么是这个形式/为什么不是别的形式/怎么从句子结构和上下文判断',
+              explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从句子结构和上下文判断',
               difficulty: 1
             }
           ]
@@ -247,7 +233,7 @@
               type: 'tense|passive|nonfinite|wordform|agreement',
               knowledgePoint: '具体知识点，如 一般过去时 / 现在进行时 / 现在完成时被动',
               category: '谓语动词|非谓语动词|词性转换',
-              explanation: '面向高一学生、能看懂的中文解析：为什么是这个形式/为什么不是别的形式/怎么从时间状语或语境判断',
+              explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从时间状语或语境判断',
               difficulty: 1
             }
           ]
@@ -266,9 +252,10 @@
     var body = {
       model: modelId,
       messages: [
-        { role: 'system', content: '你是英语语法填空命题引擎（上海命题风格 · 初高中通用）。只输出严格合法的 JSON，不要输出任何解释文字、Markdown 或代码围栏。' },
+        { role: 'system', content: '你是英语语法填空命题引擎（上海命题风格 · 初高中通用）。只输出严格合法的 json 对象：不要解释文字、不要 Markdown、不要代码围栏。' },
         { role: 'user', content: promptText }
       ],
+      response_format: { type: 'json_object' },
       temperature: 0.7,
       stream: false
     };
@@ -527,12 +514,11 @@
           }
         }
         var q = {
-          id: 'ai_' + (cfg.gradeKey || 'g1') + '_' + genId + '_' + kind.slice(0, 1) + pi + '_b' + (b.n || idx),
+          id: 'ai_' + genId + '_' + kind.slice(0, 1) + pi + '_b' + (b.n || idx),
           source: 'ai',
           isAI: true,
           aiMeta: {
-            gradeKey: cfg.gradeKey, gradeName: cfg.gradeName,
-            stage: cfg.stage, topicId: cfg.topicId === 'all' ? 'all' : (cfg.topicId || 'all'),
+            topicId: cfg.topicId === 'all' ? 'all' : (cfg.topicId || 'all'),
             catName: catName, catId: catIdOfName(catName),
             knowledgePoint: b.knowledgePoint || '', type: b.type || ''
           },
@@ -592,8 +578,7 @@
   /* ---------- 配置面板默认值 ---------- */
   function defaultConfig() {
     return {
-      gradeKey: 'g1', gradeName: '高一',
-      stage: '1', topicId: 'all',
+      topicId: 'all',
       count: 10, customCount: 15,
       apiKey: getKey(), rememberKey: !!getKey(),
       reasoning: 'low', modelUi: MODELS[0].ui,

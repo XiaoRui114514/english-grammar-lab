@@ -155,8 +155,8 @@ check('aiPage 渲染', () => {
 check('startAI', () => {
   const papers = [{ title: 'T', passage: 'Tom ____ hard.', blanks: [
     { n: 1, answer: 'works', givenWord: 'work', isGivenWord: true, type: 'tense', knowledgePoint: '一般现在时', category: '谓语动词', explanation: '三单加s', difficulty: 1 } ] }];
-  const qs = EGL.ai.papersToQuestions(papers, { gradeKey: 'g1' });
-  EGL.quiz.startAI(qs, { mode: 'normal', title: 'AI 测试', gradeKey: 'g1' });
+  const qs = EGL.ai.papersToQuestions(papers, {});
+  EGL.quiz.startAI(qs, { mode: 'normal', title: 'AI 测试' });
   if (!EGL.quiz.isActive()) throw new Error('quiz 未激活');
 });
 

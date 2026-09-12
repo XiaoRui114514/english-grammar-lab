@@ -16,10 +16,6 @@
 
   function cur() { return window.__EGL_CURRICULUM__; }
   function categoryList() { return cur() ? cur().categories : []; }
-  function gradeLabel(key) {
-    var g = cur() && cur().gradeDef ? cur().gradeDef(key) : null;
-    return g ? g.grade : (key || 'g1');
-  }
   function loadCfg() {
     var d = E.ai.defaultConfig();
     try {
@@ -30,11 +26,15 @@
       }
     } catch (e) {}
     d.apiKey = E.ai.getKey();
+    // 兼容旧版本保存的模型名（旧模型标签 → 新标签，避免下拉框与真实调用不一致）
+    if (d.modelUi !== E.ai.MODELS[0].ui && d.modelUi !== E.ai.MODELS[1].ui) {
+      d.modelUi = (d.reasoning === 'high') ? E.ai.MODELS[1].ui : E.ai.MODELS[0].ui;
+    }
     return d;
   }
   function saveCfg(cfg) {
-    var c = { gradeKey: cfg.gradeKey, stage: cfg.stage, topicId: cfg.topicId,
-              count: cfg.count, customCount: cfg.customCount, reasoning: cfg.reasoning, modelUi: cfg.modelUi, qtype: cfg.qtype, structure: cfg.structure };
+    var c = { topicId: cfg.topicId, count: cfg.count, customCount: cfg.customCount,
+              reasoning: cfg.reasoning, modelUi: cfg.modelUi, qtype: cfg.qtype, structure: cfg.structure };
     try { localStorage.setItem(LS_CFG, JSON.stringify(c)); } catch (e) {}
   }
   function appView() { return E.ui && E.ui.app ? E.ui.app.view : null; }
@@ -52,12 +52,12 @@
     if (!v) return;
     var cfg = loadCfg();
     _curCfg = cfg;
-    // Key 输入缓存与配置同步：本次会话已输入的 Key 优先保留（切换年级/题型/结构重绘不清空）
+    // Key 输入缓存与配置同步：本次会话已输入的 Key 优先保留（切换题型/结构重绘不清空）
     if (!_keyCache) _keyCache = (typeof cfg.apiKey === 'string') ? cfg.apiKey : '';
     cfg.apiKey = _keyCache;
     v.innerHTML = '';
     v.appendChild(el('div', '', '<div class="page-title"><span class="ico">🤖</span>AI 出题 · 语法填空</div>'
-      + '<div class="page-sub">按“高一/高二/高三 × 专题 × 题数”生成完整语篇；结果进入原做题界面，判分/解析/错题/统计全部通用。</div>'));
+      + '<div class="page-sub">按“专题 × 题数 × 结构”生成完整练习（初高中通用）；结果进入原做题界面，判分/解析/错题/统计全部通用。</div>'));
 
     var panel = el('div', 'glass', '');
     panel.style.padding = '18px';
@@ -82,24 +82,6 @@
       if (!cfg) return;
       var target = ev.target;
       try {
-        var g = closestOf(target, '[data-grade]');
-        if (g) {
-          if (g.dataset.grade === cfg.gradeKey) return;
-          cfg.gradeKey = g.dataset.grade;
-          cfg.stage = '';
-          saveCfg(cfg);
-          aiPage();
-          return;
-        }
-        var sg = closestOf(target, '[data-stage]');
-        if (sg) {
-          var val = sg.dataset.stage || '';
-          if (String(cfg.stage) === String(val)) return;
-          cfg.stage = val;
-          $$('#aiStageSeg button', v).forEach(function (x) { x.classList.toggle('on', x === sg); });
-          saveCfg(cfg);
-          return;
-        }
         var cBtn = closestOf(target, '[data-count]');
         if (cBtn) {
           var cval = cBtn.dataset.count;
@@ -227,25 +209,6 @@
 
   /* ================= 表单渲染 ================= */
   function renderForm(panel, cfg) {
-    var gHtml = '<div class="form-row"><label>年级</label><div class="seg" id="aiGradeSeg">';
-    (cur().grades || []).forEach(function (g) {
-      var on = cfg.gradeKey === g.key ? ' on' : '';
-      gHtml += '<button type="button" data-grade="' + g.key + '" class="' + on + '">'
-        + (g.key === 'g1' ? '🎒 ' : g.key === 'g2' ? '📘 ' : '🎓 ') + g.grade + '</button>';
-    });
-    gHtml += '</div></div>';
-
-    var gd = cur().gradeDef(cfg.gradeKey);
-    var stages = gd && gd.stages ? gd.stages : [];
-    var stHtml = '<div class="form-row"><label>训练范围</label><div class="seg" id="aiStageSeg">';
-    var allOn = (cfg.stage === '' || cfg.stage === null || cfg.stage === undefined) ? ' on' : '';
-    stHtml += '<button type="button" data-stage="" class="' + allOn + '">全部阶段</button>';
-    stages.forEach(function (s) {
-      var on = String(cfg.stage) === String(s.stage) ? ' on' : '';
-      stHtml += '<button type="button" data-stage="' + s.stage + '" class="' + on + '">阶段' + s.stage + '：' + s.name + '</button>';
-    });
-    stHtml += '</div></div>';
-
     var tHtml = '<div class="form-row"><label>专题</label><select data-f="topicId">';
     tHtml += '<option value="all"' + (cfg.topicId === 'all' ? ' selected' : '') + '>全部专题（自动合理分布）</option>';
     categoryList().forEach(function (c) {
@@ -275,11 +238,11 @@
       + '<div class="form-hint">点选模式：每个空给 3~6 个选项（A/B/C…），由 AI 按考点灵活决定个数；做错同样进错题本+中文解析。</div>'
       + '</div>';
 
-    // 结构：单句 + 语篇（推荐，仿上海高一作业）
+    // 结构：单句 + 语篇（推荐，贴近上海卷考查方式）
     var stC = cfg.structure !== 'sentence' ? ' on' : '';
     var stS = cfg.structure === 'sentence' ? ' on' : '';
     var stP = cfg.structure === 'passage' ? ' on' : '';
-    var structHtml = '<div class="form-row"><label>题目结构（仿上海高一作业）</label><div class="seg">'
+    var structHtml = '<div class="form-row"><label>题目结构</label><div class="seg">'
       + '<button type="button" data-struct="mixed" class="' + stC + '">✏️ 单句 + 语篇（推荐）</button>'
       + '<button type="button" data-struct="sentence" class="' + stS + '">🔠 纯单句</button>'
       + '<button type="button" data-struct="passage" class="' + stP + '">📄 纯语篇</button>'
@@ -306,7 +269,7 @@
       + '</select>'
       + '<div class="form-hint">“推理等级”通过模型切换实现（不向 API 发送不存在的参数）。</div></div>';
 
-    panel.innerHTML += gHtml + stHtml + tHtml + nHtml + qtHtml + structHtml + kHtml + mHtml;
+    panel.innerHTML += tHtml + nHtml + qtHtml + structHtml + kHtml + mHtml;
 
   }
 
@@ -325,14 +288,14 @@
     var listWrap = el('div', '');
     pool.forEach(function (it, idx) {
       var m = it.meta || {};
-      var title = m.title || it.topicLabel || ('AI 出题 ' + (idx + 1));
+      // 旧记录标题里可能带“高一/高二/高三”，展示时统一去掉
+      var title = String(m.title || it.topicLabel || ('AI 出题 ' + (idx + 1))).replace(/^AI · 高[一二三] · /, 'AI · ');
       var n = it.questions ? it.questions.length : (it.count || 0);
       var row = el('div', 'glass ai-rec-item');
       row.innerHTML = '<span class="t">🤖 ' + esc(title) + '</span>'
         + '<span class="badges">'
         + '<span class="badge gray">' + (it.date || '') + '</span>'
         + '<span class="badge blue">' + n + ' 空</span>'
-        + (m.gradeName ? '<span class="badge amber">' + esc(m.gradeName) + '</span>' : '')
         + '</span>'
         + '<span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">'
         + '<button type="button" class="btn sm ghost" data-pool-go="normal" data-id="' + esc(it.id) + '">▶ 普通模式</button>'
@@ -371,14 +334,14 @@
       aiPage();
     });
 
-    var gradeN = gradeLabel(cfg.gradeKey);
     var catName = '全部专题';
     if (cfg.topicId && cfg.topicId !== 'all') {
       var c = cur().category ? cur().category(cfg.topicId) : null;
       catName = c ? c.name : cfg.topicId;
     }
-    $('#genSummary', v).innerHTML = '<span class="badge blue">' + esc(gradeN) + '</span> '
-      + '<span class="badge gray">' + esc(catName) + '</span> '
+    var structBadge = cfg.structure === 'sentence' ? '纯单句' : cfg.structure === 'passage' ? '纯语篇' : '单句+语篇';
+    $('#genSummary', v).innerHTML = '<span class="badge blue">' + esc(catName) + '</span> '
+      + '<span class="badge gray">' + esc(structBadge) + '</span> '
       + '<span class="badge amber">' + (cfg.count || 10) + ' 空</span> '
       + '<span class="badge green">' + (cfg.qtype === 'input' ? '✍️ 填空输入' : '🔤 点选选择题') + '</span>';
     logLine(v, '🟣 正在分析命题要求…');
@@ -439,13 +402,12 @@
       var questions = E.ai.papersToQuestions(allSections, cfg);
       if (!questions.length) throw { code: 'SCHEMA', msg: 'AI 题目转换失败，请重试。' };
       setBar(v, 92);
-      var gName = gradeLabel(cfg.gradeKey);
       var catSel = cfg.topicId && cfg.topicId !== 'all'
         ? ' · ' + ((cur().category(cfg.topicId) || {}).name || cfg.topicId) : '';
       var structLabel = cfg.structure === 'sentence' ? '单句' : cfg.structure === 'passage' ? '语篇' : '单句+语篇';
       var meta = {
-        mode: 'normal', title: 'AI · ' + gName + ' · 语法填空(' + structLabel + ')' + catSel,
-        icon: '🤖', gradeKey: cfg.gradeKey, gradeName: gName, stage: cfg.stage
+        mode: 'normal', title: 'AI · 语法填空(' + structLabel + ')' + catSel,
+        icon: '🤖'
       };
       E.ai.cacheSession({ questions: questions, meta: meta, cfg: cfg, papers: allSections, totalBlanks: totalBlanks });
       E.ai.pushToPool(allSections, questions, cfg, meta);
@@ -526,11 +488,9 @@
       icon: '🤖'
     });
   }
-  function gotoConfig(gradeKey, catId) {
+  function gotoConfig(catId) {
     var cfg = loadCfg();
-    if (gradeKey) cfg.gradeKey = gradeKey;
     if (catId) cfg.topicId = catId;
-    cfg.stage = '';
     saveCfg(cfg);
     E.ui.go('ai');
   }

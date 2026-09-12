@@ -193,51 +193,25 @@
     });
   }
 
-  /* ============ 专题列表（按 大专题 × 年级 组织） ============ */
+  /* ============ 专题列表（按大专题组织，初高中通用） ============ */
   function topics() {
     var v = app.view;
     v.innerHTML = '';
     var cur = window.__EGL_CURRICULUM__;
-    var grade = loadGrade();
     v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">🗂️</span>专题学习 · 语法填空</div>'
-      + '<div class="page-sub">先选年级（高一优先展示基础），再按大专题学习；尚未内置题库的大专题可用「AI 出题」生成练习。</div>'));
-
-    // 年级切换
-    var gt = U.el('div', 'grade-tabs', '');
-    (cur.grades || []).forEach(function (g) {
-      var b = U.el('button', 'gt' + (g.key === grade ? ' on' : ''), (g.key === 'g1' ? '🎒 ' : g.key === 'g2' ? '📘 ' : '🎓 ') + g.grade);
-      b.dataset.g = g.key;
-      gt.appendChild(b);
-    });
-    v.appendChild(gt);
-    $$('.gt', gt).forEach(function (b) {
-      b.addEventListener('click', function () {
-        saveGrade(b.dataset.g);
-        topics();
-      });
-    });
-
-    var gd = cur.gradeDef(grade);
-    if (gd) {
-      var info = U.el('div', 'glass', '');
-      info.style.padding = '10px 16px';
-      info.style.marginBottom = '12px';
-      info.innerHTML = '<b>' + esc(gd.grade) + '</b> · <span class="muted">' + esc(gd.desc) + '</span>'
-        + '<div class="small faint" style="margin-top:4px">阶段：' + esc(gd.stages.map(function (s) { return s.name; }).join(' → ')) + '</div>';
-      v.appendChild(info);
-    }
+      + '<div class="page-sub">初高中通用：按大专题学习，内置题库直接开练；尚未内置的专题可用「AI 出题」生成练习。</div>'));
 
     // 顶部：解题方法课 + AI 出题 快捷入口
     var topRow = U.el('div', 'grid cards2', '');
     topRow.style.marginBottom = '14px';
     topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><div class="ic">🧭</div><h4>解题方法课</h4><p>先学语法填空 5 步做法与高频陷阱（上海题型），再开练。</p></button>'
-      + '<button class="mode-card glass" data-nav="ai"><div class="ic">🤖</div><h4>AI 出题</h4><p>按年级/专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
+      + '<button class="mode-card glass" data-nav="ai"><div class="ic">🤖</div><h4>AI 出题</h4><p>按专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
     v.appendChild(topRow);
 
     // 大专题卡片
     (cur.categories || []).forEach(function (cat) {
-      // 该大专题在当前年级阶段下的内置可用专题
-      var list = availableOfCat(cat.id, grade);
+      // 该大专题下已内置题库的专题
+      var list = availableOfCat(cat.id);
       var card = U.el('div', 'glass cat-card');
       card.style.setProperty('--c', cat.color || 'var(--accent)');
       var acc = 0, tried = 0;
@@ -293,29 +267,20 @@
     });
     $$('[data-ai-cat]', v).forEach(function (b) {
       b.addEventListener('click', function () {
-        var gkey = grade;
-        E.aiUI && E.aiUI.gotoConfig(gkey, b.dataset['aiCat']);
+        E.aiUI && E.aiUI.gotoConfig(b.dataset['aiCat']);
       });
     });
     bindNav(v);
   }
 
-  function loadGrade() {
-    try { var g = localStorage.getItem('EGL_GRADE'); if (g) return g; } catch (e) {}
-    return 'g1'; // 高一默认
-  }
-  function saveGrade(g) { try { localStorage.setItem('EGL_GRADE', g); } catch (e) {} }
-
-  // 该大专题下：当前有真实题库且属于本年级使用的专题
-  function availableOfCat(catId, gradeKey) {
+  // 该大专题下：当前有真实题库的专题（初高中通用，不再按年级过滤）
+  function availableOfCat(catId) {
     var out = [];
     E.availableTopicIds().forEach(function (tid) {
       var no = tid.replace('tense', '');
       var cur = window.__EGL_CURRICULUM__;
       var e = cur && cur.catOf ? cur.catOf(no) : null;
       if (!e || e.cat !== catId) return;
-      var grades = e.grades || [];
-      if (gradeKey && grades.indexOf(gradeKey) < 0) return; // 未列入该年级 → 不放行
       out.push({ tid: tid, no: no, title: (E.metaOfTopic(tid) || {}).title || tid });
     });
     out.sort(function (a, b) { return a.no.localeCompare(b.no); });
@@ -423,7 +388,6 @@
         + (isAI ? '<span class="badge gray">🤖 AI训练</span> ' : '')
         + '<span class="badge gray">' + icon + ' ' + esc(w.topicTitle || (isAI ? 'AI出题' : topicName(w.topicId))) + '</span>'
         + (w.kp ? '<span class="badge blue">' + esc(w.kp) + '</span>' : (w.tag ? '<span class="badge blue">' + esc(w.tag) + '</span>' : ''))
-        + (w.grade ? '<span class="badge amber">' + esc(w.grade) + '</span>' : '')
         + '<span class="badge red">' + wtZh(w.wrongType) + '</span>'
         + '<span class="badge amber">错 ' + w.times + ' 次</span>'
         + '<span class="badge gray">' + w.lastDate + '</span>'
@@ -440,7 +404,7 @@
           answerText: w.correctAnswer,
           explanation: {
             answer: w.correctAnswer,
-            keyPoint: (w.kp ? '考点：' + w.kp : '考点：AI 语法题') + (w.grade ? '（' + w.grade + '）' : ''),
+            keyPoint: (w.kp ? '考点：' + w.kp : '考点：AI 语法题'),
             clue: '',
             trap: '',
             chain: '',

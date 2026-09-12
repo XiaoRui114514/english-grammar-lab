@@ -112,7 +112,7 @@ async function main() {
     ok(raw && raw.papers && raw.papers.length === 1, '去代码块解析成功');
     const papers = E.ai.validateAndNormalize(raw, { count: 4 });
     ok(papers.length === 1 && papers[0].blanks.length === 4, '校验/规范化 4 空');
-    const qs = E.ai.papersToQuestions(papers, { gradeKey: 'g1', gradeName: '高一', stage: '1', topicId: 'verb', count: 4 });
+    const qs = E.ai.papersToQuestions(papers, { topicId: 'verb', count: 4 });
     ok(qs.length === 4, '4 空 → 4 条 input 题（进入原做题界面结构）');
     ok(qs.every(q => q.isAI && q.source === 'ai'), '全部标记 AI 来源');
     ok(qs.some(q => q.aiCtx && q.aiCtx.passage.indexOf('Tom') >= 0), '语篇上下文保留');
@@ -131,12 +131,12 @@ async function main() {
     const pC = E.ai.validateAndNormalize(rawC, { count: 3 });
     ok(pC[0].blanks.every(b => Array.isArray(b.options) && b.options.length >= 2
       && b.options.some(o => o.toLowerCase() === b.answer)), '选择题：options 保留且含正确项');
-    const qC = E.ai.papersToQuestions(pC, { gradeKey: 'g1', gradeName: '高一', stage: '1', topicId: 'all', count: 3, qtype: 'choice' });
+    const qC = E.ai.papersToQuestions(pC, { topicId: 'all', count: 3, qtype: 'choice' });
     ok(qC.length === 3 && qC.every(q => q.type === 'choice'), 'qtype=choice → 全部转选择题');
     ok(qC.every(q => q.options && q.options.length >= 2 && q.options.length <= 6), '选项个数 2~6（n 选 1）');
     ok(qC.every(q => q.answerIndex >= 0 && String(q.options[q.answerIndex]).toLowerCase() === q.accepted[0].toLowerCase()), 'answerIndex 指向正确项');
     ok(qC.every(q => q.hint === ''), '选择题题干不附加打字用提示');
-    const qI = E.ai.papersToQuestions(pC, { gradeKey: 'g1', count: 3, qtype: 'input' });
+    const qI = E.ai.papersToQuestions(pC, { count: 3, qtype: 'input' });
     ok(qI.length === 3 && qI.every(q => q.type === 'input' && q.accepted.length >= 1), 'qtype=input → 仍为填空输入（原流程保留）');
 
     // 兜底：AI 把答案写进正文（无下划线）→ 自动重建空位
@@ -147,12 +147,12 @@ async function main() {
       ] }] };
     const pNM = E.ai.validateAndNormalize(rawNoMark, { count: 2 });
     ok(pNM[0].passage.indexOf('______') >= 0, '无空标正文 → 自动重建空位下划线');
-    const qNM = E.ai.papersToQuestions(pNM, { gradeKey: 'g1', count: 2, qtype: 'choice' });
+    const qNM = E.ai.papersToQuestions(pNM, { count: 2, qtype: 'choice' });
     ok(qNM.length === 2 && qNM.every(q => String(q.question).indexOf('______') >= 0), '重建后每空题干含下划线');
     ok(qNM[0].question.indexOf('Although') < 0, '题干只取所在句，不会卷进后文（修复第一题混乱）');
 
-    // 单句 + 语篇 混合结构（仿上海高一作业：几个句子 + 一篇文章）
-    const rawMix = { grade: '高一',
+    // 单句 + 语篇 混合结构（贴近上海卷：几个句子 + 一篇文章）
+    const rawMix = {
       sentences: [{ sentence: 'I ____ (teach) Italian these days.', blanks: [
         { answer: 'am teaching', givenWord: 'teach', isGivenWord: true, type: 'tense', knowledgePoint: '现在进行时', category: '谓语动词', explanation: 'these days 提示现在进行', difficulty: 1,
           options: ['am teaching', 'was teaching', 'taught', 'teach', 'will teach'] } ] }],
@@ -162,27 +162,27 @@ async function main() {
     };
     const secMix = E.ai.validateAndNormalize(rawMix, { count: 2, structure: 'mixed' });
     ok(secMix.length === 2 && secMix[0].kind === 'sentence' && secMix[1].kind === 'passage', '混合结构：单句+语篇 两段');
-    const qMix = E.ai.papersToQuestions(secMix, { gradeKey: 'g1', gradeName: '高一', count: 2, structure: 'mixed', qtype: 'choice' });
+    const qMix = E.ai.papersToQuestions(secMix, { count: 2, structure: 'mixed', qtype: 'choice' });
     ok(qMix.length === 2 && qMix[0].aiCtx && qMix[0].aiCtx.kind === 'sentence' && qMix[1].aiCtx && qMix[1].aiCtx.kind === 'passage', '单句/语篇 均标记 kind');
     ok(String(qMix[0].question).indexOf('______') >= 0 && qMix[0].question.indexOf('these days') >= 0, '单句题干含空与时间状语语境');
     ok(qMix[0].type === 'choice' && qMix[0].optionCount === undefined, '单句为点选选择题');
     ok(((String(qMix[0].question).match(/\(teach\)/g) || []).length === 1), '单句题干仅保留一份提示词（不重复）');
 
     // 一句两空 → 两句（各自一空、blankN 1/2），可两排选项
-    const raw2 = { grade: '高一', sentences: [{ sentence: 'I ____ (be) a teacher, but I ____ (teach) Italian these days.', blanks: [
+    const raw2 = { sentences: [{ sentence: 'I ____ (be) a teacher, but I ____ (teach) Italian these days.', blanks: [
       { answer: 'am', givenWord: 'be', isGivenWord: true, type: 'tense', knowledgePoint: '一般现在时', category: '谓语动词', explanation: '主语 I 用 am', difficulty: 1, options: ['am', 'is', 'are', 'was', 'be'] },
       { answer: 'am teaching', givenWord: 'teach', isGivenWord: true, type: 'tense', knowledgePoint: '现在进行时', category: '谓语动词', explanation: 'these days 提示现在进行', difficulty: 1, options: ['am teaching', 'was teaching', 'taught', 'teach', 'will teach'] } ] }] };
     const sec2 = E.ai.validateAndNormalize(raw2, { count: 2, structure: 'sentence' });
     ok(sec2.length === 1 && sec2[0].kind === 'sentence' && sec2[0].blanks.length === 2, '一句两空被识别');
-    const q2 = E.ai.papersToQuestions(sec2, { gradeKey: 'g1', count: 2, structure: 'sentence', qtype: 'choice' });
+    const q2 = E.ai.papersToQuestions(sec2, { count: 2, structure: 'sentence', qtype: 'choice' });
     ok(q2.length === 2 && q2[0].aiCtx.blankN === 1 && q2[1].aiCtx.blankN === 2, '一句两空 → 两个空（第1空/第2空）');
 
     // 缓存
     E.ai.cacheSession({ questions: qs, meta: { title: 't' } });
     ok(E.ai.readCachedSession() && E.ai.readCachedSession().questions.length === 4, 'sessionStorage 缓存可用');
     // AI 出题记录池：生成完成即持久保存（未做完也能找回）；可删除/清空；不存 API Key
-    const cfgFull = { gradeKey: 'g1', gradeName: '高一', stage: '1', topicId: 'verb', count: 4, apiKey: 'sk-x', rememberKey: true, reasoning: 'low' };
-    E.ai.pushToPool(papers, qs, cfgFull, { title: 'AI · 高一 · 测试', gradeName: '高一' });
+    const cfgFull = { topicId: 'verb', count: 4, apiKey: 'sk-x', rememberKey: true, reasoning: 'low' };
+    E.ai.pushToPool(papers, qs, cfgFull, { title: 'AI · 测试' });
     let pool = E.ai.getPool();
     ok(pool.length === 1, '生成记录写入池（1 条）');
     ok(pool[0].questions && pool[0].questions.length === 4, '记录保留题目（可继续/重做）');

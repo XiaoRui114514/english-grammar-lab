@@ -588,12 +588,6 @@ details.explanation-panel .explain {
 .passage-blank { color: var(--accent); font-weight: 800; border-bottom: 2px dashed rgba(91,140,255,0.6); margin: 0 2px; white-space: nowrap; }
 .passage-blank.cur { color: var(--warn); border-bottom-color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 0 3px; }
 
-/* 年级切换 Tab */
-.grade-tabs { display: flex; gap: 8px; margin: 14px 0 8px; flex-wrap: wrap; }
-.grade-tabs .gt { border: 1.5px solid var(--stroke); background: rgba(255,255,255,0.05); color: var(--ink-dim);
-  border-radius: 12px; padding: 10px 16px; font-weight: 800; cursor: pointer; font-size: 14px; font-family: inherit; }
-.grade-tabs .gt.on { border-color: var(--accent); color: var(--hl); background: rgba(91,140,255,0.16); }
-
 /* 大专题卡片 */
 .cat-card { padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--c, var(--accent)); }
 .cat-card h4 { font-size: 16px; display:flex; align-items:center; gap:8px; }
@@ -807,7 +801,7 @@ details.explanation-panel .explain {
 
 /* ============================================================
  * data/curriculum.js — 语法填空 · 大专题课程体系（上海命题风格，初高中通用）
- * 结构：大专题(BIG TOPIC) → 知识点/子专题 → 年级×阶段×难度
+ * 结构：大专题(BIG TOPIC) → 知识点/子专题
  * 同时提供：现有专题(bank) → 大专题 的归类映射（用于能力总览统计）
  * ============================================================ */
 (function () {
@@ -834,7 +828,7 @@ details.explanation-panel .explain {
       desc: 'when/if/unless/although/because/so that… 及 however+adj/adv+主谓 让步难点。',
       core: true },
     { id: 'prep',       no: 'C7', name: '介词',          icon: '🧭', color: '#d63031',
-      desc: '固定搭配 + 语义选择。高一以固定搭配为主，越往后越靠上下文逻辑。',
+      desc: '固定搭配 + 语义选择。起步阶段以固定搭配为主，越往后越靠上下文逻辑。',
       core: true },
     { id: 'article',    no: 'C8', name: '冠词',          icon: '🏷️', color: '#00b894',
       desc: 'a/an/the/零冠词。泛指/特指/首次出现/再次出现/抽象名词具体化；a/an 看发音。',
@@ -850,128 +844,73 @@ details.explanation-panel .explain {
       core: false }
   ];
 
-  /* ---------- 年级 × 阶段 ----------
-   * 每阶段下挂知识点（subTopics）。知识点可能是：已建 bank 的专题 / AI 可生成 / 规划中。
-   * lock:true = 该知识点暂未内置题库（可由 AI 出题 或 后续阶段补齐）。
-   */
-  var GRADES = [
-    {
-      grade: '高一', key: 'g1', desc: '初高中过渡 + 基础建立',
-      stages: [
-        { stage: 1, name: '基础建立', desc: '基础时态·被动·主谓一致·to do/doing/done·词性·基础从句虚词',
-          topics: [
-            { key: 'verb_tense_basic', name: '时态基础（现在/过去/将来/进行/完成）', topicId: 'tense', available: true, note: '内置：01–07 等句子级基础训练' },
-            { key: 'verb_passive_basic', name: '基础被动语态', topicId: '', available: false, note: '规划：13–18' },
-            { key: 'verb_agreement', name: '主谓一致', topicId: '', available: false, note: '规划：49' },
-            { key: 'nonfinite_basic', name: '非谓语入门：to do / doing / done', topicId: '', available: false, note: '规划：19–25' },
-            { key: 'transform_basic', name: '基础词性：adj↔adv·名词单复数', topicId: '', available: false, note: '规划：27–32' },
-            { key: 'clause_basic', name: '基础从句与虚词（which/who/when/冠词/介词/代词/并列）', topicId: '', available: false, note: '规划：33–48 基础层' }
-          ] },
-        { stage: 2, name: '核心结构', desc: '完成时深化·语境时态·非谓语与三大从句·what/that',
-          topics: [
-            { key: 'verb_tense_core', name: '语境时态与完成时', topicId: '', available: false, note: 'AI 可生成' },
-            { key: 'nonfinite_core', name: '非谓语深入（having done / being done / to be done）', topicId: '', available: false, note: 'AI 可生成' },
-            { key: 'clause_core', name: '三大从句与 what/that', topicId: '', available: false, note: 'AI 可生成' },
-            { key: 'prep_semantic', name: '介词语义选择', topicId: '', available: false, note: 'AI 可生成' }
-          ] },
-        { stage: 3, name: '综合提升', desc: '长难句·从句嵌套·综合篇章',
-          topics: [
-            { key: 'g1_passage', name: '高一综合语篇 10 空', topicId: '', available: false, note: 'AI 可生成' }
-          ] }
-      ] },
-    {
-      grade: '高二', key: 'g2', desc: '真正进入高中语法综合训练',
-      stages: [
-        { stage: 1, name: '基础巩固（复习高一）', desc: '查漏补缺',
-          topics: [{ key: 'g2_r1', name: '高一内容复习巩固', topicId: '', available: false, note: 'AI 可按薄弱点出题' }] },
-        { stage: 2, name: '综合训练', desc: '说明文/科普/议论文，长句从句',
-          topics: [
-            { key: 'g2_verb', name: '谓语：时态语态综合 / 上下文时态', topicId: '', available: false, note: 'AI 可生成' },
-            { key: 'g2_nonfinite', name: '非谓语：作定语/状语/宾语 + 完成被动式', topicId: '', available: false, note: 'AI 可生成' },
-            { key: 'g2_clause', name: '三大从句综合 / what vs that / however 让步', topicId: '', available: false, note: 'AI 可生成' },
-            { key: 'g2_word', name: '词性：比较级最高级·否定前缀', topicId: '', available: false, note: 'AI 可生成' }
-          ] },
-        { stage: 3, name: '高二综合语篇', desc: '10 空综合篇章',
-          topics: [{ key: 'g2_passage', name: '高二综合语篇 10 空', topicId: '', available: false, note: 'AI 可生成' }] }
-      ] },
-    {
-      grade: '高三', key: 'g3', desc: '完全综合训练（春考/秋考/一模/二模方向）',
-      stages: [
-        { stage: 1, name: '综合冲刺', desc: '全时态·复杂非谓语·从句嵌套·易混辨析',
-          topics: [
-            { key: 'g3_complex', name: '长难句与隐蔽考点综合', topicId: '', available: false, note: 'AI 可生成' },
-            { key: 'g3_passage', name: '模考风格 10 空语篇', topicId: '', available: false, note: 'AI 可生成（可复用 20 题综合挑战做句子级热身）' }
-          ] }
-      ] }
-  ];
-
   /* ---------- 现有 bank 专题 → 大专题 归类映射 ----------
    * 用于：能力总览（把题目正确率聚合到大专题）、AI 建议、错题归类。
    * 目前有真实题库的是 tense01–12 与 challenge；13–60 尚无内容，但按目标大专题预归类，
    * 后续建设题库时按此挂载。
    */
   var EXISTING = [
-    /* tense01–12：谓语动词(时态)。高一阶段1可全部使用；阶段2复用为完成时/语境深化 */
-    { no: '01', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '02', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '03', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '04', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '05', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '06', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '07', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '08', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '09', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '10', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '11', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '12', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '13', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '14', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '15', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '16', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '17', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '18', cat: 'verb', grades: ['g1', 'g2'] },
-    { no: '19', cat: 'nonfinite', grades: ['g1', 'g2'] },
-    { no: '20', cat: 'nonfinite', grades: ['g1', 'g2'] },
-    { no: '21', cat: 'nonfinite', grades: ['g1', 'g2'] },
-    { no: '22', cat: 'nonfinite', grades: ['g1', 'g2'] },
-    { no: '23', cat: 'nonfinite', grades: ['g1', 'g2'] },
-    { no: '24', cat: 'nonfinite', grades: ['g1', 'g2'] },
-    { no: '25', cat: 'nonfinite', grades: ['g1', 'g2'] },
-    { no: '26', cat: 'nonfinite', grades: ['g1', 'g2'] },
-    { no: '27', cat: 'transform', grades: ['g1'] },
-    { no: '28', cat: 'transform', grades: ['g1'] },
-    { no: '29', cat: 'transform', grades: ['g1'] },
-    { no: '30', cat: 'transform', grades: ['g1'] },
-    { no: '31', cat: 'transform', grades: ['g1'] },
-    { no: '32', cat: 'transform', grades: ['g1'] },
-    { no: '33', cat: 'article', grades: ['g1'] },
-    { no: '34', cat: 'article', grades: ['g1'] },
-    { no: '35', cat: 'prep', grades: ['g1'] },
-    { no: '36', cat: 'prep', grades: ['g1'] },
-    { no: '37', cat: 'pronoun', grades: ['g1'] },
-    { no: '38', cat: 'extra', grades: ['g2'] },
-    { no: '39', cat: 'extra', grades: ['g1'] },
-    { no: '40', cat: 'coord', grades: ['g1'] },
-    { no: '41', cat: 'adverbial', grades: ['g1'] },
-    { no: '42', cat: 'attrib', grades: ['g1'] },
-    { no: '43', cat: 'nominal', grades: ['g1'] },
-    { no: '44', cat: 'nominal', grades: ['g2'] },
-    { no: '45', cat: 'nominal', grades: ['g2'] },
-    { no: '46', cat: 'nominal', grades: ['g2'] },
-    { no: '47', cat: 'nominal', grades: ['g2'] },
-    { no: '48', cat: 'adverbial', grades: ['g2'] },
-    { no: '49', cat: 'verb', grades: ['g2'] },
-    { no: '50', cat: 'extra', grades: ['g2'] },
-    { no: '51', cat: 'extra', grades: ['g2'] },
-    { no: '52', cat: 'extra', grades: ['g2'] },
-    { no: '53', cat: 'extra', grades: ['g2'] },
-    { no: '54', cat: 'prep', grades: ['g2'] },
-    { no: '55', cat: 'extra', grades: ['g2'] },
-    { no: '56', cat: 'extra', grades: ['g2'] },
-    { no: '57', cat: 'extra', grades: ['g2'] },
-    { no: '58', cat: 'extra', grades: ['g2'] },
-    { no: '59', cat: 'extra', grades: ['g3'] },
-    { no: '60', cat: 'extra', grades: ['g3'] }
+    /* tense01–12：谓语动词(时态)，初高中通用 */
+    { no: '01', cat: 'verb' },
+    { no: '02', cat: 'verb' },
+    { no: '03', cat: 'verb' },
+    { no: '04', cat: 'verb' },
+    { no: '05', cat: 'verb' },
+    { no: '06', cat: 'verb' },
+    { no: '07', cat: 'verb' },
+    { no: '08', cat: 'verb' },
+    { no: '09', cat: 'verb' },
+    { no: '10', cat: 'verb' },
+    { no: '11', cat: 'verb' },
+    { no: '12', cat: 'verb' },
+    { no: '13', cat: 'verb' },
+    { no: '14', cat: 'verb' },
+    { no: '15', cat: 'verb' },
+    { no: '16', cat: 'verb' },
+    { no: '17', cat: 'verb' },
+    { no: '18', cat: 'verb' },
+    { no: '19', cat: 'nonfinite' },
+    { no: '20', cat: 'nonfinite' },
+    { no: '21', cat: 'nonfinite' },
+    { no: '22', cat: 'nonfinite' },
+    { no: '23', cat: 'nonfinite' },
+    { no: '24', cat: 'nonfinite' },
+    { no: '25', cat: 'nonfinite' },
+    { no: '26', cat: 'nonfinite' },
+    { no: '27', cat: 'transform' },
+    { no: '28', cat: 'transform' },
+    { no: '29', cat: 'transform' },
+    { no: '30', cat: 'transform' },
+    { no: '31', cat: 'transform' },
+    { no: '32', cat: 'transform' },
+    { no: '33', cat: 'article' },
+    { no: '34', cat: 'article' },
+    { no: '35', cat: 'prep' },
+    { no: '36', cat: 'prep' },
+    { no: '37', cat: 'pronoun' },
+    { no: '38', cat: 'extra' },
+    { no: '39', cat: 'extra' },
+    { no: '40', cat: 'coord' },
+    { no: '41', cat: 'adverbial' },
+    { no: '42', cat: 'attrib' },
+    { no: '43', cat: 'nominal' },
+    { no: '44', cat: 'nominal' },
+    { no: '45', cat: 'nominal' },
+    { no: '46', cat: 'nominal' },
+    { no: '47', cat: 'nominal' },
+    { no: '48', cat: 'adverbial' },
+    { no: '49', cat: 'verb' },
+    { no: '50', cat: 'extra' },
+    { no: '51', cat: 'extra' },
+    { no: '52', cat: 'extra' },
+    { no: '53', cat: 'extra' },
+    { no: '54', cat: 'prep' },
+    { no: '55', cat: 'extra' },
+    { no: '56', cat: 'extra' },
+    { no: '57', cat: 'extra' },
+    { no: '58', cat: 'extra' },
+    { no: '59', cat: 'extra' },
+    { no: '60', cat: 'extra' }
   ];
 
   function catOf(noStr) {
@@ -986,19 +925,12 @@ details.explanation-panel .explain {
     var e = catOf(noStr);
     return e ? e.cat : null;
   }
-  function gradeDef(key) {
-    for (var i = 0; i < GRADES.length; i++) if (GRADES[i].key === key) return GRADES[i];
-    return null;
-  }
-
   window.__EGL_CURRICULUM__ = {
     categories: CATEGORIES,
-    grades: GRADES,
     existing: EXISTING,
     catOf: catOf,
     category: category,
-    catByTopicNo: catByTopicNo,
-    gradeDef: gradeDef
+    catByTopicNo: catByTopicNo
   };
 })();
 
@@ -8118,7 +8050,7 @@ details.explanation-panel .explain {
   var CSS = "\n/* ==================== 品牌署名 · 授权（Hison） ====================\n   注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。\n   删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */\n/* 右下角署名印章：平时是一枚小胶囊，悬停 / 点击后原地展开署名卡片（无弹窗） */\n.egl-seal {\n  position: fixed; right: 12px; bottom: 12px; z-index: 46;\n  display: block; text-align: left; overflow: hidden;\n  padding: 6px 11px; border-radius: 13px; cursor: pointer;\n  font-family: inherit; color: rgba(238, 241, 251, 0.76);\n  background: rgba(10, 14, 30, 0.62);\n  border: 1px solid rgba(165, 194, 255, 0.26);\n  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);\n  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);\n  opacity: 0.88; transform-origin: 100% 100%;\n  transition: padding 0.34s var(--ease), border-radius 0.34s var(--ease),\n              background 0.3s, box-shadow 0.34s, opacity 0.24s, transform 0.34s var(--ease);\n}\n.egl-seal-face {\n  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;\n  font-size: 10.5px; font-weight: 700; letter-spacing: 0.6px;\n}\n.egl-seal-panel {\n  display: block; width: 0; max-height: 0; opacity: 0; margin-top: 0;\n  overflow: hidden; white-space: nowrap; transform: translateY(6px);\n  transition: width 0.34s var(--ease), max-height 0.34s var(--ease), opacity 0.26s ease,\n              transform 0.34s var(--ease), margin-top 0.34s var(--ease);\n}\n.egl-seal-name { display: block; font-size: 12.5px; font-weight: 800; letter-spacing: 0.4px; color: var(--ink); }\n.egl-seal-row { display: block; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }\n.egl-seal-row i { font-style: normal; color: var(--ink-faint); margin-right: 6px; }\n.egl-seal-row b { color: var(--hl); font-weight: 800; letter-spacing: 0.4px; }\n/* 展开态：键盘聚焦 / 点击（触摸） */\n.egl-seal:focus-visible,\n.egl-seal.on {\n  padding: 12px 15px 13px; border-radius: 18px;\n  background: rgba(10, 14, 30, 0.94);\n  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n  opacity: 1; transform: translateY(-2px);\n}\n.egl-seal:focus-visible .egl-seal-panel,\n.egl-seal.on .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n/* 有鼠标的设备：悬停即展开 */\n@media (hover: hover) {\n  .egl-seal:hover {\n    padding: 12px 15px 13px; border-radius: 18px;\n    background: rgba(10, 14, 30, 0.94);\n    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n    opacity: 1; transform: translateY(-2px);\n  }\n  .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n}\n/* 题卡底纹已撤掉：部分机型浏览器（如荣耀浏览器）会把低透明度的水印墨迹\n   （SVG 图片版、文本 rgba 版都试过）自动提亮成实心白，糊在题干与选项上。\n   署名改由各处角标承担：题卡左下角 + 其它卡片右下角各一行小字，浓淡是\n   固定色 + 固定 opacity，与页面其它文字一致，各机型都不会被提亮，\n   截图、打印都带署名。 */\n/* 卡片角标 */\n.learn-head, .score-hero, .sq-card, .qbox { position: relative; }\n.learn-head { padding-bottom: 22px; }\n.sq-card { padding-bottom: 22px; }\n.score-hero { padding-bottom: 30px; }\n.learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {\n  content: \"by __EGL_NM__\";\n  position: absolute; right: 10px; bottom: 6px;\n  font-size: 10px; letter-spacing: 1px; font-weight: 700;\n  color: var(--ink-faint); opacity: 0.55;\n  pointer-events: none; user-select: none;\n}\n/* 题卡角标放左下：右下是固定印章的位置，靠太近会叠在一起 */\n.qbox::after { right: auto; left: 12px; }\n/* 页脚署名 */\n.egl-foot { text-align: center; padding: 30px 14px 22px; color: var(--ink-faint); font-size: 12px; }\n.egl-foot .egl-foot-main { color: var(--ink-faint); }\n.egl-foot .egl-foot-brand { margin-top: 5px; color: var(--ink-dim); letter-spacing: 0.3px; line-height: 1.8; }\n.egl-foot .egl-foot-links { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }\n.egl-foot .egl-link {\n  border: 0; background: transparent; color: var(--accent); cursor: pointer;\n  font-family: inherit; font-size: 12px; padding: 3px 4px; text-decoration: underline;\n}\n.egl-foot .egl-tip { color: var(--ink-faint); font-size: 11px; }\n/* 页脚版本号（构建时由 package.json 注入） */\n.egl-foot .egl-foot-ver { margin-top: 4px; color: var(--ink-faint); font-size: 11px; letter-spacing: 0.6px; opacity: 0.8; }\n/* 首页品牌小标签 */\n.egl-chip {\n  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;\n  font-size: 11.5px; letter-spacing: 0.4px; color: var(--ink-faint);\n  border: 1px dashed rgba(165, 194, 255, 0.3); border-radius: 999px; padding: 3px 10px;\n}\n/* 首页副标题下的适用范围标签 */\n.hero-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }\n.hero-tags span {\n  font-size: 11px; letter-spacing: 0.4px; color: var(--ink-dim);\n  border: 1px solid rgba(165, 194, 255, 0.26); border-radius: 999px; padding: 2px 9px;\n}\n.hero-tags span.hot { color: var(--glow); border-color: rgba(255, 224, 130, 0.34); }\n/* 授权说明弹窗 */\n.egl-lic p { margin: 6px 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.7; }\n.egl-lic p b { color: var(--ink); }\n@media print {\n  .egl-seal { display: none; }\n  .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after { color: #222; opacity: 0.75; }\n  .egl-foot { color: #333; }\n}\n";
   // 版本号：构建时由 build.js 用 package.json 的 version 替换（单一来源，
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
-  var VER = "v1.0.4";
+  var VER = "v1.1.0";
   if (VER.charAt(0) === '_') VER = '';
   var _guardTimer = null;
 
@@ -9338,11 +9270,11 @@ details.explanation-panel .explain {
   var API_URL = 'https://api.deepseek.com/chat/completions';
   // UI 显示名与真实 API model id 映射（避免硬编码不存在的 id）
   var MODELS = [
-    { ui: 'DeepSeek V4 Flash（默认·快）', id: 'deepseek-chat', note: '对应 deepseek-chat' },
-    { ui: 'DeepSeek Reasoner（强推理·更慢更贵）', id: 'deepseek-reasoner', note: '对应 deepseek-reasoner' }
+    { ui: 'DeepSeek V4 Flash（默认·快）', id: 'deepseek-flash', note: '对应 deepseek-flash' },
+    { ui: 'DeepSeek V4 Pro（强推理·更慢更贵）', id: 'deepseek-v4-pro', note: '对应 deepseek-v4-pro' }
   ];
-  // 推理等级：本 API 无独立 reasoning 参数，用模型选择映射；不发送不存在的参数
-  var REASON = { low: 'deepseek-chat', medium: 'deepseek-chat', high: 'deepseek-reasoner' };
+  // 推理等级：低=Flash（快）、高=V4 Pro（强推理），与 UI 的两个选择一一对应
+  var REASON = { low: 'deepseek-flash', medium: 'deepseek-flash', high: 'deepseek-v4-pro' };
 
   // 真实 model id：优先用 UI 显式选择的模型，其次按推理等级映射（不发送不存在的参数）
   function modelIdOf(cfg) {
@@ -9390,7 +9322,7 @@ details.explanation-panel .explain {
   function sanitizeCfg(cfg) {
     var c = {};
     if (!cfg) return c;
-    ['gradeKey', 'gradeName', 'stage', 'topicId', 'count', 'customCount', 'reasoning', 'qtype', 'structure', 'mode'].forEach(function (k) {
+    ['topicId', 'count', 'customCount', 'reasoning', 'qtype', 'structure', 'mode'].forEach(function (k) {
       if (cfg[k] !== undefined) c[k] = cfg[k];
     });
     return c;
@@ -9402,12 +9334,11 @@ details.explanation-panel .explain {
       id: 'ai_' + nowId(),
       ts: nowTs(),
       date: todayStr(),
-      gradeName: meta && meta.gradeName ? meta.gradeName : (cfg.gradeName || ''),
       topicLabel: meta && meta.title ? meta.title : '',
       count: (papers || []).reduce(function (s, p) { return s + (p.blanks ? p.blanks.length : 0); }, 0),
       papersCount: (papers || []).length,
       cfg: sanitizeCfg(cfg),
-      meta: { title: (meta && meta.title) || 'AI 出题', gradeName: (meta && meta.gradeName) || (cfg.gradeName || '') },
+      meta: { title: (meta && meta.title) || 'AI 出题' },
       papers: papers,       // 语篇原文（保留 blanks，便于以后转存题库/重排）
       questions: questions  // 已转换的题目，可直接进入做题
     };
@@ -9447,40 +9378,32 @@ details.explanation-panel .explain {
   /* ---------- Prompt 规则文本（稳定部分，动态部分在 buildPrompt 拼接） ---------- */
   function shanghaiRulesText() {
     return [
-      '一、语法填空命题规则（上海命题风格 · 初高中通用）：',
-      '1. 每篇语篇约 10 空；约 4-5 空为有提示词（多为动词变形/词性转换），约 5-6 空为无提示词（介/连/冠/代/从句连接词等）。',
-      '2. 全部空必须嵌入自然、连贯、有主题的完整语篇（说明文/议论文/科普/叙事）。禁止孤立单句堆题。',
-      '3. 难度主要来自语法结构与上下文语境，禁止用生僻词/超纲词/怪文化背景制造难度。',
-      '4. 禁止时间词直给答案式题目；时态题要靠语境判断，不机械用 yesterday/since/already。',
-      '二、有提示词规则：主要考时态/语态/主谓一致/非谓语/词性转换。若是非谓语，必须符合真实句法（分句是否已有谓语、主动被动、先后完成），禁止为覆盖 having done/to have done 等强行塞入。',
-      '三、无提示词规则：主要考定语从句/名词性从句/状语从句连接词、介词、冠词、代词、并列连词、whether/that/what/however 等。',
-      '四、what vs that：若答案 what，其从句必须缺成分；若答案 that，从句必须完整；不许出两可题。',
-      '五、however：仅以 however+adj/adv+主语+谓语 的让步结构出现，且语境自然；不许硬凑。',
-      '六、答案必须唯一；每个空都必须给出学生能看懂的中文解析（为什么是这个形式、为什么不是别的、句子主干/从句成分如何判断）。',
-      '七、输出必须为严格合法 JSON（不要 Markdown、不要 ``` 围栏、不要前后说明文字）。'
+      '一、命题总则（上海命题风格 · 初高中通用）',
+      '1. 语篇必须完整、连贯、有明确主题（说明文/科普/议论文/叙事均可），语言地道自然；禁止把互不相关的句子拼成“文章”。',
+      '2. 语篇题每篇约 10 空：有提示词约 4-5 空（动词变形/词性转换等），无提示词约 5-6 空（介词/连词/冠词/代词/从句连接词等），整套练习保持接近这一比例（纯单句模式不受此条限制）。',
+      '3. 难度来自语法结构与上下文逻辑，词汇限定在初高中课标范围：禁止生僻词、超纲词和陌生文化背景；禁止“时间词直给答案”的送分题，时态语态必须由上下文推断。',
+      '二、考点规则',
+      '4. 有提示词：时态、语态、主谓一致、非谓语（to do/doing/done/完成式/被动式）、词性转换（adj↔adv、名词单复数与派生、比较级最高级、否定前缀等）。',
+      '5. 无提示词：三大从句连接词（定语/名词性/状语从句）、what 与 that、介词、冠词、代词、并列与逻辑衔接词（and/but/or/so/however 等）。',
+      '6. 答案唯一：每个空有且只有一个正确答案，禁止“填 A 填 B 都说得通”的两可题；what 的从句必须缺成分、that 的从句必须完整，if/whether、which/where 等同理。',
+      '7. 非谓语必须真实需要判断：先看分句有没有谓语，再判断主动/被动与动作先后，禁止为覆盖 having done、to have done 等形式强行塞入。',
+      '8. however 只以 however + adj/adv + 主语 + 谓语 的让步结构自然出现，禁止硬凑。',
+      '9. 同一篇内考点要分散：相邻两空不考同一知识点，同一知识点全篇最多出现 2 次。',
+      '三、解析规则',
+      '10. 每个空都要给出学生能看懂的中文解析，讲清三点：①为什么是这个答案（语法依据+语境线索）；②为什么不是其它形式（对比易错项）；③做题时如何一步步判断（找句子主干、看从句成分、联系上下文）。解析要具体，禁止“固定搭配”“语感如此”之类空话。',
+      '四、输出格式规则（违反会导致程序无法读取）',
+      '11. 只输出一个 JSON 对象：不要 Markdown、不要 ```json 代码块、不要任何解释、注释或前后说明，响应必须以 { 开头、以 } 结尾。',
+      '12. 正文中的每个空都用 4 个下划线 ____ 标出，____ 的个数必须与 blanks 数组长度完全一致；正文里绝对不能出现答案词，答案只写在 blanks 里。',
+      '13. 字段名与取值严格按下方 JSON 模板，不新增、不删减字段；字符串内不要出现未转义的引号，不要写尾逗号。'
     ].join('\n');
   }
 
-  /* ---------- 年级/专题动态描述 ---------- */
-  function gradeRule(gradeKey) {
-    var map = {
-      g1: '高一（初高中过渡+基础建立）：句子主干明显，从句数量少，词汇为高中基础词。有提示词以基础时态（一般现在/过去/将来/进行/现在完成）、基础被动、主谓一致、to do/doing/done、adj↔adv、名词单复数为重点；无提示词以基础定语从句(which/who/where/when)、简单状语从句、简单名词性从句、基础介词/冠词/代词/并列连词为限。高频易错：现在完成vs一般过去、adj/adv、a/an、基础从句连接词。',
-      g2: '高二（真正高中综合）：句子变长、允许从句与结构嵌套。有提示词加入过去完成、时态语态综合、上下文时态、having done/to have done/being done/to be done、非谓语作定语状语、比较级最高级、否定前缀；无提示词加入三大从句综合、what/that、however让步、介词语义、抽象名词具体化等。重点训练拆句子主干。',
-      g3: '高三（完全综合冲刺，对标春考/秋考/一模/二模）：全时态全语态、隐蔽主谓一致、全套非谓语含完成被动式、复杂词性转换；无提示词做三大从句深度综合、从句嵌套、what/that/whose/where、复杂介词、抽象名词具体化、代词指代、并列逻辑。即使单句看懂也不一定做对，必须结合全文逻辑。'
-    };
-    return map[gradeKey] || map.g1;
-  }
-
-  function topicDistRule(topicId, gradeKey) {
+  /* ---------- 专题分布动态描述 ---------- */
+  function topicDistRule(topicId, catName) {
     if (!topicId || topicId === 'all') {
-      var weights = gradeKey === 'g3'
-        ? '谓语动词/非谓语/从句/词性/虚词都要有，但按高考实际占比安排：非谓语、谓语时态语态、三大从句(尤其名词性从句 what/that)、词性转换是主体；介词、冠词、代词、连词穿插。不要 10 空机械均分。'
-        : gradeKey === 'g2'
-          ? '以谓语时态语态综合、非谓语、三大从句、词性转换为主体，介词/冠词/代词/连词穿插，what/that 与 however 可适量出现。'
-          : '以时态、基础非谓语、简单词性转换、基础从句与虚词为主体，按上海实际重要程度分配，不要机械均分。';
-      return '训练范围：全部（自动按上海实际重要程度 + 年级难度合理分布）。' + weights;
+      return '训练范围：全部大专题。按上海卷实际重要程度分布：谓语动词（时态/语态/主谓一致）、非谓语动词、三大从句（尤其名词性从句 what/that）、词性转换为主体，介词/冠词/代词/并列逻辑穿插出现；不要 10 空机械均分。';
     }
-    return '训练范围：主要围绕「' + topicId + '」这一专题出题；同一语篇内该专题考点应有多个知识点分布，并结合谓语/从句等作自然背景，保持语篇自然；不可 10 空全是同一形式。';
+    return '训练范围：以「' + catName + '」为大专题重点——该大专题下的不同知识点要占全部空数的一半以上，其余空用其它大专题作自然铺垫，保持句子/语篇自然连贯；同一形式不可连续重复。';
   }
 
   /* ---------- buildPrompt：动态组装（§四十三） ---------- */
@@ -9493,48 +9416,43 @@ details.explanation-panel .explain {
     }
     var targetCount = Math.max(1, cfg.count || 10);
     var papersN = Math.max(1, Math.ceil(targetCount / 10));
-    var finalCount = targetCount;
     var structure = cfg.structure || 'mixed';
     var lines = [];
-    lines.push('你是一名熟悉上海地区英语考试命题特点的英语教师和语法填空命题者（初高中通用）。');
+    lines.push('你是一位熟悉上海地区英语考试（初高中通用）命题风格的英语教研员，请命制一套可直接给学生练习的语法填空题，并严格按 JSON 输出。');
     lines.push('');
-    lines.push('任务：根据以下配置生成符合上海命题风格的语法填空题（难度按所选年级调节）：');
-    lines.push('- 年级：' + (cfg.gradeName || '高一'));
-    lines.push('- 专题：' + catName);
-    lines.push('- 结构：' + (structure === 'sentence' ? '纯单句题（无语篇）' : structure === 'passage' ? '纯语篇题（无单句）' : '单句题 + 语篇题（推荐，仿上海高一作业：几个句子 + 一篇文章）'));
-    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（本批共约 ' + finalCount + ' 空，每篇不超过 10 空）'));
-    lines.push('- 总空数：' + finalCount);
+    lines.push('【本次命题配置】');
+    lines.push('- 训练专题：' + catName);
+    lines.push('- 题目结构：' + (structure === 'sentence' ? '纯单句题（无语篇）' : structure === 'passage' ? '纯语篇题（无单句）' : '单句题 + 语篇题'));
+    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇不超过 10 空）'));
+    lines.push('- 总空数：' + targetCount + '（整套练习的空数之和）');
     lines.push('');
-    lines.push(topicDistRule(cfg.topicId, cfg.gradeKey));
-    lines.push('');
-    lines.push('年级难度要求：' + gradeRule(cfg.gradeKey));
+    lines.push(topicDistRule(cfg.topicId, catName));
     lines.push('');
     lines.push(shanghaiRulesText());
     lines.push('');
-    lines.push('九、单句题规则（structure 含“单句”时必出）：每个单句是独立的完整句子，句中给出一个高频动词（如 take / learn / tell / get / come / go / make / spend / leave / fail / feel / have 等），要求学生根据该句的时间状语/语境把该词改成正确形式——一般现在时、一般过去时、现在/过去进行时、现在/过去完成时、一般将来时、被动语态、非谓语(to do/doing/done)、词性转换等，覆盖时态/语态/主谓一致/非谓语；每句 1 个空（个别可 2 个空）；必须有明确语境线索（如 these days / at that time / by then / since / tomorrow / look! 等）且答案唯一。单句正文只写 ____ 空标，不要写括号原词；原词只放 givenWord 字段，违者仅保留一份。');
-    if (structure !== 'sentence') {
+    lines.push('五、单句题规则（structure 含“单句”时必出）：每个单句都是独立完整的句子，句中给出一个高频动词原形（如 take / learn / tell / get / come / go / make / spend / leave / fail / feel / have 等），要求学生按句中的时间状语与语境改成正确形式——一般现在时、一般过去时、现在/过去进行时、现在/过去完成时、一般将来时、被动语态、非谓语（to do/doing/done）、词性转换等，覆盖时态/语态/主谓一致/非谓语；每句 1 个空（个别可 2 个空）；必须有明确语境线索（如 these days / at that time / by then / since / tomorrow 等）且答案唯一。单句正文只写 ____ 空标，不写括号原词；原词只放 givenWord 字段。');
+    if (structure === 'mixed') {
       lines.push('');
-      lines.push('十、结构分配（structure=mixed 时）：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1-2 空），语篇 1~2 篇（每篇约 5-10 空）。');
+      lines.push('六、结构分配：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1-2 空），语篇 1~2 篇（每篇 5~10 空）。');
     }
-    lines.push('自检要求（输出前在心里过一遍）：答案唯一；无 what/that 两可；非谓语真需要判断；时态靠上下文；however 只按让步结构且自然；文章自然连贯有主题；难度与年级匹配；10 空分布接近 4-5 有提示词 + 5-6 无提示词；同一考点不过度重复。');
     lines.push('');
-    lines.push('【关键】正文 passage 里每一个空必须用 ____（恰好 4 个下划线）标出，下划线数量必须与 blanks 数量一致；禁止把答案词写进正文——正文里只出现下划线，答案只能写在 blanks.answer / options 里。');
+    lines.push('输出前自检（在心里过一遍，不要写出来）：空数是否为 ' + targetCount + '；____ 的个数是否与 blanks 数量一致；答案是否唯一；有没有 what/that 两可；非谓语是否真的需要判断；时态是否靠上下文；文章是否连贯；考点是否过度重复；解析是否三点齐全。');
     if (cfg.qtype === 'input') {
       lines.push('');
-      lines.push('八、输出题型：填空输入题（无选项）。每个空只给 answer 与 givenWord，不输出 options 字段。');
+      lines.push('七、输出题型：填空输入题（无选项）。每个空只给 answer 与 givenWord，不输出 options 字段。');
     } else {
       lines.push('');
-      lines.push('八、输出题型：选择题（点选，n 选 1；学生不做任何打字）。这是本组最关键的要求：');
-      lines.push('  1. 每个空除 answer 外，必须再输出 options：选项个数由你按该考点自然能给出几个“合理干扰项”自行决定——4~6 个均可（不必固定 6 个，3 个也可但尽量 ≥4）；');
-      lines.push('  2. options 中恰好 1 个与 answer 完全一致（比较时 trim 掉首尾空格且忽略大小写），即正确项；');
-      lines.push('  3. 其余选项必须是“真实常见、看似合理”的干扰项——针对该考点的典型错误（错误时态/语态/非谓语形式/词形/单复数、错误连接词、介词、冠词多漏误、代词误用、易混逻辑词等）；');
+      lines.push('七、输出题型：点选选择题（n 选 1，学生只点不打字），这是本组最关键的要求：');
+      lines.push('  1. 每个空除 answer 外必须输出 options：选项个数由该考点自然能给出的合理干扰项决定，4~6 个（最少 3 个）；');
+      lines.push('  2. options 中恰好 1 个与 answer 完全一致（忽略首尾空格与大小写），即正确项；');
+      lines.push('  3. 其余选项必须是针对该考点的典型错误：错误时态/语态/非谓语形式/词形变化/单复数、错误连接词、错误介词、冠词多漏误、代词误用、易混逻辑词等；');
       lines.push('  4. 干扰项禁止与正确答案或彼此重复，禁止明显荒谬，禁止出现“两个都能说通”的选项；');
-      lines.push('  5. 选项文本只写答案形式本身（不加解释）。');
-      lines.push('  空对象示例（本空给 5 个选项，即 5 选 1）：{"answer":"has been built","options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时被动语态","category":"谓语动词","explanation":"主语是 building，与 build 是被动关系；by 2025 提示到说话时已完成，故用现在完成时被动 has been built。","difficulty":2}');
+      lines.push('  5. 选项文本只写答案形式本身，不加任何解释。');
+      lines.push('  空对象示例（本例 5 选 1）：{"answer":"has been built","options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时被动语态","category":"谓语动词","explanation":"主语 building 与 build 是被动关系；by 2025 说明动作到说话时已完成，所以用现在完成时的被动 has been built。has built 是主动、was built 是过去、is building 是进行，都与语境不符。判断步骤：先看主语与语态，再看时间关系，最后确定时态语态的组合形式。","difficulty":2}');
     }
     lines.push('');
-    lines.push('输出 JSON 结构（严格按此，不要输出任何其它文字）：');
-    var schema = { grade: '高一' };
+    lines.push('八、输出 JSON 模板（严格按此结构，字段一个不少、一个不多）：');
+    var schema = {};
     if (structure !== 'sentence') {
       schema.papers = [
         {
@@ -9549,7 +9467,7 @@ details.explanation-panel .explain {
               type: 'nonfinite|tense|wordform|clause|prep|article|pronoun|conjunction|other',
               knowledgePoint: '具体知识点，如 having done',
               category: '谓语动词|非谓语动词|词性转换|定语从句|名词性从句|状语从句|介词|冠词|代词|并列与逻辑|其他/拓展',
-              explanation: '面向高一学生、能看懂的中文解析：为什么是这个形式/为什么不是别的形式/怎么从句子结构和上下文判断',
+              explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从句子结构和上下文判断',
               difficulty: 1
             }
           ]
@@ -9569,7 +9487,7 @@ details.explanation-panel .explain {
               type: 'tense|passive|nonfinite|wordform|agreement',
               knowledgePoint: '具体知识点，如 一般过去时 / 现在进行时 / 现在完成时被动',
               category: '谓语动词|非谓语动词|词性转换',
-              explanation: '面向高一学生、能看懂的中文解析：为什么是这个形式/为什么不是别的形式/怎么从时间状语或语境判断',
+              explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从时间状语或语境判断',
               difficulty: 1
             }
           ]
@@ -9588,9 +9506,10 @@ details.explanation-panel .explain {
     var body = {
       model: modelId,
       messages: [
-        { role: 'system', content: '你是英语语法填空命题引擎（上海命题风格 · 初高中通用）。只输出严格合法的 JSON，不要输出任何解释文字、Markdown 或代码围栏。' },
+        { role: 'system', content: '你是英语语法填空命题引擎（上海命题风格 · 初高中通用）。只输出严格合法的 json 对象：不要解释文字、不要 Markdown、不要代码围栏。' },
         { role: 'user', content: promptText }
       ],
+      response_format: { type: 'json_object' },
       temperature: 0.7,
       stream: false
     };
@@ -9849,12 +9768,11 @@ details.explanation-panel .explain {
           }
         }
         var q = {
-          id: 'ai_' + (cfg.gradeKey || 'g1') + '_' + genId + '_' + kind.slice(0, 1) + pi + '_b' + (b.n || idx),
+          id: 'ai_' + genId + '_' + kind.slice(0, 1) + pi + '_b' + (b.n || idx),
           source: 'ai',
           isAI: true,
           aiMeta: {
-            gradeKey: cfg.gradeKey, gradeName: cfg.gradeName,
-            stage: cfg.stage, topicId: cfg.topicId === 'all' ? 'all' : (cfg.topicId || 'all'),
+            topicId: cfg.topicId === 'all' ? 'all' : (cfg.topicId || 'all'),
             catName: catName, catId: catIdOfName(catName),
             knowledgePoint: b.knowledgePoint || '', type: b.type || ''
           },
@@ -9914,8 +9832,7 @@ details.explanation-panel .explain {
   /* ---------- 配置面板默认值 ---------- */
   function defaultConfig() {
     return {
-      gradeKey: 'g1', gradeName: '高一',
-      stage: '1', topicId: 'all',
+      topicId: 'all',
       count: 10, customCount: 15,
       apiKey: getKey(), rememberKey: !!getKey(),
       reasoning: 'low', modelUi: MODELS[0].ui,
@@ -10135,51 +10052,25 @@ details.explanation-panel .explain {
     });
   }
 
-  /* ============ 专题列表（按 大专题 × 年级 组织） ============ */
+  /* ============ 专题列表（按大专题组织，初高中通用） ============ */
   function topics() {
     var v = app.view;
     v.innerHTML = '';
     var cur = window.__EGL_CURRICULUM__;
-    var grade = loadGrade();
     v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">🗂️</span>专题学习 · 语法填空</div>'
-      + '<div class="page-sub">先选年级（高一优先展示基础），再按大专题学习；尚未内置题库的大专题可用「AI 出题」生成练习。</div>'));
-
-    // 年级切换
-    var gt = U.el('div', 'grade-tabs', '');
-    (cur.grades || []).forEach(function (g) {
-      var b = U.el('button', 'gt' + (g.key === grade ? ' on' : ''), (g.key === 'g1' ? '🎒 ' : g.key === 'g2' ? '📘 ' : '🎓 ') + g.grade);
-      b.dataset.g = g.key;
-      gt.appendChild(b);
-    });
-    v.appendChild(gt);
-    $$('.gt', gt).forEach(function (b) {
-      b.addEventListener('click', function () {
-        saveGrade(b.dataset.g);
-        topics();
-      });
-    });
-
-    var gd = cur.gradeDef(grade);
-    if (gd) {
-      var info = U.el('div', 'glass', '');
-      info.style.padding = '10px 16px';
-      info.style.marginBottom = '12px';
-      info.innerHTML = '<b>' + esc(gd.grade) + '</b> · <span class="muted">' + esc(gd.desc) + '</span>'
-        + '<div class="small faint" style="margin-top:4px">阶段：' + esc(gd.stages.map(function (s) { return s.name; }).join(' → ')) + '</div>';
-      v.appendChild(info);
-    }
+      + '<div class="page-sub">初高中通用：按大专题学习，内置题库直接开练；尚未内置的专题可用「AI 出题」生成练习。</div>'));
 
     // 顶部：解题方法课 + AI 出题 快捷入口
     var topRow = U.el('div', 'grid cards2', '');
     topRow.style.marginBottom = '14px';
     topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><div class="ic">🧭</div><h4>解题方法课</h4><p>先学语法填空 5 步做法与高频陷阱（上海题型），再开练。</p></button>'
-      + '<button class="mode-card glass" data-nav="ai"><div class="ic">🤖</div><h4>AI 出题</h4><p>按年级/专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
+      + '<button class="mode-card glass" data-nav="ai"><div class="ic">🤖</div><h4>AI 出题</h4><p>按专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
     v.appendChild(topRow);
 
     // 大专题卡片
     (cur.categories || []).forEach(function (cat) {
-      // 该大专题在当前年级阶段下的内置可用专题
-      var list = availableOfCat(cat.id, grade);
+      // 该大专题下已内置题库的专题
+      var list = availableOfCat(cat.id);
       var card = U.el('div', 'glass cat-card');
       card.style.setProperty('--c', cat.color || 'var(--accent)');
       var acc = 0, tried = 0;
@@ -10235,29 +10126,20 @@ details.explanation-panel .explain {
     });
     $$('[data-ai-cat]', v).forEach(function (b) {
       b.addEventListener('click', function () {
-        var gkey = grade;
-        E.aiUI && E.aiUI.gotoConfig(gkey, b.dataset['aiCat']);
+        E.aiUI && E.aiUI.gotoConfig(b.dataset['aiCat']);
       });
     });
     bindNav(v);
   }
 
-  function loadGrade() {
-    try { var g = localStorage.getItem('EGL_GRADE'); if (g) return g; } catch (e) {}
-    return 'g1'; // 高一默认
-  }
-  function saveGrade(g) { try { localStorage.setItem('EGL_GRADE', g); } catch (e) {} }
-
-  // 该大专题下：当前有真实题库且属于本年级使用的专题
-  function availableOfCat(catId, gradeKey) {
+  // 该大专题下：当前有真实题库的专题（初高中通用，不再按年级过滤）
+  function availableOfCat(catId) {
     var out = [];
     E.availableTopicIds().forEach(function (tid) {
       var no = tid.replace('tense', '');
       var cur = window.__EGL_CURRICULUM__;
       var e = cur && cur.catOf ? cur.catOf(no) : null;
       if (!e || e.cat !== catId) return;
-      var grades = e.grades || [];
-      if (gradeKey && grades.indexOf(gradeKey) < 0) return; // 未列入该年级 → 不放行
       out.push({ tid: tid, no: no, title: (E.metaOfTopic(tid) || {}).title || tid });
     });
     out.sort(function (a, b) { return a.no.localeCompare(b.no); });
@@ -10365,7 +10247,6 @@ details.explanation-panel .explain {
         + (isAI ? '<span class="badge gray">🤖 AI训练</span> ' : '')
         + '<span class="badge gray">' + icon + ' ' + esc(w.topicTitle || (isAI ? 'AI出题' : topicName(w.topicId))) + '</span>'
         + (w.kp ? '<span class="badge blue">' + esc(w.kp) + '</span>' : (w.tag ? '<span class="badge blue">' + esc(w.tag) + '</span>' : ''))
-        + (w.grade ? '<span class="badge amber">' + esc(w.grade) + '</span>' : '')
         + '<span class="badge red">' + wtZh(w.wrongType) + '</span>'
         + '<span class="badge amber">错 ' + w.times + ' 次</span>'
         + '<span class="badge gray">' + w.lastDate + '</span>'
@@ -10382,7 +10263,7 @@ details.explanation-panel .explain {
           answerText: w.correctAnswer,
           explanation: {
             answer: w.correctAnswer,
-            keyPoint: (w.kp ? '考点：' + w.kp : '考点：AI 语法题') + (w.grade ? '（' + w.grade + '）' : ''),
+            keyPoint: (w.kp ? '考点：' + w.kp : '考点：AI 语法题'),
             clue: '',
             trap: '',
             chain: '',
@@ -11277,7 +11158,7 @@ details.explanation-panel .explain {
 
   function lastQ() { return S.idx >= S.questions.length - 1; }
 
-  /* ---------- 单题统计落库（AI 题含来源/年级/阶段/大专题标记） ---------- */
+  /* ---------- 单题统计落库（AI 题含来源/大专题标记） ---------- */
   function commitStats(q, entry) {
     var isAI = !!(q.isAI || q.source === 'ai');
     var meta = q.aiMeta || {};
@@ -11289,7 +11170,7 @@ details.explanation-panel .explain {
     E.recordTag(tid, tag, entry.ok);
     if (!entry.ok) {
       var corText = q.type === 'choice' ? q.options[q.answerIndex] : (q.answerText || (q.accepted && q.accepted[0]));
-      var topicTitle = isAI ? ((meta.gradeName || 'AI') + ' · ' + (meta.catName || 'AI出题')) : (E.bank()[S.topicId] ? E.bank()[S.topicId].title : S.title);
+      var topicTitle = isAI ? ('AI · ' + (meta.catName || '语法填空')) : (E.bank()[S.topicId] ? E.bank()[S.topicId].title : S.title);
       E.addWrong({
         topicId: tid,
         topicTitle: topicTitle,
@@ -11300,8 +11181,6 @@ details.explanation-panel .explain {
         correctAnswer: corText,
         wrongType: q.wrongType || 'CONTEXT_ERROR',
         source: isAI ? 'ai' : 'bank',
-        grade: meta.gradeName || '',
-        stage: meta.stage || '',
         catId: meta.catId || '',
         explText: isAI ? (q.explanation ? q.explanation.why : '') : '',
         kp: meta.knowledgePoint || tag
@@ -11627,10 +11506,6 @@ details.explanation-panel .explain {
 
   function cur() { return window.__EGL_CURRICULUM__; }
   function categoryList() { return cur() ? cur().categories : []; }
-  function gradeLabel(key) {
-    var g = cur() && cur().gradeDef ? cur().gradeDef(key) : null;
-    return g ? g.grade : (key || 'g1');
-  }
   function loadCfg() {
     var d = E.ai.defaultConfig();
     try {
@@ -11641,11 +11516,15 @@ details.explanation-panel .explain {
       }
     } catch (e) {}
     d.apiKey = E.ai.getKey();
+    // 兼容旧版本保存的模型名（旧模型标签 → 新标签，避免下拉框与真实调用不一致）
+    if (d.modelUi !== E.ai.MODELS[0].ui && d.modelUi !== E.ai.MODELS[1].ui) {
+      d.modelUi = (d.reasoning === 'high') ? E.ai.MODELS[1].ui : E.ai.MODELS[0].ui;
+    }
     return d;
   }
   function saveCfg(cfg) {
-    var c = { gradeKey: cfg.gradeKey, stage: cfg.stage, topicId: cfg.topicId,
-              count: cfg.count, customCount: cfg.customCount, reasoning: cfg.reasoning, modelUi: cfg.modelUi, qtype: cfg.qtype, structure: cfg.structure };
+    var c = { topicId: cfg.topicId, count: cfg.count, customCount: cfg.customCount,
+              reasoning: cfg.reasoning, modelUi: cfg.modelUi, qtype: cfg.qtype, structure: cfg.structure };
     try { localStorage.setItem(LS_CFG, JSON.stringify(c)); } catch (e) {}
   }
   function appView() { return E.ui && E.ui.app ? E.ui.app.view : null; }
@@ -11663,12 +11542,12 @@ details.explanation-panel .explain {
     if (!v) return;
     var cfg = loadCfg();
     _curCfg = cfg;
-    // Key 输入缓存与配置同步：本次会话已输入的 Key 优先保留（切换年级/题型/结构重绘不清空）
+    // Key 输入缓存与配置同步：本次会话已输入的 Key 优先保留（切换题型/结构重绘不清空）
     if (!_keyCache) _keyCache = (typeof cfg.apiKey === 'string') ? cfg.apiKey : '';
     cfg.apiKey = _keyCache;
     v.innerHTML = '';
     v.appendChild(el('div', '', '<div class="page-title"><span class="ico">🤖</span>AI 出题 · 语法填空</div>'
-      + '<div class="page-sub">按“高一/高二/高三 × 专题 × 题数”生成完整语篇；结果进入原做题界面，判分/解析/错题/统计全部通用。</div>'));
+      + '<div class="page-sub">按“专题 × 题数 × 结构”生成完整练习（初高中通用）；结果进入原做题界面，判分/解析/错题/统计全部通用。</div>'));
 
     var panel = el('div', 'glass', '');
     panel.style.padding = '18px';
@@ -11693,24 +11572,6 @@ details.explanation-panel .explain {
       if (!cfg) return;
       var target = ev.target;
       try {
-        var g = closestOf(target, '[data-grade]');
-        if (g) {
-          if (g.dataset.grade === cfg.gradeKey) return;
-          cfg.gradeKey = g.dataset.grade;
-          cfg.stage = '';
-          saveCfg(cfg);
-          aiPage();
-          return;
-        }
-        var sg = closestOf(target, '[data-stage]');
-        if (sg) {
-          var val = sg.dataset.stage || '';
-          if (String(cfg.stage) === String(val)) return;
-          cfg.stage = val;
-          $$('#aiStageSeg button', v).forEach(function (x) { x.classList.toggle('on', x === sg); });
-          saveCfg(cfg);
-          return;
-        }
         var cBtn = closestOf(target, '[data-count]');
         if (cBtn) {
           var cval = cBtn.dataset.count;
@@ -11838,25 +11699,6 @@ details.explanation-panel .explain {
 
   /* ================= 表单渲染 ================= */
   function renderForm(panel, cfg) {
-    var gHtml = '<div class="form-row"><label>年级</label><div class="seg" id="aiGradeSeg">';
-    (cur().grades || []).forEach(function (g) {
-      var on = cfg.gradeKey === g.key ? ' on' : '';
-      gHtml += '<button type="button" data-grade="' + g.key + '" class="' + on + '">'
-        + (g.key === 'g1' ? '🎒 ' : g.key === 'g2' ? '📘 ' : '🎓 ') + g.grade + '</button>';
-    });
-    gHtml += '</div></div>';
-
-    var gd = cur().gradeDef(cfg.gradeKey);
-    var stages = gd && gd.stages ? gd.stages : [];
-    var stHtml = '<div class="form-row"><label>训练范围</label><div class="seg" id="aiStageSeg">';
-    var allOn = (cfg.stage === '' || cfg.stage === null || cfg.stage === undefined) ? ' on' : '';
-    stHtml += '<button type="button" data-stage="" class="' + allOn + '">全部阶段</button>';
-    stages.forEach(function (s) {
-      var on = String(cfg.stage) === String(s.stage) ? ' on' : '';
-      stHtml += '<button type="button" data-stage="' + s.stage + '" class="' + on + '">阶段' + s.stage + '：' + s.name + '</button>';
-    });
-    stHtml += '</div></div>';
-
     var tHtml = '<div class="form-row"><label>专题</label><select data-f="topicId">';
     tHtml += '<option value="all"' + (cfg.topicId === 'all' ? ' selected' : '') + '>全部专题（自动合理分布）</option>';
     categoryList().forEach(function (c) {
@@ -11886,11 +11728,11 @@ details.explanation-panel .explain {
       + '<div class="form-hint">点选模式：每个空给 3~6 个选项（A/B/C…），由 AI 按考点灵活决定个数；做错同样进错题本+中文解析。</div>'
       + '</div>';
 
-    // 结构：单句 + 语篇（推荐，仿上海高一作业）
+    // 结构：单句 + 语篇（推荐，贴近上海卷考查方式）
     var stC = cfg.structure !== 'sentence' ? ' on' : '';
     var stS = cfg.structure === 'sentence' ? ' on' : '';
     var stP = cfg.structure === 'passage' ? ' on' : '';
-    var structHtml = '<div class="form-row"><label>题目结构（仿上海高一作业）</label><div class="seg">'
+    var structHtml = '<div class="form-row"><label>题目结构</label><div class="seg">'
       + '<button type="button" data-struct="mixed" class="' + stC + '">✏️ 单句 + 语篇（推荐）</button>'
       + '<button type="button" data-struct="sentence" class="' + stS + '">🔠 纯单句</button>'
       + '<button type="button" data-struct="passage" class="' + stP + '">📄 纯语篇</button>'
@@ -11917,7 +11759,7 @@ details.explanation-panel .explain {
       + '</select>'
       + '<div class="form-hint">“推理等级”通过模型切换实现（不向 API 发送不存在的参数）。</div></div>';
 
-    panel.innerHTML += gHtml + stHtml + tHtml + nHtml + qtHtml + structHtml + kHtml + mHtml;
+    panel.innerHTML += tHtml + nHtml + qtHtml + structHtml + kHtml + mHtml;
 
   }
 
@@ -11936,14 +11778,14 @@ details.explanation-panel .explain {
     var listWrap = el('div', '');
     pool.forEach(function (it, idx) {
       var m = it.meta || {};
-      var title = m.title || it.topicLabel || ('AI 出题 ' + (idx + 1));
+      // 旧记录标题里可能带“高一/高二/高三”，展示时统一去掉
+      var title = String(m.title || it.topicLabel || ('AI 出题 ' + (idx + 1))).replace(/^AI · 高[一二三] · /, 'AI · ');
       var n = it.questions ? it.questions.length : (it.count || 0);
       var row = el('div', 'glass ai-rec-item');
       row.innerHTML = '<span class="t">🤖 ' + esc(title) + '</span>'
         + '<span class="badges">'
         + '<span class="badge gray">' + (it.date || '') + '</span>'
         + '<span class="badge blue">' + n + ' 空</span>'
-        + (m.gradeName ? '<span class="badge amber">' + esc(m.gradeName) + '</span>' : '')
         + '</span>'
         + '<span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">'
         + '<button type="button" class="btn sm ghost" data-pool-go="normal" data-id="' + esc(it.id) + '">▶ 普通模式</button>'
@@ -11982,14 +11824,14 @@ details.explanation-panel .explain {
       aiPage();
     });
 
-    var gradeN = gradeLabel(cfg.gradeKey);
     var catName = '全部专题';
     if (cfg.topicId && cfg.topicId !== 'all') {
       var c = cur().category ? cur().category(cfg.topicId) : null;
       catName = c ? c.name : cfg.topicId;
     }
-    $('#genSummary', v).innerHTML = '<span class="badge blue">' + esc(gradeN) + '</span> '
-      + '<span class="badge gray">' + esc(catName) + '</span> '
+    var structBadge = cfg.structure === 'sentence' ? '纯单句' : cfg.structure === 'passage' ? '纯语篇' : '单句+语篇';
+    $('#genSummary', v).innerHTML = '<span class="badge blue">' + esc(catName) + '</span> '
+      + '<span class="badge gray">' + esc(structBadge) + '</span> '
       + '<span class="badge amber">' + (cfg.count || 10) + ' 空</span> '
       + '<span class="badge green">' + (cfg.qtype === 'input' ? '✍️ 填空输入' : '🔤 点选选择题') + '</span>';
     logLine(v, '🟣 正在分析命题要求…');
@@ -12050,13 +11892,12 @@ details.explanation-panel .explain {
       var questions = E.ai.papersToQuestions(allSections, cfg);
       if (!questions.length) throw { code: 'SCHEMA', msg: 'AI 题目转换失败，请重试。' };
       setBar(v, 92);
-      var gName = gradeLabel(cfg.gradeKey);
       var catSel = cfg.topicId && cfg.topicId !== 'all'
         ? ' · ' + ((cur().category(cfg.topicId) || {}).name || cfg.topicId) : '';
       var structLabel = cfg.structure === 'sentence' ? '单句' : cfg.structure === 'passage' ? '语篇' : '单句+语篇';
       var meta = {
-        mode: 'normal', title: 'AI · ' + gName + ' · 语法填空(' + structLabel + ')' + catSel,
-        icon: '🤖', gradeKey: cfg.gradeKey, gradeName: gName, stage: cfg.stage
+        mode: 'normal', title: 'AI · 语法填空(' + structLabel + ')' + catSel,
+        icon: '🤖'
       };
       E.ai.cacheSession({ questions: questions, meta: meta, cfg: cfg, papers: allSections, totalBlanks: totalBlanks });
       E.ai.pushToPool(allSections, questions, cfg, meta);
@@ -12137,11 +11978,9 @@ details.explanation-panel .explain {
       icon: '🤖'
     });
   }
-  function gotoConfig(gradeKey, catId) {
+  function gotoConfig(catId) {
     var cfg = loadCfg();
-    if (gradeKey) cfg.gradeKey = gradeKey;
     if (catId) cfg.topicId = catId;
-    cfg.stage = '';
     saveCfg(cfg);
     E.ui.go('ai');
   }

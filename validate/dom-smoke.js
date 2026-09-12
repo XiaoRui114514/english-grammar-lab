@@ -221,20 +221,20 @@ check('startAI（AI 语篇题进入原做题界面）', () => {
     { n: 1, answer: 'works', givenWord: 'work', isGivenWord: true, type: 'tense', knowledgePoint: '一般现在时', category: '谓语动词', explanation: '三单加s', difficulty: 1 },
     { n: 2, answer: 'Though', givenWord: '', isGivenWord: false, type: 'conjunction', knowledgePoint: '让步连词', category: '并列与逻辑', explanation: '让步', difficulty: 1 }
   ] }];
-  const qs = EGL.ai.papersToQuestions(papers, { gradeKey: 'g1', gradeName: '高一', stage: '1', topicId: 'all', count: 2 });
+  const qs = EGL.ai.papersToQuestions(papers, { topicId: 'all', count: 2 });
   if (qs.length !== 2) throw new Error('AI 转换条数错误：' + qs.length);
-  EGL.quiz.startAI(qs, { mode: 'normal', title: 'AI 测试', gradeKey: 'g1' });
+  EGL.quiz.startAI(qs, { mode: 'normal', title: 'AI 测试' });
   if (!EGL.quiz.isActive()) throw new Error('startAI 后 quiz 未激活');
 });
 check('AI 判分/错题/大专题统计落库', () => {
   // 直接走核心统计路径（模拟第1空答错）
   const q = { id: 'ai_x_p0_b1', source: 'ai', isAI: true, type: 'input',
-    aiMeta: { gradeKey: 'g1', gradeName: '高一', stage: '1', catId: 'verb', catName: '谓语动词', knowledgePoint: '一般现在时' },
+    aiMeta: { catId: 'verb', catName: '谓语动词', knowledgePoint: '一般现在时' },
     tag: '一般现在时', question: 'Tom ____ hard.', hint: 'work', accepted: ['works'], answerText: 'works',
     wrongType: 'CONTEXT_ERROR', explanation: { why: '主语三单', keyPoint: '考点' } };
   EGL.recordTag('ai:verb', '一般现在时', false);
-  EGL.addWrong({ topicId: 'ai:verb', topicTitle: '高一 · 谓语动词', qid: q.id, question: q.question, tag: '一般现在时',
-    myAnswer: 'work', correctAnswer: 'works', wrongType: 'CONTEXT_ERROR', source: 'ai', grade: '高一', stage: '1', catId: 'verb' });
+  EGL.addWrong({ topicId: 'ai:verb', topicTitle: 'AI · 谓语动词', qid: q.id, question: q.question, tag: '一般现在时',
+    myAnswer: 'work', correctAnswer: 'works', wrongType: 'CONTEXT_ERROR', source: 'ai', catId: 'verb' });
   const wb = EGL.data.wrongBook.find(x => x.qid === q.id);
   if (!wb || wb.source !== 'ai') throw new Error('AI 错题未入库或来源缺失');
   const stats = EGL.categoryStats().find(c => c.catId === 'verb');
@@ -246,8 +246,8 @@ check('AI 整篇卷面：点选全部空并交卷', () => {
       { n: 1, answer: 'works', options: ['works', 'work', 'worked', 'working'], givenWord: 'work', isGivenWord: true, type: 'tense', knowledgePoint: '一般现在时', category: '谓语动词', explanation: '三单加s', difficulty: 1 },
       { n: 2, answer: 'Although', options: ['Although', 'But', 'Because', 'If'], givenWord: null, isGivenWord: false, type: 'conjunction', knowledgePoint: '让步连词', category: '并列与逻辑', explanation: '虽然…但', difficulty: 1 }
     ] }];
-  const qs2 = EGL.ai.papersToQuestions(papers2, { gradeKey: 'g1', gradeName: '高一', count: 2, qtype: 'choice' });
-  EGL.quiz.startAI(qs2, { mode: 'normal', title: 'Sheet', gradeKey: 'g1' });
+  const qs2 = EGL.ai.papersToQuestions(papers2, { count: 2, qtype: 'choice' });
+  EGL.quiz.startAI(qs2, { mode: 'normal', title: 'Sheet' });
   if (!EGL.quiz.isActive()) throw new Error('startAI 未激活');
   // 找到每个空的第一选项并点击（正确项在首位）
   const opts = [];
