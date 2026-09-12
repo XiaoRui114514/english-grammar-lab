@@ -164,6 +164,7 @@ check('专题页 tense06', () => EGL.ui.topicPage('tense06'));
 check('错题本 wrongBook', () => EGL.ui.wrongBook());
 check('薄弱点 weak', () => EGL.ui.weak());
 check('学习记录 records', () => EGL.ui.records());
+check('关于 about', () => EGL.ui.aboutPage());
 check('综合挑战 gate', () => EGL.quiz.mixedGate());
 
 console.log('[dom] 练习流程渲染');

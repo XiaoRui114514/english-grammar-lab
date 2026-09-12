@@ -376,6 +376,13 @@ body {
 .mode-card .ic { font-size: 30px; }
 .mode-card h4 { font-size: 17px; margin-top: 6px; color: var(--ink); }
 .mode-card p { font-size: 13px; color: var(--ink-dim); margin-top: 4px; }
+/* 关于页：联系方式一行一个 */
+.about-links { display: flex; flex-direction: column; }
+.about-link { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; border-bottom: 1px solid rgba(165,194,255,0.12); }
+.about-link:last-child { border-bottom: 0; }
+.about-link .lb { font-weight: 800; font-size: 13px; color: var(--hl); flex: none; width: 58px; }
+.about-link a { color: var(--accent); font-size: 13.5px; text-decoration: none; word-break: break-all; }
+.about-link a:hover { text-decoration: underline; }
 
 /* 折叠 details */
 details.panel { background: var(--glass); border: 1px solid var(--stroke); border-radius: var(--radius-sm); margin: 8px 0; }

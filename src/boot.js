@@ -1,7 +1,7 @@
 /* ============================================================
  * boot.js — 入口：hash 路由 / 顶栏 / 全局事件
  * 路由：#/home  #/topics  #/topic/tense01  #/wrong  #/weak
- *        #/records  #/challenge
+ *        #/records  #/challenge  #/about
  * ============================================================ */
 (function () {
   'use strict';
@@ -23,6 +23,7 @@
       case 'wrong': E.ui.wrongBook(); break;
       case 'weak': E.ui.weak(); break;
       case 'records': E.ui.records(); break;
+      case 'about': (E.ui && E.ui.aboutPage) ? E.ui.aboutPage() : E.ui.home(); break;
       case 'challenge': E.quiz.mixedGate(); break;
       case 'ai': (E.aiUI && E.aiUI.aiPage) ? E.aiUI.aiPage() : E.ui.home(); break;
       case 'method': (E.ui && E.ui.methodPage) ? E.ui.methodPage() : E.ui.home(); break;

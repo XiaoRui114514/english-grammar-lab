@@ -757,6 +757,70 @@
     bindNav(v);
   }
 
+  /* ============ 关于（作者 / 联系方式 / 项目介绍） ============ */
+  function aboutPage() {
+    var v = app.view;
+    v.innerHTML = '';
+    var id = (E.brand && E.brand.identity) ? E.brand.identity() : null;
+    var name = id ? id.name : 'Hison';
+    var dy = id ? id.douyin : '';
+    var xhs = id ? id.xhs : '';
+
+    v.appendChild(U.el('div', '', '<div class="page-title">关于</div>'
+      + '<div class="page-sub">谁做的、怎么联系、为什么有这个站</div>'));
+
+    // 作者 + 联系方式
+    var who = U.el('div', 'glass', '');
+    who.style.padding = '16px 18px';
+    var wh = '<div class="sec-title" style="margin-top:0">关于作者</div>'
+      + '<div class="kblock"><div class="lb">' + esc(name) + '</div>'
+      + '<p>上海的高一学生。语法填空一直是我的弱项，练的时候又找不到顺手的方式，'
+      + '所以自己边学边写了这个工具，给同学和需要的人免费用。</p></div>'
+      + '<div class="sec-title">联系我</div>'
+      + '<div class="about-links">';
+    if (dy) {
+      wh += '<div class="about-link"><span class="lb">抖音</span>'
+        + '<a href="https://v.douyin.com/e5QisJORWpc/" target="_blank" rel="noopener">' + esc(dy) + '</a></div>';
+    }
+    if (xhs) {
+      wh += '<div class="about-link"><span class="lb">小红书</span>'
+        + '<a href="https://xhslink.cn/o/AcNQAbM9pNE" target="_blank" rel="noopener">' + esc(xhs) + '</a></div>';
+    }
+    wh += '<div class="about-link"><span class="lb">GitHub</span>'
+      + '<a href="https://github.com/XiaoRui114514/english-grammar-lab" target="_blank" rel="noopener">english-grammar-lab</a></div>'
+      + '</div>'
+      + '<div class="small faint" style="margin-top:10px">做题遇到问题、发现答案或解析有错、想提建议，都可以从上面任意一个渠道找我。</div>';
+    who.innerHTML = wh;
+    v.appendChild(who);
+
+    // 项目介绍
+    var intro = U.el('div', 'glass', '');
+    intro.style.padding = '16px 18px';
+    intro.style.marginTop = '14px';
+    intro.innerHTML = '<div class="sec-title" style="margin-top:0">关于这个项目</div>'
+      + '<div class="kblock"><div class="lb">它是什么</div>'
+      + '<p>一个英语语法填空练习工具，打开网页就能用，不用注册、不用装软件，做过的记录和错题都留在你自己的浏览器里。</p></div>'
+      + '<div class="kblock"><div class="lb">为什么做</div>'
+      + '<p>市面上的练习要么散在各处、要么不能离线用。这个页面把考点、方法、练习和错题整理到了一起，'
+      + '内容按上海卷的命题习惯编排，初高中都能用，其他地区也通用。</p></div>'
+      + '<div class="kblock"><div class="lb">现在有什么</div>'
+      + '<p>先发布的是谓语动词·时态部分：12 个专题、每个专题 12 道核心题加 6 道扩展题，另有 20 道综合挑战；'
+      + '其余大专题还在陆续更新，也可以先用 AI 出题按专题生成练习。'
+      + '题库和解析是作者整理的，其中一部分借助 AI 生成后经过人工筛选、修改和校对。</p></div>'
+      + '<div class="kblock"><div class="lb">使用方式</div>'
+      + '<p>个人免费自学使用，不用于商业用途。转发请保留署名、水印和版权说明，完整条款见页面右下角印章和页脚里的「版权与使用授权」。</p></div>'
+      + '<div class="kblock"><div class="lb">源码与更新</div>'
+      + '<p>源码在 GitHub 上，答案或解析有误、功能建议、想一起改，欢迎提 Issue 或 PR。'
+      + '觉得有用的话，转给同样在练语法填空的同学就好。</p></div>';
+    v.appendChild(intro);
+
+    var act = U.el('div', 'btn-row', '');
+    act.style.marginTop = '16px';
+    act.innerHTML = '<button class="btn" data-nav="home">返回首页</button>';
+    v.appendChild(act);
+    bindNav(v);
+  }
+
   E.ui = E.ui || {};
   E.ui.setApp = setApp;
   E.ui.home = home;
@@ -776,4 +840,5 @@
   E.ui.allCoreFinished = allCoreFinished;
   E.ui.topWeakTags = topWeakTags;
   E.ui.methodPage = methodPage;
+  E.ui.aboutPage = aboutPage;
 })();

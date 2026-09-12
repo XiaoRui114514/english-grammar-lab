@@ -394,6 +394,13 @@ body {
 .mode-card .ic { font-size: 30px; }
 .mode-card h4 { font-size: 17px; margin-top: 6px; color: var(--ink); }
 .mode-card p { font-size: 13px; color: var(--ink-dim); margin-top: 4px; }
+/* 关于页：联系方式一行一个 */
+.about-links { display: flex; flex-direction: column; }
+.about-link { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; border-bottom: 1px solid rgba(165,194,255,0.12); }
+.about-link:last-child { border-bottom: 0; }
+.about-link .lb { font-weight: 800; font-size: 13px; color: var(--hl); flex: none; width: 58px; }
+.about-link a { color: var(--accent); font-size: 13.5px; text-decoration: none; word-break: break-all; }
+.about-link a:hover { text-decoration: underline; }
 
 /* 折叠 details */
 details.panel { background: var(--glass); border: 1px solid var(--stroke); border-radius: var(--radius-sm); margin: 8px 0; }
@@ -749,6 +756,7 @@ details.explanation-panel .explain {
     <button class="nav-btn" data-nav="wrong">📕 错题</button>
     <button class="nav-btn" data-nav="weak">🎯 薄弱点</button>
     <button class="nav-btn" data-nav="records">📊 记录</button>
+    <button class="nav-btn" data-nav="about">关于</button>
   </nav>
 </header>
 <div id="app"></div>
@@ -8138,7 +8146,7 @@ details.explanation-panel .explain {
   var CSS = "\n/* ==================== 品牌署名 · 授权（Hison） ====================\n   注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。\n   删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */\n/* 右下角署名印章：平时是一枚小胶囊，悬停 / 点击后原地展开署名卡片（无弹窗） */\n.egl-seal {\n  position: fixed; right: 12px; bottom: 12px; z-index: 46;\n  display: block; text-align: left; overflow: hidden;\n  padding: 6px 11px; border-radius: 13px; cursor: pointer;\n  font-family: inherit; color: rgba(238, 241, 251, 0.76);\n  background: rgba(10, 14, 30, 0.62);\n  border: 1px solid rgba(165, 194, 255, 0.26);\n  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);\n  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);\n  opacity: 0.88; transform-origin: 100% 100%;\n  transition: padding 0.34s var(--ease), border-radius 0.34s var(--ease),\n              background 0.3s, box-shadow 0.34s, opacity 0.24s, transform 0.34s var(--ease);\n}\n.egl-seal-face {\n  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;\n  font-size: 10.5px; font-weight: 700; letter-spacing: 0.6px;\n}\n.egl-seal-panel {\n  display: block; width: 0; max-height: 0; opacity: 0; margin-top: 0;\n  overflow: hidden; white-space: nowrap; transform: translateY(6px);\n  transition: width 0.34s var(--ease), max-height 0.34s var(--ease), opacity 0.26s ease,\n              transform 0.34s var(--ease), margin-top 0.34s var(--ease);\n}\n.egl-seal-name { display: block; font-size: 12.5px; font-weight: 800; letter-spacing: 0.4px; color: var(--ink); }\n.egl-seal-row { display: block; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }\n.egl-seal-row i { font-style: normal; color: var(--ink-faint); margin-right: 6px; }\n.egl-seal-row b { color: var(--hl); font-weight: 800; letter-spacing: 0.4px; }\n/* 展开态：键盘聚焦 / 点击（触摸） */\n.egl-seal:focus-visible,\n.egl-seal.on {\n  padding: 12px 15px 13px; border-radius: 18px;\n  background: rgba(10, 14, 30, 0.94);\n  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n  opacity: 1; transform: translateY(-2px);\n}\n.egl-seal:focus-visible .egl-seal-panel,\n.egl-seal.on .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n/* 有鼠标的设备：悬停即展开 */\n@media (hover: hover) {\n  .egl-seal:hover {\n    padding: 12px 15px 13px; border-radius: 18px;\n    background: rgba(10, 14, 30, 0.94);\n    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n    opacity: 1; transform: translateY(-2px);\n  }\n  .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n}\n/* 题卡底纹已撤掉：部分机型浏览器（如荣耀浏览器）会把低透明度的水印墨迹\n   （SVG 图片版、文本 rgba 版都试过）自动提亮成实心白，糊在题干与选项上。\n   署名改由各处角标承担：题卡左下角 + 其它卡片右下角各一行小字，浓淡是\n   固定色 + 固定 opacity，与页面其它文字一致，各机型都不会被提亮，\n   截图、打印都带署名。 */\n/* 卡片角标 */\n.learn-head, .score-hero, .sq-card, .qbox { position: relative; }\n.learn-head { padding-bottom: 22px; }\n.sq-card { padding-bottom: 22px; }\n.score-hero { padding-bottom: 30px; }\n.learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {\n  content: \"by __EGL_NM__\";\n  position: absolute; right: 10px; bottom: 6px;\n  font-size: 10px; letter-spacing: 1px; font-weight: 700;\n  color: var(--ink-faint); opacity: 0.55;\n  pointer-events: none; user-select: none;\n}\n/* 题卡角标放左下：右下是固定印章的位置，靠太近会叠在一起 */\n.qbox::after { right: auto; left: 12px; }\n/* 页脚署名 */\n.egl-foot { text-align: center; padding: 30px 14px 22px; color: var(--ink-faint); font-size: 12px; }\n.egl-foot .egl-foot-main { color: var(--ink-faint); }\n.egl-foot .egl-foot-brand { margin-top: 5px; color: var(--ink-dim); letter-spacing: 0.3px; line-height: 1.8; }\n.egl-foot .egl-foot-links { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }\n.egl-foot .egl-link {\n  border: 0; background: transparent; color: var(--accent); cursor: pointer;\n  font-family: inherit; font-size: 12px; padding: 3px 4px; text-decoration: underline;\n}\n.egl-foot .egl-tip { color: var(--ink-faint); font-size: 11px; }\n/* 页脚版本号（构建时由 package.json 注入） */\n.egl-foot .egl-foot-ver { margin-top: 4px; color: var(--ink-faint); font-size: 11px; letter-spacing: 0.6px; opacity: 0.8; }\n/* 首页品牌小标签 */\n.egl-chip {\n  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;\n  font-size: 11.5px; letter-spacing: 0.4px; color: var(--ink-faint);\n  border: 1px dashed rgba(165, 194, 255, 0.3); border-radius: 999px; padding: 3px 10px;\n}\n/* 首页副标题下的适用范围标签 */\n.hero-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }\n.hero-tags span {\n  font-size: 11px; letter-spacing: 0.4px; color: var(--ink-dim);\n  border: 1px solid rgba(165, 194, 255, 0.26); border-radius: 999px; padding: 2px 9px;\n}\n.hero-tags span.hot { color: var(--glow); border-color: rgba(255, 224, 130, 0.34); }\n/* 授权说明弹窗 */\n.egl-lic p { margin: 6px 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.7; }\n.egl-lic p b { color: var(--ink); }\n@media print {\n  .egl-seal { display: none; }\n  .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after { color: #222; opacity: 0.75; }\n  .egl-foot { color: #333; }\n}\n";
   // 版本号：构建时由 build.js 用 package.json 的 version 替换（单一来源，
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
-  var VER = "v1.2.1";
+  var VER = "v1.3.1";
   if (VER.charAt(0) === '_') VER = '';
   var _guardTimer = null;
 
@@ -10705,6 +10713,70 @@ details.explanation-panel .explain {
     bindNav(v);
   }
 
+  /* ============ 关于（作者 / 联系方式 / 项目介绍） ============ */
+  function aboutPage() {
+    var v = app.view;
+    v.innerHTML = '';
+    var id = (E.brand && E.brand.identity) ? E.brand.identity() : null;
+    var name = id ? id.name : 'Hison';
+    var dy = id ? id.douyin : '';
+    var xhs = id ? id.xhs : '';
+
+    v.appendChild(U.el('div', '', '<div class="page-title">关于</div>'
+      + '<div class="page-sub">谁做的、怎么联系、为什么有这个站</div>'));
+
+    // 作者 + 联系方式
+    var who = U.el('div', 'glass', '');
+    who.style.padding = '16px 18px';
+    var wh = '<div class="sec-title" style="margin-top:0">关于作者</div>'
+      + '<div class="kblock"><div class="lb">' + esc(name) + '</div>'
+      + '<p>上海的高一学生。语法填空一直是我的弱项，练的时候又找不到顺手的方式，'
+      + '所以自己边学边写了这个工具，给同学和需要的人免费用。</p></div>'
+      + '<div class="sec-title">联系我</div>'
+      + '<div class="about-links">';
+    if (dy) {
+      wh += '<div class="about-link"><span class="lb">抖音</span>'
+        + '<a href="https://v.douyin.com/e5QisJORWpc/" target="_blank" rel="noopener">' + esc(dy) + '</a></div>';
+    }
+    if (xhs) {
+      wh += '<div class="about-link"><span class="lb">小红书</span>'
+        + '<a href="https://xhslink.cn/o/AcNQAbM9pNE" target="_blank" rel="noopener">' + esc(xhs) + '</a></div>';
+    }
+    wh += '<div class="about-link"><span class="lb">GitHub</span>'
+      + '<a href="https://github.com/XiaoRui114514/english-grammar-lab" target="_blank" rel="noopener">english-grammar-lab</a></div>'
+      + '</div>'
+      + '<div class="small faint" style="margin-top:10px">做题遇到问题、发现答案或解析有错、想提建议，都可以从上面任意一个渠道找我。</div>';
+    who.innerHTML = wh;
+    v.appendChild(who);
+
+    // 项目介绍
+    var intro = U.el('div', 'glass', '');
+    intro.style.padding = '16px 18px';
+    intro.style.marginTop = '14px';
+    intro.innerHTML = '<div class="sec-title" style="margin-top:0">关于这个项目</div>'
+      + '<div class="kblock"><div class="lb">它是什么</div>'
+      + '<p>一个英语语法填空练习工具，打开网页就能用，不用注册、不用装软件，做过的记录和错题都留在你自己的浏览器里。</p></div>'
+      + '<div class="kblock"><div class="lb">为什么做</div>'
+      + '<p>市面上的练习要么散在各处、要么不能离线用。这个页面把考点、方法、练习和错题整理到了一起，'
+      + '内容按上海卷的命题习惯编排，初高中都能用，其他地区也通用。</p></div>'
+      + '<div class="kblock"><div class="lb">现在有什么</div>'
+      + '<p>先发布的是谓语动词·时态部分：12 个专题、每个专题 12 道核心题加 6 道扩展题，另有 20 道综合挑战；'
+      + '其余大专题还在陆续更新，也可以先用 AI 出题按专题生成练习。'
+      + '题库和解析是作者整理的，其中一部分借助 AI 生成后经过人工筛选、修改和校对。</p></div>'
+      + '<div class="kblock"><div class="lb">使用方式</div>'
+      + '<p>个人免费自学使用，不用于商业用途。转发请保留署名、水印和版权说明，完整条款见页面右下角印章和页脚里的「版权与使用授权」。</p></div>'
+      + '<div class="kblock"><div class="lb">源码与更新</div>'
+      + '<p>源码在 GitHub 上，答案或解析有误、功能建议、想一起改，欢迎提 Issue 或 PR。'
+      + '觉得有用的话，转给同样在练语法填空的同学就好。</p></div>';
+    v.appendChild(intro);
+
+    var act = U.el('div', 'btn-row', '');
+    act.style.marginTop = '16px';
+    act.innerHTML = '<button class="btn" data-nav="home">返回首页</button>';
+    v.appendChild(act);
+    bindNav(v);
+  }
+
   E.ui = E.ui || {};
   E.ui.setApp = setApp;
   E.ui.home = home;
@@ -10724,6 +10796,7 @@ details.explanation-panel .explain {
   E.ui.allCoreFinished = allCoreFinished;
   E.ui.topWeakTags = topWeakTags;
   E.ui.methodPage = methodPage;
+  E.ui.aboutPage = aboutPage;
 })();
 
 
@@ -12130,7 +12203,7 @@ details.explanation-panel .explain {
 /* ============================================================
  * boot.js — 入口：hash 路由 / 顶栏 / 全局事件
  * 路由：#/home  #/topics  #/topic/tense01  #/wrong  #/weak
- *        #/records  #/challenge
+ *        #/records  #/challenge  #/about
  * ============================================================ */
 (function () {
   'use strict';
@@ -12152,6 +12225,7 @@ details.explanation-panel .explain {
       case 'wrong': E.ui.wrongBook(); break;
       case 'weak': E.ui.weak(); break;
       case 'records': E.ui.records(); break;
+      case 'about': (E.ui && E.ui.aboutPage) ? E.ui.aboutPage() : E.ui.home(); break;
       case 'challenge': E.quiz.mixedGate(); break;
       case 'ai': (E.aiUI && E.aiUI.aiPage) ? E.aiUI.aiPage() : E.ui.home(); break;
       case 'method': (E.ui && E.ui.methodPage) ? E.ui.methodPage() : E.ui.home(); break;
