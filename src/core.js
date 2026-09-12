@@ -1,5 +1,5 @@
 /* ============================================================
- * core.js — English Grammar Lab 核心引擎
+ * core.js — 上海初高语法填空 核心引擎
  * 数据 / 存储 / 答题判定 / 分析 / 推荐 / 错题本
  * 全部逻辑挂在 window.EGL 命名空间，由 ui.js 调用。
  * 题库注册表：window.__GRAMMAR_LAB__ （data/*.js 写入）
@@ -480,7 +480,7 @@
         // 版权元数据随备份文件一起传播（导入时忽略，不影响数据结构）
         out = deepClone(data);
         out._brand = st;
-        out._notice = '本数据由 ' + st.tag + ' 的 English Grammar Lab 导出，仅供个人免费学习使用，禁止商用。'
+        out._notice = '本数据由 ' + st.tag + ' 的《上海初高语法填空》导出，仅供个人免费学习使用，禁止商用。'
           + ' 抖音 ' + st.douyin + ' · 小红书 ' + st.xhs;
       }
     } catch (e) { out = data; }

@@ -50,7 +50,7 @@ async function main() {
   const problems = [];
   if (!dom) { console.log('FAIL: 无 DOM 输出'); process.exit(1); }
 
-  const hasHome = /English Grammar Lab|选择专题|继续学习/.test(dom);
+  const hasHome = /上海初高语法填空|选择专题|继续学习/.test(dom);
   problems.push(['首页渲染', hasHome]);
 
   // 检查是否有明显 JS 错误痕迹（chrome 会输出到 stderr 或页面保持空）

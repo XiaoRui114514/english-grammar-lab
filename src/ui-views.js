@@ -44,8 +44,8 @@
 
     var hero = U.el('div', 'glass hero');
     hero.innerHTML = '<span class="date">' + dateStr + '</span>'
-      + '<h1><span class="en">English Grammar Lab</span><br>初高中语法填空学习系统</h1>'
-      + '<div class="hero-tags"><span class="hot">初高中通用</span><span>推荐上海地区使用</span>'
+      + '<h1><span class="en">上海初高语法填空</span><br>初高中英语语法填空学习系统</h1>'
+      + '<div class="hero-tags"><span class="hot">上海命题风格</span><span>初高中通用</span><span>全国其他地区也能用</span>'
       + '<span>10 空 = 4 空给词 + 6 空纯空</span><span>有提示词不考词性转换</span></div>'
       + '<p>先懂方法 → 学专题 → 做句子级基础 → 练 10 空语篇 → 错题复盘 → AI 按薄弱点巩固</p>';
     v.appendChild(hero);
