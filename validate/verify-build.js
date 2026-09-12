@@ -19,6 +19,8 @@ const checks = [
   ['页脚版本号已内联', 'egl-foot-ver'],
   ['顶栏品牌文字可收起（竖屏/窄屏只留图标）', '.topbar .brand .brand-text'],
   ['底部白边修复：固定背景层 + 画布底色', 'body::before {'],
+  ['题干空位只有一条虚线（无下划线字符）', '<span class="blank"></span>'],
+  ['编号空位只有一条虚线（无下划线字符）', '<i class="pb-u"></i>'],
 ];
 let failed = 0;
 for (const [name, needle] of checks) {

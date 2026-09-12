@@ -262,10 +262,11 @@ body::before {
 .qtext { font-size: 18px; font-weight: 600; line-height: 1.9; margin: 12px 0 4px;
   word-break: break-word; }
 .qtext .blank {
-  font-weight: 800; padding: 0 6px; color: transparent;
-  background: linear-gradient(120deg, #ffe082, #ffb84d);
-  -webkit-background-clip: text; background-clip: text;
-  border-bottom: 2px dashed #ffe082; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px;
+  /* 空位 = 一条虚线（用渐变画线，避免 border-style:dashed 在窄盒子上糊成实线） */
+  display: inline-block; width: 3.1em; height: 2px; vertical-align: -0.3em; margin: 0 2px;
+  border-radius: 2px;
+  background-image: linear-gradient(90deg, #ffe082 0 7px, transparent 7px 12px);
+  background-size: 12px 2px; background-repeat: space;
 }
 .qtext .hint-p { color: var(--glow); font-size: 15px; font-weight: 700; }
 .qtext b.tok { color: var(--hl); font-weight: 800; }
@@ -593,8 +594,15 @@ details.explanation-panel .explain {
 .passage-panel { background: rgba(255,255,255,0.05); border: 1px solid var(--stroke); border-radius: 14px; padding: 12px 14px; margin: 10px 0; }
 .passage-title { font-weight: 800; font-size: 14px; margin-bottom: 6px; }
 .passage-body { font-size: 16px; line-height: 2.0; }
-.passage-blank { color: var(--accent); font-weight: 800; border-bottom: 2px dashed rgba(91,140,255,0.6); margin: 0 2px; white-space: nowrap; }
-.passage-blank.cur { color: var(--warn); border-bottom-color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 0 3px; }
+.passage-blank { color: var(--accent); font-weight: 800; margin: 0 2px; white-space: nowrap; }
+/* 空位只用元素画一条虚线，不再用下划线字符（避免两层线） */
+.passage-blank .pb-u {
+  display: inline-block; width: 2.6em; height: 2px; margin-left: 3px; vertical-align: -0.28em;
+  border-radius: 2px;
+  background-image: linear-gradient(90deg, currentColor 0 7px, transparent 7px 12px);
+  background-size: 12px 2px; background-repeat: space;
+}
+.passage-blank.cur { color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 0 3px; }
 
 /* 大专题卡片 */
 .cat-card { padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--c, var(--accent)); }

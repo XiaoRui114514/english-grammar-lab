@@ -53,12 +53,13 @@
 
   /* ---------- 题目文本渲染（把 ______ 变成醒目的空） ---------- */
   // opts.hideInlineHint：输入框已另显提示词字卡时，题干里不再追加 (hint)
+  // 空位本身不放下划线字符，只画一条虚线（否则字符与边框会叠成两层线）
   function renderSentence(q, opts) {
     opts = opts || {};
     var s = String(q.question || '');
     var hasBlank = s.indexOf('______') >= 0;
     var h = esc(s);
-    var blankHtml = '<span class="blank">______</span>';
+    var blankHtml = '<span class="blank"></span>';
     if (hasBlank) {
       h = h.replace('______', blankHtml);
     }
@@ -83,7 +84,7 @@
       out.push(esc(parts[i]).replace(/\n/g, '<br>'));
       if (i < parts.length - 1) {
         var n = i + 1;
-        out.push('<span class="passage-blank' + (n === curN ? ' cur' : '') + '">(' + n + ')______</span>');
+        out.push('<span class="passage-blank' + (n === curN ? ' cur' : '') + '">(' + n + ')<i class="pb-u"></i></span>');
       }
     }
     var meta = '<div class="passage-title">📄 ' + esc(aiCtx.title || '语篇')

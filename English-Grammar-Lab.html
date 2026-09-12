@@ -280,10 +280,11 @@ body::before {
 .qtext { font-size: 18px; font-weight: 600; line-height: 1.9; margin: 12px 0 4px;
   word-break: break-word; }
 .qtext .blank {
-  font-weight: 800; padding: 0 6px; color: transparent;
-  background: linear-gradient(120deg, #ffe082, #ffb84d);
-  -webkit-background-clip: text; background-clip: text;
-  border-bottom: 2px dashed #ffe082; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px;
+  /* 空位 = 一条虚线（用渐变画线，避免 border-style:dashed 在窄盒子上糊成实线） */
+  display: inline-block; width: 3.1em; height: 2px; vertical-align: -0.3em; margin: 0 2px;
+  border-radius: 2px;
+  background-image: linear-gradient(90deg, #ffe082 0 7px, transparent 7px 12px);
+  background-size: 12px 2px; background-repeat: space;
 }
 .qtext .hint-p { color: var(--glow); font-size: 15px; font-weight: 700; }
 .qtext b.tok { color: var(--hl); font-weight: 800; }
@@ -611,8 +612,15 @@ details.explanation-panel .explain {
 .passage-panel { background: rgba(255,255,255,0.05); border: 1px solid var(--stroke); border-radius: 14px; padding: 12px 14px; margin: 10px 0; }
 .passage-title { font-weight: 800; font-size: 14px; margin-bottom: 6px; }
 .passage-body { font-size: 16px; line-height: 2.0; }
-.passage-blank { color: var(--accent); font-weight: 800; border-bottom: 2px dashed rgba(91,140,255,0.6); margin: 0 2px; white-space: nowrap; }
-.passage-blank.cur { color: var(--warn); border-bottom-color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 0 3px; }
+.passage-blank { color: var(--accent); font-weight: 800; margin: 0 2px; white-space: nowrap; }
+/* 空位只用元素画一条虚线，不再用下划线字符（避免两层线） */
+.passage-blank .pb-u {
+  display: inline-block; width: 2.6em; height: 2px; margin-left: 3px; vertical-align: -0.28em;
+  border-radius: 2px;
+  background-image: linear-gradient(90deg, currentColor 0 7px, transparent 7px 12px);
+  background-size: 12px 2px; background-repeat: space;
+}
+.passage-blank.cur { color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 0 3px; }
 
 /* 大专题卡片 */
 .cat-card { padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--c, var(--accent)); }
@@ -8165,7 +8173,7 @@ details.explanation-panel .explain {
   var CSS = "\n/* ==================== 品牌署名 · 授权（Hison） ====================\n   注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。\n   删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */\n/* 右下角署名印章：平时是一枚小胶囊，悬停 / 点击后原地展开署名卡片（无弹窗） */\n.egl-seal {\n  position: fixed; right: 12px; bottom: 12px; z-index: 46;\n  display: block; text-align: left; overflow: hidden;\n  padding: 6px 11px; border-radius: 13px; cursor: pointer;\n  font-family: inherit; color: rgba(238, 241, 251, 0.76);\n  background: rgba(10, 14, 30, 0.62);\n  border: 1px solid rgba(165, 194, 255, 0.26);\n  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);\n  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);\n  opacity: 0.88; transform-origin: 100% 100%;\n  transition: padding 0.34s var(--ease), border-radius 0.34s var(--ease),\n              background 0.3s, box-shadow 0.34s, opacity 0.24s, transform 0.34s var(--ease);\n}\n.egl-seal-face {\n  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;\n  font-size: 10.5px; font-weight: 700; letter-spacing: 0.6px;\n}\n.egl-seal-panel {\n  display: block; width: 0; max-height: 0; opacity: 0; margin-top: 0;\n  overflow: hidden; white-space: nowrap; transform: translateY(6px);\n  transition: width 0.34s var(--ease), max-height 0.34s var(--ease), opacity 0.26s ease,\n              transform 0.34s var(--ease), margin-top 0.34s var(--ease);\n}\n.egl-seal-name { display: block; font-size: 12.5px; font-weight: 800; letter-spacing: 0.4px; color: var(--ink); }\n.egl-seal-row { display: block; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }\n.egl-seal-row i { font-style: normal; color: var(--ink-faint); margin-right: 6px; }\n.egl-seal-row b { color: var(--hl); font-weight: 800; letter-spacing: 0.4px; }\n/* 展开态：键盘聚焦 / 点击（触摸） */\n.egl-seal:focus-visible,\n.egl-seal.on {\n  padding: 12px 15px 13px; border-radius: 18px;\n  background: rgba(10, 14, 30, 0.94);\n  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n  opacity: 1; transform: translateY(-2px);\n}\n.egl-seal:focus-visible .egl-seal-panel,\n.egl-seal.on .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n/* 有鼠标的设备：悬停即展开 */\n@media (hover: hover) {\n  .egl-seal:hover {\n    padding: 12px 15px 13px; border-radius: 18px;\n    background: rgba(10, 14, 30, 0.94);\n    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.55);\n    opacity: 1; transform: translateY(-2px);\n  }\n  .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n}\n/* 题卡底纹已撤掉：部分机型浏览器（如荣耀浏览器）会把低透明度的水印墨迹\n   （SVG 图片版、文本 rgba 版都试过）自动提亮成实心白，糊在题干与选项上。\n   署名改由各处角标承担：题卡左下角 + 其它卡片右下角各一行小字，浓淡是\n   固定色 + 固定 opacity，与页面其它文字一致，各机型都不会被提亮，\n   截图、打印都带署名。 */\n/* 卡片角标 */\n.learn-head, .score-hero, .sq-card, .qbox { position: relative; }\n.learn-head { padding-bottom: 22px; }\n.sq-card { padding-bottom: 22px; }\n.score-hero { padding-bottom: 30px; }\n.learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {\n  content: \"by __EGL_NM__\";\n  position: absolute; right: 10px; bottom: 6px;\n  font-size: 10px; letter-spacing: 1px; font-weight: 700;\n  color: var(--ink-faint); opacity: 0.55;\n  pointer-events: none; user-select: none;\n}\n/* 题卡角标放左下：右下是固定印章的位置，靠太近会叠在一起 */\n.qbox::after { right: auto; left: 12px; }\n/* 页脚署名 */\n.egl-foot { text-align: center; padding: 30px 14px 22px; color: var(--ink-faint); font-size: 12px; }\n.egl-foot .egl-foot-main { color: var(--ink-faint); }\n.egl-foot .egl-foot-brand { margin-top: 5px; color: var(--ink-dim); letter-spacing: 0.3px; line-height: 1.8; }\n.egl-foot .egl-foot-links { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }\n.egl-foot .egl-link {\n  border: 0; background: transparent; color: var(--accent); cursor: pointer;\n  font-family: inherit; font-size: 12px; padding: 3px 4px; text-decoration: underline;\n}\n.egl-foot .egl-tip { color: var(--ink-faint); font-size: 11px; }\n/* 页脚版本号（构建时由 package.json 注入） */\n.egl-foot .egl-foot-ver { margin-top: 4px; color: var(--ink-faint); font-size: 11px; letter-spacing: 0.6px; opacity: 0.8; }\n/* 首页品牌小标签 */\n.egl-chip {\n  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;\n  font-size: 11.5px; letter-spacing: 0.4px; color: var(--ink-faint);\n  border: 1px dashed rgba(165, 194, 255, 0.3); border-radius: 999px; padding: 3px 10px;\n}\n/* 首页副标题下的适用范围标签 */\n.hero-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }\n.hero-tags span {\n  font-size: 11px; letter-spacing: 0.4px; color: var(--ink-dim);\n  border: 1px solid rgba(165, 194, 255, 0.26); border-radius: 999px; padding: 2px 9px;\n}\n.hero-tags span.hot { color: var(--glow); border-color: rgba(255, 224, 130, 0.34); }\n/* 授权说明弹窗 */\n.egl-lic p { margin: 6px 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.7; }\n.egl-lic p b { color: var(--ink); }\n@media print {\n  .egl-seal { display: none; }\n  .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after { color: #222; opacity: 0.75; }\n  .egl-foot { color: #333; }\n}\n";
   // 版本号：构建时由 build.js 用 package.json 的 version 替换（单一来源，
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
-  var VER = "v1.3.2";
+  var VER = "v1.3.3";
   if (VER.charAt(0) === '_') VER = '';
   var _guardTimer = null;
 
@@ -9154,12 +9162,13 @@ details.explanation-panel .explain {
 
   /* ---------- 题目文本渲染（把 ______ 变成醒目的空） ---------- */
   // opts.hideInlineHint：输入框已另显提示词字卡时，题干里不再追加 (hint)
+  // 空位本身不放下划线字符，只画一条虚线（否则字符与边框会叠成两层线）
   function renderSentence(q, opts) {
     opts = opts || {};
     var s = String(q.question || '');
     var hasBlank = s.indexOf('______') >= 0;
     var h = esc(s);
-    var blankHtml = '<span class="blank">______</span>';
+    var blankHtml = '<span class="blank"></span>';
     if (hasBlank) {
       h = h.replace('______', blankHtml);
     }
@@ -9184,7 +9193,7 @@ details.explanation-panel .explain {
       out.push(esc(parts[i]).replace(/\n/g, '<br>'));
       if (i < parts.length - 1) {
         var n = i + 1;
-        out.push('<span class="passage-blank' + (n === curN ? ' cur' : '') + '">(' + n + ')______</span>');
+        out.push('<span class="passage-blank' + (n === curN ? ' cur' : '') + '">(' + n + ')<i class="pb-u"></i></span>');
       }
     }
     var meta = '<div class="passage-title">📄 ' + esc(aiCtx.title || '语篇')
@@ -10997,7 +11006,7 @@ details.explanation-panel .explain {
     var out = [];
     for (var i = 0; i < parts.length; i++) {
       out.push(esc(parts[i]).replace(/\n/g, '<br>'));
-      if (i < parts.length - 1) out.push('<span class="passage-blank">(' + (i + 1) + ')______</span>');
+      if (i < parts.length - 1) out.push('<span class="passage-blank">(' + (i + 1) + ')<i class="pb-u"></i></span>');
     }
     return '<div class="passage-body">' + out.join('') + '</div>';
   }
@@ -11090,7 +11099,7 @@ details.explanation-panel .explain {
           var gw = (it && it.q && it.q.aiCtx && it.q.aiCtx.given) || '';
           var after = (parts[i + 1] || '');
           var inline = gw && after.trim().toLowerCase().indexOf('(' + gw.toLowerCase() + ')') === 0;
-          out.push('<span class="passage-blank">(' + bi + ')______'
+          out.push('<span class="passage-blank">(' + bi + ')<i class="pb-u"></i>'
             + (gw && !inline ? ' (' + esc(gw) + ')' : '') + '</span>');
         } else {
           out.push(esc(parts[i]).replace(/\n/g, '<br>'));

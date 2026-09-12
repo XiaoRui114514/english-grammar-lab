@@ -176,7 +176,7 @@
     var out = [];
     for (var i = 0; i < parts.length; i++) {
       out.push(esc(parts[i]).replace(/\n/g, '<br>'));
-      if (i < parts.length - 1) out.push('<span class="passage-blank">(' + (i + 1) + ')______</span>');
+      if (i < parts.length - 1) out.push('<span class="passage-blank">(' + (i + 1) + ')<i class="pb-u"></i></span>');
     }
     return '<div class="passage-body">' + out.join('') + '</div>';
   }
@@ -269,7 +269,7 @@
           var gw = (it && it.q && it.q.aiCtx && it.q.aiCtx.given) || '';
           var after = (parts[i + 1] || '');
           var inline = gw && after.trim().toLowerCase().indexOf('(' + gw.toLowerCase() + ')') === 0;
-          out.push('<span class="passage-blank">(' + bi + ')______'
+          out.push('<span class="passage-blank">(' + bi + ')<i class="pb-u"></i>'
             + (gw && !inline ? ' (' + esc(gw) + ')' : '') + '</span>');
         } else {
           out.push(esc(parts[i]).replace(/\n/g, '<br>'));
