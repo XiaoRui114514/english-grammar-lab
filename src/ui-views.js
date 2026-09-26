@@ -42,50 +42,57 @@
     var weekday = ['日', '一', '二', '三', '四', '五', '六'][dateW.getDay()];
     var dateStr = (dateW.getMonth() + 1) + '月' + dateW.getDate() + '日 周' + weekday;
 
-    var hero = U.el('div', 'glass hero');
-    hero.innerHTML = '<span class="date">' + dateStr + '</span>'
-      + '<h1><span class="en">上海初高语法填空</span><br>初高中英语语法填空学习系统</h1>'
+    // 报头：刊名与日期一行，标题一句，学习路线一句（不再是卡片 + 标签墙）
+    var hero = U.el('div', 'hero');
+    hero.innerHTML = '<div class="mast-line"><span class="mast-name">上海初高语法填空</span>'
+      + '<span class="date">' + dateStr + '</span></div>'
+      + '<h1>初高中英语语法填空学习系统</h1>'
+      + '<p>先懂方法 → 学专题 → 做句子级基础 → 练 10 空语篇 → 错题复盘 → AI 按薄弱点巩固</p>'
       + '<div class="hero-tags"><span class="hot">上海命题风格</span><span>初高中通用</span><span>全国其他地区也能用</span>'
-      + '<span>10 空 = 4 空给词 + 6 空纯空</span><span>有提示词不考词性转换</span></div>'
-      + '<p>先懂方法 → 学专题 → 做句子级基础 → 练 10 空语篇 → 错题复盘 → AI 按薄弱点巩固</p>';
+      + '<span>10 空 = 4 空给词 + 6 空纯空</span><span>有提示词不考词性转换</span></div>';
     v.appendChild(hero);
 
-    // 今日学习 + 进度
+    // 今日 / 进度 / 累计：一张账目表（左标签、右数字，进度画成一条细线）
     var todayN = Math.min(st.todayAnswered, 12);
-    var g = U.el('div', 'grid cards2', ''); g.style.marginTop = '14px';
-    g.innerHTML =
-      '<div class="glass stat-card"><div class="k">📅 今日学习</div><div class="v">' + todayN + ' <small>/ 12 题</small></div>'
+    var led = U.el('div', 'ledger');
+    led.innerHTML =
+      '<div class="ledger-row"><span class="k">今日学习</span>'
+      + '<span class="v">' + todayN + '<small>/ 12 题</small></span>'
       + U.progressBar(todayN / 12) + '</div>'
-      + '<div class="glass stat-card"><div class="k">🗺 学习进度（第一阶段先行 12 专题）</div><div class="v">' + st.finished + ' <small>/ ' + st.available + ' 专题</small></div>'
-      + U.progressBar(st.available ? st.finished / st.available : 0) + '</div>';
-    v.appendChild(g);
+      + '<div class="ledger-row"><span class="k">学习进度</span>'
+      + '<span class="v">' + st.finished + '<small>/ ' + st.available + ' 专题</small></span>'
+      + U.progressBar(st.available ? st.finished / st.available : 0) + '</div>'
+      + '<div class="ledger-row"><span class="k">已完成专题</span>'
+      + '<span class="v">' + st.finished + '<small>/ 12</small></span>'
+      + '<span class="note">全课程规划共 ' + st.totalPlan + ' 个专题 · 第一阶段先行 12 个</span></div>'
+      + '<div class="ledger-row"><span class="k">累计题目</span>'
+      + '<span class="v">' + st.answered + '<small>题</small></span>'
+      + '<span class="note">答对 ' + st.correct + ' 题</span></div>'
+      + '<div class="ledger-row"><span class="k">总正确率</span>'
+      + '<span class="v" style="color:' + (st.pct === null ? '' : st.pct >= 0.8 ? 'var(--ok)' : st.pct >= 0.6 ? 'var(--warn)' : 'var(--bad)') + '">' + (st.pct === null ? '—' : pct(st.pct)) + '</span>'
+      + '<span class="note">答错会进错题本，别怕</span></div>';
+    v.appendChild(led);
 
-    var g2 = U.el('div', 'grid cards3', ''); g2.style.marginTop = '14px';
-    g2.innerHTML =
-      '<div class="glass stat-card"><div class="k">已完成专题</div><div class="v">' + st.finished + ' <small>/ 12</small></div><div class="faint small">全课程规划共 ' + st.totalPlan + ' 个专题</div></div>'
-      + '<div class="glass stat-card"><div class="k">累计题目</div><div class="v">' + st.answered + ' <small>题</small></div><div class="faint small">答对 ' + st.correct + ' 题</div></div>'
-      + '<div class="glass stat-card"><div class="k">总正确率</div><div class="v" style="color:' + (st.pct === null ? '' : st.pct >= 0.8 ? 'var(--ok)' : st.pct >= 0.6 ? 'var(--warn)' : 'var(--bad)') + '">' + (st.pct === null ? '—' : pct(st.pct)) + '</div>'
-      + '<div class="faint small">答错会进错题本，别怕</div></div>';
-    v.appendChild(g2);
-
-    // 快捷入口
+    // 快捷入口：目录式列表（一行一件事，右侧细箭头）
     var chalDone = E.isChallengeAvailable() && allCoreFinished();
-    var qa = U.el('div', 'quick-actions');
-    qa.innerHTML = '<button class="btn" data-nav="go-learn"><b>▶️</b>继续学习</button>'
-      + '<button class="btn" data-nav="topics"><b>🗂</b>专题学习</button>'
-      + '<button class="btn" data-nav="ai"><b>🤖</b>AI 出题</button>'
-      + '<button class="btn" data-nav="method"><b>🧭</b>解题方法课</button>'
-      + '<button class="btn" data-nav="wrong"><b>📕</b>错题本 <span class="faint">(' + d.wrongBook.length + ')</span></button>'
-      + '<button class="btn" data-nav="weak"><b>🎯</b>我的薄弱点</button>'
-      + '<button class="btn" data-nav="records"><b>📊</b>学习记录</button>'
-      + (chalDone ? '<button class="btn" data-nav="challenge"><b>🧪</b>时态综合挑战</button>' : '');
-    v.appendChild(qa);
+    var idx = U.el('nav', 'index-list');
+    idx.setAttribute('aria-label', '快捷入口');
+    idx.innerHTML =
+      '<button class="index-row" data-nav="go-learn"><span class="tt">继续学习</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="topics"><span class="tt">专题学习</span><span class="meta">' + st.available + ' 个专题</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="ai"><span class="tt">AI 出题</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="method"><span class="tt">解题方法课</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="wrong"><span class="tt">错题本</span><span class="meta">' + d.wrongBook.length + ' 题</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="weak"><span class="tt">我的薄弱点</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="records"><span class="tt">学习记录</span><span class="ar">→</span></button>'
+      + (chalDone ? '<button class="index-row" data-nav="challenge"><span class="tt">时态综合挑战</span><span class="meta">20 题</span><span class="ar">→</span></button>' : '');
+    v.appendChild(idx);
 
     // AI 训练可继续提示
     if (E.aiUI && E.aiUI.resumeIfAny()) {
       var resume = U.el('div', 'glass rec-card');
       resume.style.marginTop = '14px';
-      resume.innerHTML = '<b>🤖 有一组 AI 训练可继续 / 重做</b>'
+      resume.innerHTML = '<b>有一组 AI 训练可继续 / 重做</b>'
         + '<div class="btn-row" style="margin-top:8px"><button class="btn sm" data-airesume="normal">继续普通模式</button>'
         + '<button class="btn sm ghost" data-airesume="blind">继续盲做模式</button></div>';
       v.appendChild(resume);
@@ -103,7 +110,7 @@
         if (c.attempts <= 0) return;
         var row = U.el('div', 'bar-row');
         var color = c.pct >= 0.8 ? 'var(--ok)' : c.pct >= 0.6 ? 'var(--warn)' : 'var(--bad)';
-        row.innerHTML = '<span class="nm">' + (c.icon || '📌') + ' ' + esc(c.name) + '</span>'
+        row.innerHTML = '<span class="nm">' + (c.icon ? c.icon + ' ' : '') + esc(c.name) + '</span>'
           + '<div class="tr">' + U.progressBar(c.pct, c.pct < 0.6 ? 'bad' : '') + '</div>'
           + '<span class="pct" style="color:' + color + '">' + pct(c.pct) + '</span>'
           + '<span class="faint small">' + c.correct + '/' + c.attempts + '</span>';
@@ -120,13 +127,13 @@
       var rc = U.el('div', 'glass reason-card');
       if (rec.type === 'topic') {
         var rm = metaById(rec.topicId);
-        rc.innerHTML = '<span class="badge blue">🎯 ' + esc(topicName(rec.topicId)) + '</span>'
-          + '<div class="big">' + (rm && rm.icon ? rm.icon : '📘') + ' ' + esc(rm ? rm.title : '') + '</div>'
+        rc.innerHTML = '<span class="badge blue">' + esc(topicName(rec.topicId)) + '</span>'
+          + '<div class="big">' + (rm && rm.icon ? rm.icon + ' ' : '') + esc(rm ? rm.title : '') + '</div>'
           + '<div class="why">' + esc(rec.reason) + '</div>'
           + '<div class="btn-row" style="margin-top:12px"><button class="btn sm" data-nav="topic" data-tid="' + rec.topicId + '">开始学习</button>'
-          + '<button class="btn sm ghost" data-nav="ai">🤖 让 AI 出题巩固</button></div>';
+          + '<button class="btn sm ghost" data-nav="ai">让 AI 出题巩固</button></div>';
       } else {
-        rc.innerHTML = '<span class="badge amber">🧪 时态综合挑战</span><div class="big">挑战一下综合能力</div>'
+        rc.innerHTML = '<span class="badge amber">时态综合挑战</span><div class="big">挑战一下综合能力</div>'
           + '<div class="why">' + esc(rec.reason) + '</div>'
           + '<div class="btn-row" style="margin-top:12px"><button class="btn sm" data-nav="challenge">去挑战</button></div>';
       }
@@ -160,7 +167,7 @@
     if (chalDone) {
       var chal = U.el('div', 'glass rec-card');
       chal.style.marginTop = '14px';
-      chal.innerHTML = '<b>🧪 时态综合挑战已解锁</b> <span class="faint small">20 题大综合 · 七大时态混合</span>'
+      chal.innerHTML = '<b>时态综合挑战已解锁</b> <span class="faint small">20 题大综合 · 七大时态混合</span>'
         + '<div class="btn-row" style="margin-top:10px"><button class="btn sm" data-nav="challenge">开始 20 题综合挑战</button></div>';
       v.appendChild(chal);
     } else if (E.isChallengeAvailable()) {
@@ -171,7 +178,7 @@
         var s = E.topicStat(tid);
         if (s.finished && s.attempts >= 12) doneN++;
       });
-      chalLock.innerHTML = '<b>🔒 时态综合挑战（未解锁）</b>'
+      chalLock.innerHTML = '<b>时态综合挑战（未解锁）</b>'
         + '<div class="why">完成全部 12 个专题后自动解锁。当前已完成 ' + doneN + ' / 12。</div>'
         + '<div class="pbar" style="margin-top:10px"><i style="width:' + (doneN / 12 * 100) + '%"></i></div>';
       v.appendChild(chalLock);
@@ -198,14 +205,14 @@
     var v = app.view;
     v.innerHTML = '';
     var cur = window.__EGL_CURRICULUM__;
-    v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">🗂️</span>专题学习 · 语法填空</div>'
+    v.appendChild(U.el('div', '', '<div class="page-title">专题学习 · 语法填空</div>'
       + '<div class="page-sub">初高中通用：按大专题学习，内置题库直接开练；尚未内置的专题可用「AI 出题」生成练习。</div>'));
 
     // 顶部：解题方法课 + AI 出题 快捷入口
     var topRow = U.el('div', 'grid cards2', '');
     topRow.style.marginBottom = '14px';
-    topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><div class="ic">🧭</div><h4>解题方法课</h4><p>先学上海语法填空的做题顺序（数谓语 → 连词优先 → 5 类排查）与高频坑，再开练。</p></button>'
-      + '<button class="mode-card glass" data-nav="ai"><div class="ic">🤖</div><h4>AI 出题</h4><p>按专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
+    topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><h4>解题方法课</h4><p>先学上海语法填空的做题顺序（数谓语 → 连词优先 → 5 类排查）与高频坑，再开练。</p></button>'
+      + '<button class="mode-card glass" data-nav="ai"><h4>AI 出题</h4><p>按专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
     v.appendChild(topRow);
 
     // 大专题卡片
@@ -220,7 +227,7 @@
         if (a !== null) { acc += a; tried++; }
       });
       var pctShow = tried ? '<span class="pct" style="color:' + (acc / tried >= 0.8 ? 'var(--ok)' : acc / tried >= 0.6 ? 'var(--warn)' : 'var(--bad)') + '">' + pct(acc / tried) + '</span>' : '';
-      var head = '<h4>' + (cat.icon || '📌') + ' ' + esc(cat.name) + pctShow + '</h4>'
+      var head = '<h4>' + (cat.icon ? cat.icon + ' ' : '') + esc(cat.name) + pctShow + '</h4>'
         + '<div class="desc">' + esc(cat.desc) + '</div>';
       card.innerHTML = head;
       // 内置可练（目前 tense 系列归属谓语动词）
@@ -228,7 +235,10 @@
         var rows = U.el('div', '', '');
         list.forEach(function (t) {
           var st2 = E.topicStatus(t.tid);
-          var stText = st2 === 'master' ? '🟢' : st2 === 'learning' ? '🟡' : st2 === 'weak' ? '🔴' : '⚪';
+          var stText = st2 === 'master' ? '<i class="dot master"></i>'
+            : st2 === 'learning' ? '<i class="dot learning"></i>'
+            : st2 === 'weak' ? '<i class="dot weak"></i>'
+            : '<i class="dot none"></i>';
           var acc2 = E.topicAccuracy(t.tid);
           var r = U.el('div', 'topic-row');
           r.dataset.tid = t.tid;
@@ -242,7 +252,7 @@
       // 规划/AI 占位行
       var extra = U.el('div', 'topic-row');
       extra.innerHTML = '<span class="no">✦</span><span class="tt faint">该大专题其余子考点</span>'
-        + '<button class="btn sm ghost" data-ai-cat="' + cat.id + '" style="margin-left:auto">🤖 AI 生成练习</button>';
+        + '<button class="btn sm ghost" data-ai-cat="' + cat.id + '" style="margin-left:auto">AI 生成练习</button>';
       card.appendChild(extra);
       v.appendChild(card);
     });
@@ -250,10 +260,10 @@
     if (E.isChallengeAvailable()) {
       var locked = !allCoreFinished();
       var cc = U.el('div', 'glass phase-card');
-      cc.innerHTML = '<div class="phase-head"><h3>🧪 额外挑战</h3><span>句子级大综合</span></div>';
+      cc.innerHTML = '<div class="phase-head"><h3>额外挑战</h3><span>句子级大综合</span></div>';
       var cr = U.el('div', 'topic-row');
       cr.innerHTML = '<span class="no">CH</span><span class="tt">时态综合挑战（20题 · 句子级）</span>'
-        + (locked ? '<span class="st">🔒 完成全部 12 个谓语动词专题后解锁</span>'
+        + (locked ? '<span class="st">完成全部 12 个谓语动词专题后解锁</span>'
                    : '<span class="st">✅ 已解锁</span>');
       if (!locked) {
         cr.style.cursor = 'pointer';
@@ -291,7 +301,7 @@
   function topicPage(tid) {
     var v = app.view;
     var meta = metaById(tid);
-    if (!meta) { v.innerHTML = '<div class="empty"><span class="e">🤔</span>专题未找到</div>'; return; }
+    if (!meta) { v.innerHTML = '<div class="empty">专题未找到</div>'; return; }
     var topic = E.bank()[tid] || {};
     var st = E.topicStatus(tid);
     var acc = E.topicAccuracy(tid);
@@ -306,9 +316,7 @@
     var head = U.el('div', 'glass', '');
     head.style.marginTop = '10px';
     head.style.padding = '16px 18px';
-    var icon = topic.icon || meta.icon || '📘';
     head.innerHTML = '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
-      + '<span style="font-size:34px">' + esc(icon) + '</span>'
       + '<div><div class="page-title" style="font-size:20px">专题 ' + esc(meta.no) + '｜' + esc(meta.title) + '</div>'
       + '<div class="page-sub">第一阶段 · 谓语动词与时态</div></div>'
       + '<div style="margin-left:auto">' + U.statusBadge(st) + '</div></div>'
@@ -326,17 +334,17 @@
     modeBox.style.padding = '18px';
     var modeHtml = '<div class="sec-title" style="margin-top:0">开始练习</div>'
       + '<div class="mode-grid">'
-      + '<div class="mode-card glass" data-mode="normal"><div class="ic">📖</div><h4>普通模式</h4><p>每题答完立刻看对错与解析，适合学习新知识。</p></div>'
-      + '<div class="mode-card glass" data-mode="blind"><div class="ic">🎭</div><h4>盲做模式</h4><p>一口气做完 12 题再看答案，模拟真实考试。</p></div>'
+      + '<div class="mode-card glass" data-mode="normal"><h4>普通模式</h4><p>每题答完立刻看对错与解析，适合学习新知识。</p></div>'
+      + '<div class="mode-card glass" data-mode="blind"><h4>盲做模式</h4><p>一口气做完 12 题再看答案，模拟真实考试。</p></div>'
       + '</div>';
     if (unlockedChal) {
-      modeHtml += '<div class="btn-row" style="margin-top:12px"><button class="btn warn sm" data-chal="1">🎯 挑战模式（5 题 · 全输入 · 已解锁）</button></div>';
+      modeHtml += '<div class="btn-row" style="margin-top:12px"><button class="btn warn sm" data-chal="1">挑战模式（5 题 · 全输入 · 已解锁）</button></div>';
     } else if (s.finished) {
-      modeHtml += '<div class="btn-row" style="margin-top:12px"><button class="btn sm" disabled>🎯 挑战模式：正确率 ≥90% 后解锁</button></div>';
+      modeHtml += '<div class="btn-row" style="margin-top:12px"><button class="btn sm" disabled>挑战模式：正确率 ≥90% 后解锁</button></div>';
     }
     if (wrongCount > 0) {
-      modeHtml += '<div class="btn-row" style="margin-top:10px"><button class="btn ghost sm" data-retrain="1">♻️ 再练 5 题（针对薄弱点，新题）</button>'
-        + '<button class="btn ghost sm" data-wrongretrain="1">📕 错题回炉 5 题</button></div>';
+      modeHtml += '<div class="btn-row" style="margin-top:10px"><button class="btn ghost sm" data-retrain="1">再练 5 题（针对薄弱点，新题）</button>'
+      + '<button class="btn ghost sm" data-wrongretrain="1">错题回炉 5 题</button></div>';
     }
     modeBox.innerHTML = modeHtml;
     v.appendChild(modeBox);
@@ -370,11 +378,11 @@
     var v = app.view;
     var wb = E.data.wrongBook;
     v.innerHTML = '';
-    v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">📕</span>错题本</div>'
+    v.appendChild(U.el('div', '', '<div class="page-title">错题本</div>'
       + '<div class="page-sub">共 ' + wb.length + ' 条 · 同一题再错会累加错误次数</div>'));
 
     if (!wb.length) {
-      v.appendChild(U.el('div', 'glass empty', '<span class="e">🎉</span>还没有错题<br><span class="faint small">做错的题会自动收进来，加油！</span>'));
+      v.appendChild(U.el('div', 'glass empty', '还没有错题<br><span class="faint small">做错的题会自动收进来，加油！</span>'));
       return;
     }
     var box = U.el('div', '');
@@ -383,10 +391,10 @@
       var q = isAI ? null : E.findQuestion(w.topicId, w.qid); // AI 题已存快照，不入库
       var card = U.el('div', 'glass wb-item');
       var meta = isAI ? null : metaById(w.topicId);
-      var icon = isAI ? '🤖' : (meta && meta.icon ? meta.icon : '📘');
+      var icon = isAI ? '' : (meta && meta.icon ? meta.icon : '');
       card.innerHTML = '<div class="head">'
-        + (isAI ? '<span class="badge gray">🤖 AI训练</span> ' : '')
-        + '<span class="badge gray">' + icon + ' ' + esc(w.topicTitle || (isAI ? 'AI出题' : topicName(w.topicId))) + '</span>'
+        + (isAI ? '<span class="badge gray">AI 训练</span> ' : '')
+        + '<span class="badge gray">' + (icon ? icon + ' ' : '') + esc(w.topicTitle || (isAI ? 'AI出题' : topicName(w.topicId))) + '</span>'
         + (w.kp ? '<span class="badge blue">' + esc(w.kp) + '</span>' : (w.tag ? '<span class="badge blue">' + esc(w.tag) + '</span>' : ''))
         + '<span class="badge red">' + wtZh(w.wrongType) + '</span>'
         + '<span class="badge amber">错 ' + w.times + ' 次</span>'
@@ -416,14 +424,14 @@
             examMind: ''
           }
         };
-        dAI.innerHTML = '<summary>📖 查看解析与考点</summary>'
+        dAI.innerHTML = '<summary>查看解析与考点</summary>'
           + U.explanationHTML(pseudo, { correctText: w.correctAnswer, myText: w.myAnswer, myOk: false, grammar: (w.kp || 'AI题') });
         card.appendChild(dAI);
       } else if (q) {
         var det = U.el('details', 'qa explanation-panel');
         det.style.marginTop = '10px';
         var corText = q.type === 'choice' ? (q.options[q.answerIndex]) : (q.answerText || (q.accepted && q.accepted[0]));
-        det.innerHTML = '<summary>📖 查看解析与考点</summary>'
+      det.innerHTML = '<summary>查看解析与考点</summary>'
           + U.explanationHTML(q, { correctText: corText, myText: w.myAnswer, myOk: false, grammar: (meta && meta.title) || '' });
         card.appendChild(det);
       }
@@ -433,7 +441,7 @@
 
     var foot = U.el('div', 'btn-row', '');
     foot.style.marginTop = '8px';
-    foot.innerHTML = '<button class="btn ghost" data-clear="1">🗑 清空错题本</button>'
+      foot.innerHTML = '<button class="btn ghost" data-clear="1">清空错题本</button>'
       + '<button class="btn ghost" data-nav="weak">去练薄弱点</button>';
     v.appendChild(foot);
 
@@ -456,7 +464,7 @@
   function weak() {
     var v = app.view;
     v.innerHTML = '';
-    v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">🎯</span>我的薄弱点分析</div>'
+    v.appendChild(U.el('div', '', '<div class="page-title">我的薄弱点分析</div>'
       + '<div class="page-sub">正确率越低越靠前 · 连续答错会亮红灯，直接针对性训练</div>'));
 
     // 专题级
@@ -467,7 +475,7 @@
       c1.style.padding = '10px 16px';
       weakT.forEach(function (t) {
         var row = U.el('div', 'bar-row');
-        row.innerHTML = '<span class="nm">' + (t.meta && t.meta.icon ? t.meta.icon : '📘') + ' ' + esc(t.meta ? t.meta.title : t.id) + '</span>'
+        row.innerHTML = '<span class="nm">' + (t.meta && t.meta.icon ? t.meta.icon + ' ' : '') + esc(t.meta ? t.meta.title : t.id) + '</span>'
           + '<div class="tr">' + U.progressBar(t.pct, t.pct < 0.6 ? 'bad' : '') + '</div>'
           + '<span class="pct" style="color:' + (t.pct < 0.6 ? 'var(--bad)' : t.pct < 0.8 ? 'var(--warn)' : 'var(--ok)') + '">' + pct(t.pct) + '</span>';
         c1.appendChild(row);
@@ -520,7 +528,7 @@
     }
 
     if (!tags.length && !weakT.length && !errKeys.length) {
-      v.appendChild(U.el('div', 'glass empty', '<span class="e">💪</span>还没有足够数据<br><span class="faint small">做完几个专题后，这里会告诉你哪里最需要补</span>'));
+      v.appendChild(U.el('div', 'glass empty', '还没有足够数据<br><span class="faint small">做完几个专题后，这里会告诉你哪里最需要补</span>'));
     }
     bindNav(v);
   }
@@ -529,7 +537,7 @@
   function records() {
     var v = app.view;
     v.innerHTML = '';
-    v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">📊</span>学习记录</div>'
+    v.appendChild(U.el('div', '', '<div class="page-title">学习记录</div>'
       + '<div class="page-sub">每轮练习都会记录在这里</div>'));
 
     var sessions = E.data.sessions.slice().reverse();
@@ -538,19 +546,19 @@
       sessions.slice(0, 60).forEach(function (s) {
         var isAI = s.mode === 'ai' || s.topicId === 'ai';
         var meta = isAI ? null : metaById(s.topicId);
-        var modeZh = { normal: '普通模式', blind: '盲做模式', retrain: '再练5题', challenge: '挑战模式', wrongretrain: '错题回炉', mixed: '综合挑战', ai: '🤖 AI训练' }[s.mode] || s.mode;
+        var modeZh = { normal: '普通模式', blind: '盲做模式', retrain: '再练5题', challenge: '挑战模式', wrongretrain: '错题回炉', mixed: '综合挑战', ai: 'AI 训练' }[s.mode] || s.mode;
         var nameTxt = isAI ? (s.label || 'AI 出题训练') : topicName(s.topicId);
         var it = U.el('div', 'glass hist-item');
         var grade = U.gradeOf(s.correct, s.total);
         it.innerHTML = '<span class="d">' + s.date + '</span>'
-          + '<span class="t">' + (isAI ? '🤖' : (meta && meta.icon ? meta.icon : '📘')) + ' ' + esc(nameTxt) + ' <span class="badge gray">' + esc(modeZh) + '</span></span>'
+          + '<span class="t">' + (meta && meta.icon ? meta.icon + ' ' : '') + esc(nameTxt) + ' <span class="badge gray">' + esc(modeZh) + '</span></span>'
           + '<span class="s" style="color:' + grade.color + '">' + s.correct + '/' + s.total + '</span>'
           + '<span class="faint small" style="width:64px;text-align:right">' + U.fmtTime(s.seconds) + '</span>';
         c.appendChild(it);
       });
       v.appendChild(c);
     } else {
-      v.appendChild(U.el('div', 'glass empty', '<span class="e">🗒️</span>还没有学习记录<br><span class="faint small">开始第一个专题吧</span>'));
+      v.appendChild(U.el('div', 'glass empty', '还没有学习记录<br><span class="faint small">开始第一个专题吧</span>'));
     }
 
     // 数据管理
@@ -655,8 +663,8 @@
     var v = app.view;
     v.innerHTML = '';
     var m = window.__EGL_METHOD_COURSE__;
-    if (!m) { v.innerHTML = '<div class="empty"><span class="e">🧭</span>方法课内容缺失</div>'; return; }
-    v.appendChild(U.el('div', '', '<div class="page-title"><span class="ico">🧭</span>' + esc(m.title) + '</div>'
+    if (!m) { v.innerHTML = '<div class="empty">方法课内容缺失</div>'; return; }
+    v.appendChild(U.el('div', '', '<div class="page-title">' + esc(m.title) + '</div>'
       + '<div class="page-sub">' + esc(m.intro) + '</div>'));
     // 上海卷 10 空结构速览
     if (m.facts && m.facts.length) {
@@ -744,15 +752,15 @@
     tc.style.padding = '12px 16px';
     (m.fiveTrapTips || []).forEach(function (t) {
       var row = U.el('div', 'kblock', '');
-      row.innerHTML = '<div class="lb">⚠️ ' + esc(t.name) + '</div><p>' + esc(t.text) + '</p>';
+      row.innerHTML = '<div class="lb">' + esc(t.name) + '</div><p>' + esc(t.text) + '</p>';
       tc.appendChild(row);
     });
     v.appendChild(tc);
 
     var act = U.el('div', 'btn-row', '');
     act.style.marginTop = '16px';
-    act.innerHTML = '<button class="btn" data-nav="topics">🗂 去选专题练习</button>'
-      + '<button class="btn ok" data-nav="ai">🤖 让 AI 生成一篇练手</button>';
+    act.innerHTML = '<button class="btn" data-nav="topics">去选专题练习</button>'
+      + '<button class="btn ok" data-nav="ai">让 AI 生成一篇练手</button>';
     v.appendChild(act);
     bindNav(v);
   }

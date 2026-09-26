@@ -43,7 +43,7 @@
     var app = document.getElementById('app');
     if (!app) return;
     app.innerHTML = '<div class="wrap"><div class="glass" style="padding:34px 26px;text-align:center">'
-      + '<h2>⚠️ 版本校验未通过</h2>'
+      + '<h2>版本校验未通过</h2>'
       + '<p style="margin-top:10px;color:var(--ink-dim)">本文件缺少作者署名与版权（水印）模块，无法启动。</p>'
       + '<p class="small faint" style="margin-top:10px">若本文件来自他人转发，可能已被二次修改（去署名 / 去水印 / 去版权说明）。'
       + '请回到作者发布渠道获取完整版本，并保留署名与授权说明。</p></div></div>';
@@ -136,8 +136,8 @@
     var bankKeys = window.__GRAMMAR_LAB__ ? Object.keys(window.__GRAMMAR_LAB__) : [];
     if (!bankKeys.length) {
       var body = document.getElementById('app');
-      body.innerHTML = '<div class="wrap"><div class="glass" style="padding:40px;text-align:center;color:#aab3d0">'
-        + '<h2>📭 题库数据未加载</h2><p style="margin-top:10px">请使用完整版本，或运行 build.js 生成单文件 English-Grammar-Lab.html。</p></div></div>';
+      body.innerHTML = '<div class="wrap"><div class="glass" style="padding:40px;text-align:center;color:var(--ink-dim)">'
+        + '<h2>题库数据未加载</h2><p style="margin-top:10px">请使用完整版本，或运行 build.js 生成单文件 English-Grammar-Lab.html。</p></div></div>';
       return;
     }
     // 题库文本打隐形指纹：被复制、被搬运的题干会带着作者信息走

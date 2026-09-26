@@ -56,7 +56,7 @@
     if (!_keyCache) _keyCache = (typeof cfg.apiKey === 'string') ? cfg.apiKey : '';
     cfg.apiKey = _keyCache;
     v.innerHTML = '';
-    v.appendChild(el('div', '', '<div class="page-title"><span class="ico">🤖</span>AI 出题 · 语法填空</div>'
+    v.appendChild(el('div', '', '<div class="page-title">AI 出题 · 语法填空</div>'
       + '<div class="page-sub">按“专题 × 题数 × 结构”生成完整练习（初高中通用）；结果进入原做题界面，判分/解析/错题/统计全部通用。</div>'));
 
     var panel = el('div', 'glass', '');
@@ -66,7 +66,7 @@
     renderForm(panel, cfg);
 
     var btnRow = el('div', '', '<div class="btn-row" style="margin-top:16px">'
-      + '<button type="button" class="btn block" id="aiGo">🤖 开始生成语法填空</button></div>');
+      + '<button type="button" class="btn block" id="aiGo">开始生成语法填空</button></div>');
     v.appendChild(btnRow);
 
     ensureBound(v);      // 视图级委托：只绑一次
@@ -212,7 +212,7 @@
     var tHtml = '<div class="form-row"><label>专题</label><select data-f="topicId">';
     tHtml += '<option value="all"' + (cfg.topicId === 'all' ? ' selected' : '') + '>全部专题（自动合理分布）</option>';
     categoryList().forEach(function (c) {
-      tHtml += '<option value="' + c.id + '"' + (cfg.topicId === c.id ? ' selected' : '') + '>' + c.icon + ' ' + c.name + '</option>';
+      tHtml += '<option value="' + c.id + '"' + (cfg.topicId === c.id ? ' selected' : '') + '>' + (c.icon ? c.icon + ' ' : '') + c.name + '</option>';
     });
     tHtml += '</select></div>';
 
@@ -232,8 +232,8 @@
     var qtChoice = cfg.qtype !== 'input' ? ' on' : '';
     var qtInput = cfg.qtype === 'input' ? ' on' : '';
     var qtHtml = '<div class="form-row"><label>答题形式（默认点选，不用打字）</label><div class="seg">'
-      + '<button type="button" data-qtype="choice" class="' + qtChoice + '">🔤 点选选择题（n 选 1，推荐）</button>'
-      + '<button type="button" data-qtype="input" class="' + qtInput + '">✍️ 填空输入（打字）</button>'
+      + '<button type="button" data-qtype="choice" class="' + qtChoice + '">点选选择题（n 选 1，推荐）</button>'
+      + '<button type="button" data-qtype="input" class="' + qtInput + '">填空输入（打字）</button>'
       + '</div>'
       + '<div class="form-hint">点选模式：每个空给 3~6 个选项（A/B/C…），由 AI 按考点灵活决定个数；做错同样进错题本+中文解析。</div>'
       + '</div>';
@@ -243,9 +243,9 @@
     var stS = cfg.structure === 'sentence' ? ' on' : '';
     var stP = cfg.structure === 'passage' ? ' on' : '';
     var structHtml = '<div class="form-row"><label>题目结构</label><div class="seg">'
-      + '<button type="button" data-struct="mixed" class="' + stC + '">✏️ 单句 + 语篇（推荐）</button>'
-      + '<button type="button" data-struct="sentence" class="' + stS + '">🔠 纯单句</button>'
-      + '<button type="button" data-struct="passage" class="' + stP + '">📄 纯语篇</button>'
+      + '<button type="button" data-struct="mixed" class="' + stC + '">单句 + 语篇（推荐）</button>'
+      + '<button type="button" data-struct="sentence" class="' + stS + '">纯单句</button>'
+      + '<button type="button" data-struct="passage" class="' + stP + '">纯语篇</button>'
       + '</div>'
       + '<div class="form-hint">「单句」= 每题给一个提示词（动词按语境改成过去时/完成时/被动/非谓语等；形容词、副词改成比较级或最高级）；「语篇」= 整篇连贯文章挖空，满 10 空按“4 空给词 + 6 空纯空”配比。</div>'
       + '</div>';
@@ -279,12 +279,12 @@
     var box = el('div', '');
     box.style.marginTop = '18px';
     if (!pool.length) {
-      box.innerHTML = '<div class="glass" style="padding:14px 16px"><span class="faint small">📭 AI 出题记录会保存在这里（含未做完的），可随时继续或删除。</span></div>';
+      box.innerHTML = '<div class="glass" style="padding:14px 16px"><span class="faint small">AI 出题记录会保存在这里（含未做完的），可随时继续或删除。</span></div>';
       v.appendChild(box);
       return;
     }
-    box.innerHTML = '<div class="sec-title">🗂 AI 出题题目列表 <span class="faint" style="font-weight:500">（共 ' + pool.length + ' 组 · 自动保存）</span>'
-      + '<button type="button" class="btn ghost sm" data-pool-clear="1" style="margin-left:auto">🗑 清空全部</button></div>';
+    box.innerHTML = '<div class="sec-title">AI 出题题目列表 <span class="faint" style="font-weight:500">（共 ' + pool.length + ' 组 · 自动保存）</span>'
+      + '<button type="button" class="btn ghost sm" data-pool-clear="1" style="margin-left:auto">清空全部</button></div>';
     var listWrap = el('div', '');
     pool.forEach(function (it, idx) {
       var m = it.meta || {};
@@ -292,14 +292,14 @@
       var title = String(m.title || it.topicLabel || ('AI 出题 ' + (idx + 1))).replace(/^AI · 高[一二三] · /, 'AI · ');
       var n = it.questions ? it.questions.length : (it.count || 0);
       var row = el('div', 'glass ai-rec-item');
-      row.innerHTML = '<span class="t">🤖 ' + esc(title) + '</span>'
+      row.innerHTML = '<span class="t">' + esc(title) + '</span>'
         + '<span class="badges">'
         + '<span class="badge gray">' + (it.date || '') + '</span>'
         + '<span class="badge blue">' + n + ' 空</span>'
         + '</span>'
         + '<span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">'
         + '<button type="button" class="btn sm ghost" data-pool-go="normal" data-id="' + esc(it.id) + '">▶ 普通模式</button>'
-        + '<button type="button" class="btn sm ghost" data-pool-go="blind" data-id="' + esc(it.id) + '">🎭 盲做</button>'
+        + '<button type="button" class="btn sm ghost" data-pool-go="blind" data-id="' + esc(it.id) + '">盲做</button>'
         + '<button type="button" class="btn sm danger" data-pool-del="' + esc(it.id) + '" style="box-shadow:none;padding:6px 12px">删除</button>'
         + '</span>';
       listWrap.appendChild(row);
@@ -318,7 +318,7 @@
     v.innerHTML = '';
     var card = el('div', 'glass', '');
     card.style.padding = '24px';
-    card.innerHTML = '<div class="page-title"><span class="ico">🤖</span>AI 出题中</div>'
+    card.innerHTML = '<div class="page-title">AI 出题中</div>'
       + '<div class="page-sub" id="genSummary"></div>'
       + '<div style="margin:18px 0 12px"><div class="pbar" id="genBar"><i style="width:3%"></i></div></div>'
       + '<div id="genLog" style="min-height:130px;font-size:15px;line-height:2"></div>'
@@ -343,8 +343,8 @@
     $('#genSummary', v).innerHTML = '<span class="badge blue">' + esc(catName) + '</span> '
       + '<span class="badge gray">' + esc(structBadge) + '</span> '
       + '<span class="badge amber">' + (cfg.count || 10) + ' 空</span> '
-      + '<span class="badge green">' + (cfg.qtype === 'input' ? '✍️ 填空输入' : '🔤 点选选择题') + '</span>';
-    logLine(v, '🟣 正在分析命题要求…');
+      + '<span class="badge green">' + (cfg.qtype === 'input' ? '填空输入' : '点选选择题') + '</span>';
+    logLine(v, '正在分析命题要求…');
     runGeneration(cfg, v);
   }
 
@@ -382,7 +382,7 @@
       var prompt = E.ai.buildPrompt(cfg1);
       return E.ai.callDeepSeek(prompt, cfg1).then(function (text) {
         if (stopped()) return null;
-        logLine(v, '🟢 第 ' + idx + ' 批生成完成，正在校验…');
+        logLine(v, '第 ' + idx + ' 批生成完成，正在校验…');
         var raw = E.ai.extractJSON(text);
         var sections = E.ai.validateAndNormalize(raw, cfg1);
         sections.forEach(function (s) { allSections.push(s); });
@@ -398,7 +398,7 @@
       if (stopped()) return;
       var totalBlanks = allSections.reduce(function (s, p) { return s + p.blanks.length; }, 0);
       if (totalBlanks < Math.min(count, 5)) throw { code: 'COUNT', msg: '生成空数不足（' + totalBlanks + '），请重试。' };
-      logLine(v, '🟣 正在转换题目结构…');
+      logLine(v, '正在转换题目结构…');
       var questions = E.ai.papersToQuestions(allSections, cfg);
       if (!questions.length) throw { code: 'SCHEMA', msg: 'AI 题目转换失败，请重试。' };
       setBar(v, 92);
@@ -407,7 +407,7 @@
       var structLabel = cfg.structure === 'sentence' ? '单句' : cfg.structure === 'passage' ? '语篇' : '单句+语篇';
       var meta = {
         mode: 'normal', title: 'AI · 语法填空(' + structLabel + ')' + catSel,
-        icon: '🤖'
+        icon: ''
       };
       E.ai.cacheSession({ questions: questions, meta: meta, cfg: cfg, papers: allSections, totalBlanks: totalBlanks });
       E.ai.pushToPool(allSections, questions, cfg, meta);
@@ -428,7 +428,7 @@
       lg.appendChild(el('div', '', '<div class="fb ok" style="margin-top:8px"><span class="big">✅</span>生成完成：'
         + papersN + ' 组（单句+语篇） · ' + blanksN + ' 空（已自动保存到「AI 出题题目列表」）</div>'));
       if (questions && questions.fallbackCount) {
-        lg.appendChild(el('div', '', '<div class="fb bad" style="margin-top:6px">⚠️ ' + questions.fallbackCount
+        lg.appendChild(el('div', '', '<div class="fb bad" style="margin-top:6px">' + questions.fallbackCount
           + ' 空 AI 未给出选项，已按填空输入呈现（其余为点选）。可重试生成一次。</div>'));
       }
     } else {
@@ -437,7 +437,7 @@
     var btnRow = el('div', 'btn-row');
     btnRow.style.marginTop = '14px';
     if (ok) {
-      var start = el('button', 'btn ok', '📄 打开整篇卷面做题（全文+全部空）');
+      var start = el('button', 'btn ok', '打开整篇卷面做题（全文+全部空）');
       start.type = 'button';
       start.addEventListener('click', function () {
         var m = meta || {};
@@ -446,14 +446,14 @@
       });
       btnRow.appendChild(start);
     }
-    var retry = el('button', 'btn', ok ? '再生成一组（同配置）' : '🔄 重试生成');
+    var retry = el('button', 'btn', ok ? '再生成一组（同配置）' : '重试生成');
     retry.type = 'button';
     retry.addEventListener('click', function () {
       if (_lastCfg) startGeneration(_lastCfg);
       else aiPage();
     });
     btnRow.appendChild(retry);
-    var toList = el('button', 'btn ghost', '🗂 查看 AI 出题列表');
+    var toList = el('button', 'btn ghost', '查看 AI 出题列表');
     toList.type = 'button';
     toList.addEventListener('click', function () { aiPage(); });
     btnRow.appendChild(toList);
@@ -485,7 +485,7 @@
     E.quiz.startAI(cached.questions, {
       mode: mode || 'normal',
       title: (cached.meta && cached.meta.title) || 'AI 出题训练',
-      icon: '🤖'
+      icon: ''
     });
   }
   function gotoConfig(catId) {

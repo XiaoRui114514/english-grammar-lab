@@ -32,23 +32,23 @@
    * 12题制：12=S 11=A+ 10=A 9=B+ 8=B 6-7=C ≤5=D
    * 其它题量按比例折算到 12 题制 */
   function gradeOf(correct, total) {
-    if (!total) return { g: '—', color: '#8b93b5' };
+    if (!total) return { g: '—', color: 'var(--ink-faint)' };
     var x = Math.round((correct / total) * 12);
-    if (x >= 12) return { g: 'S', color: '#ffd54f' };
-    if (x === 11) return { g: 'A+', color: '#9be15d' };
-    if (x === 10) return { g: 'A', color: '#3ecf8e' };
-    if (x === 9) return { g: 'B+', color: '#5b8cff' };
-    if (x === 8) return { g: 'B', color: '#5b8cff' };
-    if (x >= 6) return { g: 'C', color: '#ffb84d' };
-    return { g: 'D', color: '#ff5d7a' };
+    if (x >= 12) return { g: 'S', color: 'var(--ok)' };
+    if (x === 11) return { g: 'A+', color: 'var(--ok)' };
+    if (x === 10) return { g: 'A', color: 'var(--ok)' };
+    if (x === 9) return { g: 'B+', color: 'var(--accent)' };
+    if (x === 8) return { g: 'B', color: 'var(--accent)' };
+    if (x >= 6) return { g: 'C', color: 'var(--warn)' };
+    return { g: 'D', color: 'var(--bad)' };
   }
 
   /* ---------- 状态图标 ---------- */
   function statusBadge(st) {
-    if (st === 'master') return '<span class="badge green">🟢 已掌握</span>';
-    if (st === 'learning') return '<span class="badge blue">🟡 学习中</span>';
-    if (st === 'weak') return '<span class="badge red">🔴 薄弱</span>';
-    return '<span class="badge gray">⚪ 未开始</span>';
+    if (st === 'master') return '<span class="badge green">已掌握</span>';
+    if (st === 'learning') return '<span class="badge blue">学习中</span>';
+    if (st === 'weak') return '<span class="badge red">薄弱</span>';
+    return '<span class="badge gray">未开始</span>';
   }
 
   /* ---------- 题目文本渲染（把 ______ 变成醒目的空） ---------- */
@@ -87,7 +87,7 @@
         out.push('<span class="passage-blank' + (n === curN ? ' cur' : '') + '">(' + n + ')<i class="pb-u"></i></span>');
       }
     }
-    var meta = '<div class="passage-title">📄 ' + esc(aiCtx.title || '语篇')
+    var meta = '<div class="passage-title">' + esc(aiCtx.title || '语篇')
       + ' <span class="faint">· 语篇 ' + (aiCtx.paperIndex + 1) + '/' + aiCtx.paperCount
       + ' · 共 ' + aiCtx.total + ' 空 · 当前第 ' + curN + ' 空</span></div>';
     return '<div class="passage-panel">' + meta + '<div class="passage-body">' + out.join('') + '</div></div>';
@@ -118,11 +118,11 @@
     }
     b.push('</div>');
 
-    if (ex.keyPoint) b.push('<div class="ex-mod"><span class="lb2">📌 考查知识点</span><div>' + lines(ex.keyPoint) + '</div></div>');
-    if (ex.clue) b.push('<div class="ex-mod"><span class="lb2">🔎 本题关键线索</span><div>' + lines(ex.clue) + '</div></div>');
-    if (ex.trap) b.push('<div class="ex-mod"><span class="lb2">⚠️ 不要被什么骗了</span><div>' + lines(ex.trap) + '</div></div>');
-    if (ex.chain) b.push('<div class="ex-mod"><span class="lb2">🧗 判断链（一步一步想）</span><div class="chain">' + chainHTML(ex.chain) + '</div></div>');
-    if (ex.why) b.push('<div class="ex-mod"><span class="lb2">💡 为什么是这个答案</span><div>' + lines(ex.why) + '</div></div>');
+    if (ex.keyPoint) b.push('<div class="ex-mod"><span class="lb2">考查知识点</span><div>' + lines(ex.keyPoint) + '</div></div>');
+    if (ex.clue) b.push('<div class="ex-mod"><span class="lb2">本题关键线索</span><div>' + lines(ex.clue) + '</div></div>');
+    if (ex.trap) b.push('<div class="ex-mod"><span class="lb2">不要被什么骗了</span><div>' + lines(ex.trap) + '</div></div>');
+    if (ex.chain) b.push('<div class="ex-mod"><span class="lb2">判断链（一步一步想）</span><div class="chain">' + chainHTML(ex.chain) + '</div></div>');
+    if (ex.why) b.push('<div class="ex-mod"><span class="lb2">为什么是这个答案</span><div>' + lines(ex.why) + '</div></div>');
     if (ex.whyOthers) {
       b.push('<div class="ex-mod"><span class="lb2">❓ 为什么其他答案不合适</span>');
       b.push('<ul class="why-others">');
@@ -134,10 +134,10 @@
       });
       b.push('</ul></div>');
     }
-    if (ex.commonError) b.push('<div class="ex-mod"><span class="lb2">🚨 容易犯的错误</span><div>' + lines(ex.commonError) + '</div></div>');
-    if (ex.memory) b.push('<div class="ex-mod"><span class="lb2">🧠 一句话记忆</span><div>' + lines(ex.memory) + '</div></div>');
-    if (ex.examMind) b.push('<div class="ex-mod"><span class="lb2">🏁 如果你在考试现场</span><div>' + lines(ex.examMind) + '</div></div>');
-    if (ex.cue) b.push('<div class="ex-mod"><span class="lb2">🧠 以后看到什么，就想到什么？</span><div class="chain">' + chainHTML(ex.cue) + '</div></div>');
+    if (ex.commonError) b.push('<div class="ex-mod"><span class="lb2">容易犯的错误</span><div>' + lines(ex.commonError) + '</div></div>');
+    if (ex.memory) b.push('<div class="ex-mod"><span class="lb2">一句话记忆</span><div>' + lines(ex.memory) + '</div></div>');
+    if (ex.examMind) b.push('<div class="ex-mod"><span class="lb2">如果你在考试现场</span><div>' + lines(ex.examMind) + '</div></div>');
+    if (ex.cue) b.push('<div class="ex-mod"><span class="lb2">以后看到什么，就想到什么？</span><div class="chain">' + chainHTML(ex.cue) + '</div></div>');
 
     b.push('</div>');
     return b.join('');
@@ -161,7 +161,7 @@
     var kc = topic.knowledgeCard || {};
     var b = [];
     b.push('<div class="kcard glass">');
-    b.push('<h2>' + (topic.icon || '📘') + ' ' + esc(topic.no) + ' ' + esc(topic.title) + '</h2>');
+    b.push('<h2>' + (topic.icon ? topic.icon + ' ' : '') + esc(topic.no) + ' ' + esc(topic.title) + '</h2>');
     if (kc.oneLine) b.push('<div class="kblock"><div class="lb">一句话理解</div><p>' + lines(kc.oneLine) + '</p></div>');
     if (kc.structure) b.push('<div class="kblock"><div class="lb">基本结构</div><p>' + lines(kc.structure) + '</p></div>');
     if (kc.glossary && kc.glossary.length) {
@@ -224,7 +224,7 @@
   }
   function toast(msg, type) {
     var t = el('div', 'fb ' + (type === 'ok' ? 'ok' : type === 'bad' ? 'bad' : ''),
-      '<span class="big">' + (type === 'ok' ? '✅' : type === 'bad' ? '❌' : '📌') + '</span>' + esc(msg));
+      '<span class="big">' + (type === 'ok' ? '✓' : type === 'bad' ? '✕' : '·') + '</span>' + esc(msg));
     t.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:99;box-shadow:var(--shadow)';
     document.body.appendChild(t);
     setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 2200);
@@ -239,7 +239,7 @@
     if (!document || !document.body) return;
     if (!_saveEl) {
       _saveEl = el('div', 'save-notice',
-        '<span style="display:inline-flex;align-items:center;gap:6px">💾 <b>已自动保存</b></span>');
+        '<span style="display:inline-flex;align-items:center;gap:6px"><b>已自动保存</b></span>');
       _saveEl.style.cssText = 'position:fixed;top:12px;right:14px;z-index:120;opacity:0;'
         + 'transform:translateY(-6px);transition:opacity .25s var(--ease),transform .25s var(--ease);';
       document.body.appendChild(_saveEl);

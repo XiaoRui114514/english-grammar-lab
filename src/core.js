@@ -239,7 +239,7 @@
       var c = cur.category(catId);
       if (c) return c;
     }
-    return { name: catId, icon: '📌' };
+    return { name: catId, icon: '' };
   }
   // 聚合：data.tags 按 大专题 汇总（含题库与 AI 题）
   function categoryStats() {
@@ -257,7 +257,7 @@
     Object.keys(map).forEach(function (cat) {
       var c = map[cat];
       var meta = categoryName(cat);
-      out.push({ catId: cat, name: meta.name, icon: meta.icon, color: meta.color || '#8b93b5',
+    out.push({ catId: cat, name: meta.name, icon: meta.icon, color: meta.color || 'var(--ink-faint)',
                  attempts: c.attempts, correct: c.correct,
                  pct: c.attempts ? c.correct / c.attempts : null });
     });

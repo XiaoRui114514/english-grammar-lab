@@ -31,7 +31,7 @@
     S = {
       kind: 'challenge', mode: 'normal', topicId: tid, title: topic.title, icon: topic.icon,
       questions: qs, idx: 0, answers: [], startTs: E.util.nowTs(),
-      modeLabel: '🎯 挑战模式（全输入）'
+      modeLabel: '挑战模式（全输入）'
     };
     E.ui.quizActive = true;
     renderPractice();
@@ -44,7 +44,7 @@
     S = {
       kind: 'retrain', mode: 'normal', topicId: tid, title: topic.title, icon: topic.icon,
       questions: qs, idx: 0, answers: [], startTs: E.util.nowTs(),
-      modeLabel: '♻️ 再练 5 题' + (tag ? '（' + tag + '）' : '')
+    modeLabel: '再练 5 题' + (tag ? '（' + tag + '）' : '')
     };
     E.ui.quizActive = true;
     renderPractice();
@@ -56,7 +56,7 @@
     if (!qs.length) { U.toast('该专题还没有可回炉的输入错题', 'bad'); return; }
     S = {
       kind: 'wrongretrain', mode: 'normal', topicId: tid, title: topic.title, icon: topic.icon,
-      questions: qs, idx: 0, answers: [], startTs: E.util.nowTs(), modeLabel: '📕 错题回炉 5 题'
+      questions: qs, idx: 0, answers: [], startTs: E.util.nowTs(), modeLabel: '错题回炉 5 题'
     };
     E.ui.quizActive = true;
     renderPractice();
@@ -66,9 +66,9 @@
     if (!ch || !ch.questions || !ch.questions.length) return;
     mode = mode || 'normal';
     S = {
-      kind: 'mixed', mode: mode, topicId: 'challenge', title: ch.title || '时态综合挑战', icon: ch.icon || '🧪',
+      kind: 'mixed', mode: mode, topicId: 'challenge', title: ch.title || '时态综合挑战', icon: ch.icon || '',
       questions: ch.questions.slice(), idx: 0, answers: [], startTs: E.util.nowTs(),
-      modeLabel: '🧪 时态综合挑战 · ' + (mode === 'blind' ? '盲做' : '普通')
+      modeLabel: '时态综合挑战 · ' + (mode === 'blind' ? '盲做' : '普通')
     };
     E.ui.quizActive = true;
     renderPractice();
@@ -83,9 +83,9 @@
     var mode = meta.mode || 'normal';
     S = {
       kind: 'ai', mode: mode, topicId: 'ai', title: meta.title || 'AI 出题训练',
-      icon: meta.icon || '🤖', subtitle: meta.subtitle || '',
+      icon: meta.icon || '', subtitle: meta.subtitle || '',
       questions: questions.slice(), idx: 0, answers: [], startTs: E.util.nowTs(),
-      modeLabel: '🤖 AI 生成 · ' + (mode === 'blind' ? '盲做' : '普通'),
+      modeLabel: 'AI 生成 · ' + (mode === 'blind' ? '盲做' : '普通'),
       _aiQuestions: questions.slice(), _aiMeta: meta
     };
     E.ui.quizActive = true;
@@ -103,7 +103,6 @@
 
     var head = el('div', 'learn-head glass');
     head.innerHTML = '<button class="btn ghost sm" data-exit="1">✕</button>'
-      + '<span style="font-size:26px">' + (S.icon || '📘') + '</span>'
       + '<div class="tt">' + esc(S.title) + '</div>'
       + '<div class="mode">' + esc(S.modeLabel) + (S.kind === 'core' ? ' · 12题 · 1-6选择/7-12输入' : '') + '</div>'
       + '<span class="pn">' + (S.idx + 1) + ' / ' + S.questions.length + '</span>';    v.appendChild(head);
@@ -127,7 +126,7 @@
       var det = el('details', 'panel');
       det.style.marginTop = '0';
       if (window.matchMedia && window.matchMedia('(min-width:1024px)').matches) det.open = true;
-      det.innerHTML = '<summary>📘 知识卡<span class="arr">▶</span></summary><div class="inner">'
+      det.innerHTML = '<summary>知识卡<span class="arr">▶</span></summary><div class="inner">'
         + U.knowledgeCardHTML(topic) + '</div>';
       aside.appendChild(det);
       layout.appendChild(aside);
@@ -140,10 +139,10 @@
     var aiMeta = q.aiMeta || {};
     var grammarName = isAI ? (aiMeta.catName || 'AI出题')
       : ((E.bank()[S.topicId] && E.bank()[S.topicId].title) || '');
-    var chip = q.type === 'choice' ? '🔤 点选选择题（点 A/B/C…，不用打字）' : '✍️ 输入题（自己拼写）';
+    var chip = q.type === 'choice' ? '点选选择题（点 A/B/C…，不用打字）' : '输入题（自己拼写）';
     qbox.appendChild(el('div', 'qno',
       '<span class="badge badge-grammar">考点：' + esc(grammarName) + '</span> '
-      + (isAI ? '<span class="badge gray">🤖 AI 题</span> ' : '')
+      + (isAI ? '<span class="badge gray">AI 题</span> ' : '')
       + chip
       + (q.tag ? ' <span class="qtag">· ' + esc(q.tag) + '</span>' : '')
       + (q.difficulty ? ' <span class="qtag">· 难度 ' + q.difficulty + '/5</span>' : '')));
@@ -189,7 +188,6 @@
 
     var head = el('div', 'learn-head glass');
     head.innerHTML = '<button class="btn ghost sm" data-exit="1">✕</button>'
-      + '<span style="font-size:26px">' + (S.icon || '🤖') + '</span>'
       + '<div class="tt">' + esc(S.title) + '</div>'
       + '<div class="mode">整篇卷面 · 全部空一起作答，答完统一交卷看解析</div>'
       + '<span class="pn" id="sheetCount">0 / ' + S.questions.length + '</span>';
@@ -331,7 +329,7 @@
     function renderPassageBlock(g, gIdx, headIcon, headLabel) {
       var paper = el('div', 'passage-panel sheet-paper sheet-paper-top');
       paper.style.marginTop = (gIdx === 0 ? '12px' : '16px');
-      var t = el('div', 'passage-title', headIcon + ' ' + esc(g.ctx.title || (headLabel + ' ' + (gIdx + 1)))
+      var t = el('div', 'passage-title', (headIcon ? headIcon + ' ' : '') + esc(g.ctx.title || (headLabel + ' ' + (gIdx + 1)))
         + ' <span class="faint small" style="font-weight:500">本区固定顶部 · 通读后在下方作答</span>');
       paper.appendChild(t);
       paper.appendChild(el('div', '', sheetPassageHTML(g.ctx)));
@@ -342,11 +340,11 @@
     // 单句：每句一次展示 + 每空一排选项（一句两空 → 第一排第1空、第二排第2空）
     sentGroups.forEach(function (g) { if (g) v.appendChild(renderSentenceCard(g)); });
     // 语篇：文章固定顶部 + 各空卡片
-    passGroups.forEach(function (g, gIdx) { if (g) renderPassageBlock(g, gIdx, '📄', '语篇'); });
+    passGroups.forEach(function (g, gIdx) { if (g) renderPassageBlock(g, gIdx, '', '语篇'); });
 
     var act = el('div', 'btn-row');
     act.style.cssText = 'position:sticky;bottom:12px;margin-top:16px';
-    var sub = el('button', 'btn block', '✅ 全部答完，交卷看成绩');
+    var sub = el('button', 'btn block', '全部答完，交卷看成绩');
     sub.id = 'sheetSubmit';
     sub.type = 'button';
     sub.addEventListener('click', submitSheet);
@@ -376,8 +374,8 @@
     if (elC) elC.textContent = answered + ' / ' + S.questions.length;
     var sub = $('#sheetSubmit', appView());
     if (sub) sub.textContent = answered === S.questions.length
-      ? '✅ 已全部作答（' + answered + '/' + S.questions.length + '），交卷看成绩'
-      : '✅ 已作答 ' + answered + '/' + S.questions.length + '，交卷';
+      ? '已全部作答（' + answered + '/' + S.questions.length + '），交卷看成绩'
+      : '已作答 ' + answered + '/' + S.questions.length + '，交卷';
   }
   function submitSheet() {
     if (!S) return;
@@ -519,7 +517,7 @@
       }
       appendAnalysis(qbox, q, entry);
       var act = el('div', 'act-row');
-      var nx = el('button', 'btn ' + (lastQ() ? 'ok' : ''), lastQ() ? '🏁 查看成绩' : '下一题 →');
+      var nx = el('button', 'btn ' + (lastQ() ? 'ok' : ''), lastQ() ? '查看成绩' : '下一题 →');
       nx.type = 'button';
       nx.addEventListener('click', function () {
         if (lastQ()) finish(); else { S.idx++; renderPractice(); }
@@ -557,7 +555,7 @@
     var isAI = !!(q.isAI || q.source === 'ai');
     var grammarName = isAI ? ((q.aiMeta && q.aiMeta.catName) || 'AI出题')
       : ((E.bank()[S.topicId] && E.bank()[S.topicId].title) || '');
-    det.innerHTML = '<summary>📖 解析与考点（点击展开）</summary>'
+    det.innerHTML = '<summary>解析与考点（点击展开）</summary>'
       + U.explanationHTML(q, { correctText: corText, myText: entry.userText, myOk: entry.ok, grammar: grammarName });
     qbox.appendChild(det);
   }
@@ -670,7 +668,7 @@
     if (isCore && p >= 0.9) {
       var ul = el('div', 'glass rec-card');
       ul.style.marginTop = '12px';
-      ul.innerHTML = '<b>🎯 挑战模式已解锁！</b>'
+      ul.innerHTML = '<b>挑战模式已解锁！</b>'
         + '<div class="why">正确率 ≥90%！挑战 5 道「全输入·15-30词·无提示」题，检验真功夫。</div>'
         + '<div class="btn-row" style="margin-top:10px"><button class="btn warn sm" data-chal="1">开始挑战模式</button></div>';
       v.appendChild(ul);
@@ -694,8 +692,8 @@
       sug.innerHTML = '<div class="sec-title" style="margin-top:0">建议</div>'
         + '<p class="muted small">先回看知识卡 → 再用「再练 5 题」专攻 <b>' + esc(topTag) + '</b>（会生成全新句子，不重复）。</p>'
         + '<div class="btn-row" style="margin-top:10px">'
-        + '<button class="btn ok sm" data-retrain="1">♻️ 再练 5 题</button>'
-        + '<button class="btn ghost sm" data-topic="' + S.topicId + '">📘 回看知识卡</button></div>';
+        + '<button class="btn ok sm" data-retrain="1">再练 5 题</button>'
+        + '<button class="btn ghost sm" data-topic="' + S.topicId + '">回看知识卡</button></div>';
       v.appendChild(sug);
     }
 
@@ -706,7 +704,7 @@
       if (!a) return;
       var card = el('div', 'glass wb-item');
       card.style.borderLeftColor = a.ok ? 'var(--ok)' : 'var(--bad)';
-      var head = '<div class="head"><span class="badge ' + (a.ok ? 'green' : 'red') + '">第' + (i + 1) + '题 ' + (a.ok ? '✓ 对' : '✗ 错') + '</span>'
+      var head = '<div class="head"><span class="badge ' + (a.ok ? 'green' : 'red') + '">第' + (i + 1) + '题 ' + (a.ok ? '对' : '错') + '</span>'
         + (a.q.tag ? '<span class="badge blue">' + esc(a.q.tag) + '</span>' : '')
         + (a.q.type === 'choice' ? '<span class="badge gray">选择</span>' : '<span class="badge gray">输入</span>') + '</div>';
       var corText = a.q.type === 'choice' ? a.q.options[a.q.answerIndex] : (a.q.answerText || (a.q.accepted && a.q.accepted[0]));
@@ -717,7 +715,7 @@
       var revIsAI = !!(a.q.isAI || a.q.source === 'ai');
       var gName = revIsAI ? ((a.q.aiMeta && a.q.aiMeta.catName) || 'AI出题')
         : ((E.bank()[S.topicId] && E.bank()[S.topicId].title) || '');
-      det.innerHTML = '<summary>📖 查看解析与考点</summary>' + U.explanationHTML(a.q, { correctText: corText, myText: a.userText, myOk: a.ok, grammar: gName });
+      det.innerHTML = '<summary>查看解析与考点</summary>' + U.explanationHTML(a.q, { correctText: corText, myText: a.userText, myOk: a.ok, grammar: gName });
       card.appendChild(det);
       rev.appendChild(card);
     });
@@ -727,7 +725,7 @@
     if (topicFull && (topicFull.review5 || topicFull.examFlow)) {
       var sum = el('details', 'panel');
       sum.style.marginTop = '12px';
-      sum.innerHTML = '<summary>📌 专题总结 · 5 句话复习<span class="arr">▶</span></summary><div class="inner">';
+      sum.innerHTML = '<summary>专题总结 · 5 句话复习<span class="arr">▶</span></summary><div class="inner">';
       if (topicFull.review5) {
         sum.lastChild.innerHTML += '<div class="sec-title" style="margin-top:4px">今天只需要记住</div>';
         topicFull.review5.forEach(function (ln) { sum.lastChild.innerHTML += '<p style="font-size:14px">' + esc(ln) + '</p>'; });
@@ -759,7 +757,7 @@
         rows += '<tr><td>' + esc(k) + '</td><td>' + it.c + '/' + it.t + '</td><td>' + pct(it.c / it.t) + '</td></tr>';
       });
       rows += '</table>';
-      tb.innerHTML = '<div class="sec-title" style="margin-top:0">🧪 综合挑战 · 知识点分析</div>' + rows;
+      tb.innerHTML = '<div class="sec-title" style="margin-top:0">综合挑战 · 知识点分析</div>' + rows;
       v.appendChild(tb);
     }
 
@@ -782,7 +780,7 @@
         rows2 += '<tr><td>' + esc(k) + '</td><td>' + it.c + '/' + it.t + '</td><td>' + pct(it.c / it.t) + '</td></tr>';
       });
       rows2 += '</table>';
-      ab.innerHTML = '<div class="sec-title" style="margin-top:0">🤖 AI 题 · 知识点分析（已计入大专题能力）</div>' + rows2
+      ab.innerHTML = '<div class="sec-title" style="margin-top:0">AI 题 · 知识点分析（已计入大专题能力）</div>' + rows2
         + '<p class="faint small" style="margin-top:6px">做错的空已进入错题本并标记来源“AI训练”；可在错题本与能力总览中追踪。</p>';
       v.appendChild(ab);
     }
@@ -791,7 +789,7 @@
     var foot = el('div', 'btn-row');
     foot.style.marginTop = '14px';
     var tidNow = S.topicId, modeNow = S.mode, kindNow = S.kind;
-    var again = el('button', 'btn', '🔄 再练一轮');
+    var again = el('button', 'btn', '再练一轮');
     again.addEventListener('click', function () {
       if (kindNow === 'core') startCore(tidNow, modeNow);
       else if (kindNow === 'challenge') startChallenge(tidNow);
@@ -807,14 +805,14 @@
       }
       else startMixed(modeNow);
     });
-    var back = el('button', 'btn ghost', '🗂 返回列表');
+    var back = el('button', 'btn ghost', '返回列表');
     back.addEventListener('click', function () { E.ui.go('topics', true); });
-    var home = el('button', 'btn ghost', '🏠 首页');
+    var home = el('button', 'btn ghost', '首页');
     home.addEventListener('click', function () { E.ui.go('home', true); });
     foot.appendChild(again);
     // 核心整轮结束后：始终提供"再练5题(新题)"（需求§24）
     if (kindNow === 'core' && S.topicId !== 'challenge') {
-      var r5 = el('button', 'btn warn', '♻️ 再练5题 · 新句子');
+    var r5 = el('button', 'btn warn', '再练5题 · 新句子');
       r5.addEventListener('click', function () {
         startRetrain(S.topicId, Object.keys(m.errByTag)[0] || null);
       });
@@ -872,12 +870,12 @@
     v.innerHTML = '';
     var card = el('div', 'glass', '');
     card.style.padding = '20px';
-    card.innerHTML = '<div class="page-title"><span class="ico">🧪</span>时态综合挑战</div>'
+    card.innerHTML = '<div class="page-title">时态综合挑战</div>'
       + '<div class="page-sub">20 题大综合：前 10 选择、后 10 输入；七大时态混合，不提示考点，检验真实判断力。</div>'
-      + (locked ? '<div class="fb bad" style="margin-top:16px"><span class="big">🔒</span>需先完成全部 12 个专题（每题至少一轮）</div>' : '')
+      + (locked ? '<div class="fb bad" style="margin-top:16px">需先完成全部 12 个专题（每题至少一轮）</div>' : '')
       + '<div class="mode-grid" style="margin-top:16px">'
-      + '<div class="mode-card glass" data-m="normal"><div class="ic">📖</div><h4>普通模式</h4><p>每题即时反馈，边做边学。</p></div>'
-      + '<div class="mode-card glass" data-m="blind"><div class="ic">🎭</div><h4>盲做模式（模拟考试）</h4><p>20 题一口气做完，再统一看成绩与解析。</p></div>'
+      + '<div class="mode-card glass" data-m="normal"><h4>普通模式</h4><p>每题即时反馈，边做边学。</p></div>'
+      + '<div class="mode-card glass" data-m="blind"><h4>盲做模式（模拟考试）</h4><p>20 题一口气做完，再统一看成绩与解析。</p></div>'
       + '</div>';
     v.appendChild(card);
     $$('[data-m]', card).forEach(function (c) {
