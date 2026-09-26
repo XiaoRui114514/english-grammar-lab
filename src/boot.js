@@ -26,6 +26,7 @@
       case 'about': (E.ui && E.ui.aboutPage) ? E.ui.aboutPage() : E.ui.home(); break;
       case 'challenge': E.quiz.mixedGate(); break;
       case 'ai': (E.aiUI && E.aiUI.aiPage) ? E.aiUI.aiPage() : E.ui.home(); break;
+      case 'settings': (E.ui && E.ui.settingsPage) ? E.ui.settingsPage() : E.ui.home(); break;
       case 'method': (E.ui && E.ui.methodPage) ? E.ui.methodPage() : E.ui.home(); break;
       default: E.ui.home(); break;
     }
@@ -150,6 +151,8 @@
     E.ui.app = { view: viewEl };
     if (E.ui.setApp) E.ui.setApp(E.ui.app);
     E.ui.quizActive = false;
+    // 背景主题：<head> 里的首屏脚本已应用过一次，这里兜底再同步一遍
+    if (E.ui.applySavedBg) E.ui.applySavedBg();
     // 任意自动保存 → 右上角“已自动保存”提示（节流，1.4s 后消失）
     if (E.setSaveListener && U.savedNotice) E.setSaveListener(U.savedNotice);
     bindTopbar();

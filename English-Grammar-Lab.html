@@ -15,18 +15,28 @@
 <meta name="copyright" content="Hison · 抖音 XRuiiiiii · 小红书 xiaoruiaaa520 · 仅供个人免费学习，禁止商用">
 <meta name="description" content="上海初高语法填空：按上海命题风格整理的初高中英语语法填空学习系统（全国其他地区也能用）——知识卡 + 专题训练 + 错题复习 + AI 出题（作者 Hison）">
 <title>上海初高语法填空 · 初高中英语语法填空学习系统</title>
+<script data-egl-prefs="1">
+/* 首屏渲染前应用已保存的背景主题（避免先闪一下默认纸白） */
+(function () {
+  try {
+    var p = JSON.parse(localStorage.getItem('EGL_UI_PREFS_v1') || '{}');
+    if (p && p.bg && p.bg !== 'plain') document.documentElement.setAttribute('data-bg', p.bg);
+  } catch (e) { /* localStorage 不可用时按默认纸白 */ }
+})();
+</script>
 <style>
 /* ============================================================
  * styles.css — 上海初高语法填空
  *
  * 版式方向：纸面 / 墨色（editorial）
- *   · 底：暖白纸 + 极淡横格；面：比纸略白的卡片，1px 细线收边
+ *   · 底：纯色纸面（可选 纸白 / 米黄 / 灰青 / 墨夜，设置页切换）
+ *        面：比纸略亮的卡片，1px 细线收边
  *   · 色：墨黑正文 + 单一钢笔墨蓝强调 + 朱砂批改红；不用玻璃拟态与渐变光晕
  *   · 字：标题宋体 / 正文黑体 / 数字等宽；英文语篇用衬线体
  *   · 动：只动 opacity / transform，尊重 prefers-reduced-motion
  *
- * Hallmark · genre: editorial · macrostructure: Desk Ledger · design-system: design.md · designed-as-app
- * Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V4
+* Hallmark · genre: editorial · macrostructure: Desk Ledger · design-system: design.md · designed-as-app
+ * Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5
  * ============================================================ */
 
 :root {
@@ -45,8 +55,7 @@
 
   --stroke: #dcdce1;       --stroke: oklch(0.884 0.006 265);  /* 细线 */
   --stroke-strong: #b7bac6; --stroke-strong: oklch(0.772 0.012 265);
-  --rule-faint: rgba(43, 47, 58, 0.055);
-  --rule-faint: color-mix(in oklch, var(--ink) 6%, transparent); /* 纸面横格 */
+  --scrim: rgba(43, 47, 58, 0.42);                           /* 弹层遮罩 */
 
   /* ── 强调（钢笔墨蓝）与批改（朱砂） ── */
   --accent: #2f4f9e;       --accent: oklch(0.440 0.135 262);
@@ -76,6 +85,12 @@
   --radius-sm: 6px;
   --shadow: 0 1px 2px rgba(43, 47, 58, 0.05), 0 10px 26px -20px rgba(43, 47, 58, 0.55);
   --shadow-sheet: 0 30px 70px -30px rgba(43, 47, 58, 0.45);
+
+  /* 设置页「背景」色卡 */
+  --sw-plain: oklch(0.972 0.008 85);
+  --sw-cream: oklch(0.958 0.020 85);
+  --sw-slate: oklch(0.966 0.006 240);
+  --sw-dark:  oklch(0.225 0.014 265);
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -114,13 +129,59 @@ body {
 
 /* 纸面层：单独用 position: fixed 铺满可视区（z-index:-1 的层会被 body 自身背景盖住）。
    （不用 background-attachment: fixed —— 手机上滚到底部时固定背景覆盖不到的区域会露白。）
-   极淡横格给页面一点纸感；卡片是实底色，不会压到正文。 */
+   纯色底，不画格子；配色由设置页的 data-bg 决定。 */
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background-color: var(--bg1);
-  background-image: linear-gradient(to bottom, var(--rule-faint) 1px, transparent 1px);
-  background-size: 100% 34px;
-  background-position: 0 14px;
+  background: var(--bg1);
+}
+
+/* ============ 背景主题（设置页切换 · html[data-bg]） ============ */
+/* 米黄：偏暖，长时间看更柔和 */
+html[data-bg="cream"] {
+  --bg1: #f8f0e0;  --bg1: oklch(0.958 0.020 85);
+  --bg2: #f2e8d6;  --bg2: oklch(0.938 0.024 85);
+  --bg3: #e9dcc4;  --bg3: oklch(0.905 0.030 85);
+  --panel: #fdf8ee; --panel: oklch(0.982 0.012 85);
+  --glass-strong: #f4ecdc; --glass-strong: oklch(0.955 0.020 85);
+}
+/* 灰青：偏冷，素净 */
+html[data-bg="slate"] {
+  --bg1: #f2f4f7;  --bg1: oklch(0.966 0.006 240);
+  --bg2: #e9edf2;  --bg2: oklch(0.944 0.008 240);
+  --bg3: #dde3ea;  --bg3: oklch(0.910 0.012 240);
+  --panel: #fbfcfd; --panel: oklch(0.988 0.003 240);
+  --glass-strong: #edf1f5; --glass-strong: oklch(0.950 0.008 240);
+}
+/* 墨夜：深色，夜间用（墨色翻转为浅色，强调色提亮） */
+html[data-bg="dark"] {
+  color-scheme: dark;
+  --bg1: #1b1e27;  --bg1: oklch(0.225 0.014 265);
+  --bg2: #23262f;  --bg2: oklch(0.265 0.016 265);
+  --bg3: #2c3038;  --bg3: oklch(0.320 0.018 265);
+  --panel: #222530; --panel: oklch(0.262 0.015 265);
+  --glass-strong: #2b2f3a; --glass-strong: oklch(0.310 0.018 265);
+  --ink: #ebedf2;        --ink: oklch(0.930 0.008 265);
+  --ink-dim: #b3b8c6;    --ink-dim: oklch(0.775 0.012 265);
+  --ink-faint: #8f95a6;  --ink-faint: oklch(0.630 0.014 265);
+  --stroke: #3a3f4b;     --stroke: oklch(0.365 0.016 265);
+  --stroke-strong: #545b6b; --stroke-strong: oklch(0.480 0.018 265);
+  --accent: #7fa3f0;     --accent: oklch(0.720 0.120 262);
+  --accent2: #6d92e4;    --accent2: oklch(0.660 0.120 262);
+  --accent-soft: #2b3547; --accent-soft: oklch(0.340 0.050 262);
+  --hl: #9dbaf5;         --hl: oklch(0.800 0.100 262);
+  --focus: #8fb2f8;      --focus: oklch(0.760 0.130 262);
+  --on-accent: #171a22;  --on-accent: oklch(0.205 0.020 265);
+  --glow: #e8c07a;       --glow: oklch(0.820 0.100 75);
+  --glow-bg: #3a3227;    --glow-bg: oklch(0.330 0.045 85);
+  --ok: #74c79c;         --ok: oklch(0.740 0.110 158);
+  --ok-bg: #25372f;      --ok-bg: oklch(0.320 0.045 158);
+  --bad: #ea8a80;        --bad: oklch(0.720 0.130 28);
+  --bad-bg: #3a2a2a;     --bad-bg: oklch(0.330 0.055 28);
+  --warn: #e0b46a;       --warn: oklch(0.790 0.105 75);
+  --warn-bg: #3a3226;    --warn-bg: oklch(0.330 0.045 85);
+  --scrim: rgba(6, 8, 12, 0.62);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 10px 26px -18px rgba(0, 0, 0, 0.8);
+  --shadow-sheet: 0 30px 70px -30px rgba(0, 0, 0, 0.8);
 }
 
 ::selection { background: var(--accent-soft); color: var(--ink); }
@@ -648,8 +709,7 @@ details.panel .inner { padding: 0 15px 14px; }
 /* 弹层 */
 .overlay {
   position: fixed; inset: 0; z-index: 60;
-  background: rgba(43, 47, 58, 0.42);
-  background: color-mix(in oklch, var(--ink) 42%, transparent);
+  background: var(--scrim);
   display: flex; align-items: center; justify-content: center; padding: 18px;
   animation: fadeIn 0.16s var(--ease-out);
 }
@@ -805,11 +865,22 @@ details.explanation-panel .explain {
   flex: 1 1 auto; border: 1px solid var(--stroke-strong); background: var(--panel);
   color: var(--ink-dim); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13.5px; font-weight: 700;
   cursor: pointer; font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   transition: border-color 0.14s var(--ease), background 0.14s var(--ease), color 0.14s var(--ease);
 }
 .form-row .seg button:hover { border-color: var(--ink-dim); color: var(--ink); }
 .form-row .seg button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .form-row .seg button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* 设置页「背景」色卡 */
+.sw {
+  width: 13px; height: 13px; border-radius: 3px; flex: 0 0 auto;
+  border: 1px solid var(--stroke-strong); display: inline-block;
+}
+.sw-plain { background: var(--sw-plain); }
+.sw-cream { background: var(--sw-cream); }
+.sw-slate { background: var(--sw-slate); }
+.sw-dark  { background: var(--sw-dark); }
 
 .ai-status-ok { border-color: var(--ok); color: var(--ok); }
 .ai-status-bad { border-color: var(--bad); color: var(--bad); }
@@ -988,6 +1059,7 @@ details.explanation-panel .explain {
     <button class="nav-btn" data-nav="weak">薄弱点</button>
     <button class="nav-btn" data-nav="records">记录</button>
     <button class="nav-btn" data-nav="about">关于</button>
+    <button class="nav-btn" data-nav="settings">设置</button>
   </nav>
 </header>
 <div id="app"></div>
@@ -8377,7 +8449,7 @@ details.explanation-panel .explain {
   var CSS = "\n/* ==================== 品牌署名 · 授权（Hison） ====================\n   注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。\n   删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */\n/* 右下角署名印章：平时是一枚小方签，悬停 / 点击后原地展开署名卡片（无弹窗） */\n.egl-seal {\n  position: fixed; right: 12px; bottom: 12px; z-index: 46;\n  display: block; text-align: left; overflow: hidden;\n  padding: 5px 10px; border-radius: var(--radius-sm); cursor: pointer;\n  font-family: var(--font-body); color: var(--ink-dim);\n  background: var(--panel);\n  border: 1px solid var(--stroke-strong);\n  box-shadow: var(--shadow);\n  opacity: 0.88; transform-origin: 100% 100%;\n  transition: padding 0.3s var(--ease), background 0.24s var(--ease),\n              box-shadow 0.3s var(--ease), opacity 0.2s var(--ease), transform 0.3s var(--ease);\n}\n.egl-seal-face {\n  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;\n  font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;\n}\n.egl-seal-panel {\n  display: block; width: 0; max-height: 0; opacity: 0; margin-top: 0;\n  overflow: hidden; white-space: nowrap; transform: translateY(6px);\n  transition: width 0.3s var(--ease), max-height 0.3s var(--ease), opacity 0.24s var(--ease),\n              transform 0.3s var(--ease), margin-top 0.3s var(--ease);\n}\n.egl-seal-name { display: block; font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); }\n.egl-seal-row { display: block; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }\n.egl-seal-row i { font-style: normal; color: var(--ink-faint); margin-right: 6px; }\n.egl-seal-row b { color: var(--hl); font-weight: 700; letter-spacing: 0.02em; }\n/* 展开态：键盘聚焦 / 点击（触摸） */\n.egl-seal:focus-visible,\n.egl-seal.on {\n  padding: 11px 14px 12px; border-radius: var(--radius);\n  background: var(--panel);\n  border-color: var(--ink-dim);\n  box-shadow: var(--shadow-sheet);\n  opacity: 1; transform: translateY(-2px);\n}\n.egl-seal:focus-visible .egl-seal-panel,\n.egl-seal.on .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n/* 有鼠标的设备：悬停即展开 */\n@media (hover: hover) {\n  .egl-seal:hover {\n    padding: 11px 14px 12px; border-radius: var(--radius);\n    background: var(--panel);\n    border-color: var(--ink-dim);\n    box-shadow: var(--shadow-sheet);\n    opacity: 1; transform: translateY(-2px);\n  }\n  .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n}\n/* 题卡底纹已撤掉：部分机型浏览器（如荣耀浏览器）会把低透明度的水印墨迹\n   （SVG 图片版、文本 rgba 版都试过）自动提亮成实心白，糊在题干与选项上。\n   署名改由各处角标承担：题卡左下角 + 其它卡片右下角各一行小字，浓淡是\n   固定色 + 固定 opacity，与页面其它文字一致，各机型都不会被提亮，\n   截图、打印都带署名。 */\n/* 卡片角标 */\n.learn-head, .score-hero, .sq-card, .qbox { position: relative; }\n.learn-head { padding-bottom: 22px; }\n.sq-card { padding-bottom: 22px; }\n.score-hero { padding-bottom: 30px; }\n.learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {\n  content: \"by __EGL_NM__\";\n  position: absolute; right: 10px; bottom: 6px;\n  font-family: var(--font-body);\n  font-size: 10px; letter-spacing: 0.1em; font-weight: 700;\n  color: var(--ink-faint); opacity: 0.6;\n  pointer-events: none; user-select: none;\n}\n/* 题卡角标放左下：右下是固定印章的位置，靠太近会叠在一起 */\n.qbox::after { right: auto; left: 12px; }\n/* 页脚署名 */\n.egl-foot { text-align: center; padding: 30px 16px 24px; color: var(--ink-faint); font-size: 12px; }\n.egl-foot .egl-foot-main { color: var(--ink-faint); }\n.egl-foot .egl-foot-brand { margin-top: 5px; color: var(--ink-dim); letter-spacing: 0.01em; line-height: 1.8; }\n.egl-foot .egl-foot-links { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }\n.egl-foot .egl-link {\n  border: 0; background: transparent; color: var(--accent); cursor: pointer;\n  font-family: inherit; font-size: 12px; padding: 3px 4px; text-decoration: underline;\n}\n.egl-foot .egl-link:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }\n.egl-foot .egl-tip { color: var(--ink-faint); font-size: 11px; }\n/* 页脚版本号（构建时由 package.json 注入） */\n.egl-foot .egl-foot-ver {\n  margin-top: 4px; color: var(--ink-faint); font-size: 11px;\n  font-family: var(--font-mono); letter-spacing: 0.06em; opacity: 0.85;\n}\n/* 首页品牌小标签 */\n.egl-chip {\n  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;\n  font-size: 11.5px; letter-spacing: 0.02em; color: var(--ink-faint);\n  border: 1px dashed var(--stroke-strong); border-radius: 4px; padding: 3px 9px;\n}\n/* 授权说明弹窗 */\n.egl-lic p { margin: 6px 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.75; }\n.egl-lic p b { color: var(--ink); }\n@media print {\n  body::before { display: none; }\n  .egl-seal { display: none; }\n  .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after { color: #222; opacity: 0.75; }\n  .egl-foot { color: #333; }\n}\n";
   // 版本号：构建时由 build.js 用 package.json 的 version 替换（单一来源，
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
-  var VER = "v1.4.0";
+  var VER = "v1.5.0";
   if (VER.charAt(0) === '_') VER = '';
   var _guardTimer = null;
 
@@ -11017,6 +11089,157 @@ details.explanation-panel .explain {
     bindNav(v);
   }
 
+  /* ============ 设置（背景 / API Key / 数据入口） ============ */
+  var LS_PREFS = 'EGL_UI_PREFS_v1';
+  var LS_AI_CFG = 'EGL_AI_CFG_v1';
+  var BG_PRESETS = [
+    { id: 'plain', name: '纸白', sw: 'sw-plain', note: '默认' },
+    { id: 'cream', name: '米黄', sw: 'sw-cream', note: '偏暖，长时间看更柔和' },
+    { id: 'slate', name: '灰青', sw: 'sw-slate', note: '偏冷，素净' },
+    { id: 'dark',  name: '墨夜', sw: 'sw-dark',  note: '夜间深色，字色自动反转' }
+  ];
+
+  function prefsGet() {
+    try {
+      var raw = localStorage.getItem(LS_PREFS);
+      var o = raw ? JSON.parse(raw) : null;
+      return (o && typeof o === 'object') ? o : {};
+    } catch (e) { return {}; }
+  }
+  function prefsSet(o) {
+    try { localStorage.setItem(LS_PREFS, JSON.stringify(o || {})); } catch (e) {}
+  }
+  // 切背景：写 html[data-bg]，同步浏览器地址栏配色（theme-color）
+  function applyBg(id) {
+    var el = document.documentElement;
+    if (!el) return;
+    if (id && id !== 'plain') el.setAttribute('data-bg', id);
+    else if (el.removeAttribute) el.removeAttribute('data-bg');
+    try {
+      var meta = document.querySelector('meta[name=theme-color]');
+      var bg = window.getComputedStyle ? window.getComputedStyle(el).backgroundColor : '';
+      if (meta && bg && meta.setAttribute) meta.setAttribute('content', bg);
+    } catch (e) {}
+  }
+  function applySavedBg() {
+    var p = prefsGet();
+    applyBg(p.bg || 'plain');
+  }
+  function readAiCfg() {
+    try {
+      var raw = localStorage.getItem(LS_AI_CFG);
+      var o = raw ? JSON.parse(raw) : null;
+      return (o && typeof o === 'object') ? o : {};
+    } catch (e) { return {}; }
+  }
+  // 与「AI 出题」页共用同一份 Key（EGL_AI_CFG_v1 + E.ai 的 Key 存储）
+  function writeAiKey(val, remember) {
+    var cfg = readAiCfg();
+    cfg.apiKey = val;
+    cfg.rememberKey = !!remember;
+    try { localStorage.setItem(LS_AI_CFG, JSON.stringify(cfg)); } catch (e) {}
+    try { if (E.ai && E.ai.saveKey) E.ai.saveKey(val, !!remember); } catch (e2) {}
+    if (E.aiUI && E.aiUI.setKeyCache) E.aiUI.setKeyCache(val);
+  }
+  function currentAiKey() {
+    if (E.aiUI && E.aiUI.getKeyCache) {
+      var c = E.aiUI.getKeyCache();
+      if (c) return c;
+    }
+    if (E.ai && E.ai.getKey) {
+      try { var k = E.ai.getKey(); if (k) return k; } catch (e) {}
+    }
+    return readAiCfg().apiKey || '';
+  }
+
+  function settingsPage() {
+    var v = app.view;
+    v.innerHTML = '';
+    v.appendChild(U.el('div', '', '<div class="page-title">设置</div>'
+      + '<div class="page-sub">所有设置只保存在本机浏览器，不上传、不联网。</div>'));
+
+    // —— 外观 ——
+    v.appendChild(U.el('div', 'sec-title', '外观'));
+    var prefs = prefsGet();
+    var curBg = prefs.bg || 'plain';
+    var cur = BG_PRESETS.filter(function (p) { return p.id === curBg; })[0] || BG_PRESETS[0];
+    var look = U.el('div', 'glass', '');
+    look.style.padding = '14px 16px';
+    look.innerHTML = '<div class="form-row"><label>背景</label>'
+      + '<div class="seg">'
+      + BG_PRESETS.map(function (p) {
+          return '<button type="button" data-bg="' + p.id + '" class="' + (p.id === curBg ? 'on' : '') + '">'
+            + '<i class="sw ' + p.sw + '"></i>' + p.name + '</button>';
+        }).join('')
+      + '</div>'
+      + '<div class="form-hint" data-bgnote="1">' + cur.note + '　·　纯色底，不画格子。</div>'
+      + '</div>';
+    v.appendChild(look);
+
+    $$('[data-bg]', look).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.dataset.bg;
+        var p = prefsGet();
+        p.bg = id;
+        prefsSet(p);
+        applyBg(id);
+        $$('[data-bg]', look).forEach(function (x) { x.classList.toggle('on', x.dataset.bg === id); });
+        var hit = BG_PRESETS.filter(function (x) { return x.id === id; })[0];
+        var note = $('[data-bgnote]', look);
+        if (note && hit) note.textContent = hit.note + '　·　纯色底，不画格子。';
+      });
+    });
+
+    // —— AI 出题 ——
+    v.appendChild(U.el('div', 'sec-title', 'AI 出题'));
+    var aiCfg = readAiCfg();
+    var box = U.el('div', 'glass', '');
+    box.style.padding = '14px 16px';
+    box.innerHTML = '<div class="form-row"><label for="setKey">DeepSeek API Key</label>'
+      + '<input type="password" id="setKey" data-set="key" autocomplete="off" spellcheck="false" placeholder="sk-…" value="' + esc(currentAiKey()) + '">'
+      + '<div class="form-hint">Key 只写在本机浏览器；「AI 出题」页用的是同一个 Key，两边改都一样。</div></div>'
+      + '<label class="ck-row"><input type="checkbox" data-set="remember"' + (aiCfg.rememberKey ? ' checked' : '') + '>记住 Key（取消勾选则只在本次会话临时使用）</label>'
+      + '<div class="btn-row" style="margin-top:12px">'
+      + '<button type="button" class="btn sm" data-set="save">保存</button>'
+      + '<button type="button" class="btn ghost sm" data-set="show">显示 Key</button>'
+      + '<button type="button" class="btn ghost sm" data-set="clear">清除</button>'
+      + '</div>';
+    v.appendChild(box);
+
+    var keyEl = $('[data-set=key]', box);
+    var remEl = $('[data-set=remember]', box);
+    $('[data-set=save]', box).addEventListener('click', function () {
+      var val = (keyEl.value || '').trim();
+      writeAiKey(val, !!(remEl && remEl.checked));
+      U.toast(val ? '已保存 API Key' : '已清空 API Key', val ? 'ok' : '');
+    });
+    $('[data-set=clear]', box).addEventListener('click', function () {
+      keyEl.value = '';
+      if (remEl) remEl.checked = false;
+      writeAiKey('', false);
+      U.toast('已清除本机保存的 API Key', '');
+    });
+    $('[data-set=show]', box).addEventListener('click', function () {
+      var on = keyEl.type === 'text';
+      keyEl.type = on ? 'password' : 'text';
+      this.textContent = on ? '显示 Key' : '隐藏 Key';
+    });
+
+    // —— 数据与关于 ——
+    v.appendChild(U.el('div', 'sec-title', '数据与关于'));
+    var dm = U.el('div', 'glass', '');
+    dm.style.padding = '14px 16px';
+    dm.innerHTML = '<div class="small faint">专题进度、错题本、学习记录都保存在本机 localStorage，换浏览器或清缓存会丢。'
+      + '导出备份 / 导入 / 重置都在「学习记录」页。</div>'
+      + '<div class="btn-row" style="margin-top:10px">'
+      + '<button class="btn ghost sm" data-nav="records">去学习记录页管理数据</button>'
+      + '<button class="btn ghost sm" data-nav="about">关于本工具</button>'
+      + '</div>';
+    v.appendChild(dm);
+
+    bindNav(v);
+  }
+
   E.ui = E.ui || {};
   E.ui.setApp = setApp;
   E.ui.home = home;
@@ -11037,6 +11260,10 @@ details.explanation-panel .explain {
   E.ui.topWeakTags = topWeakTags;
   E.ui.methodPage = methodPage;
   E.ui.aboutPage = aboutPage;
+  E.ui.settingsPage = settingsPage;
+  E.ui.applyBg = applyBg;
+  E.ui.applySavedBg = applySavedBg;
+  E.ui.prefsGet = prefsGet;
 })();
 
 
@@ -12433,7 +12660,10 @@ details.explanation-panel .explain {
 
   E.aiUI = {
     aiPage: aiPage, resumeIfAny: resumeIfAny, resumeTraining: resumeTraining,
-    regenerateLast: regenerateLast, gotoConfig: gotoConfig
+    regenerateLast: regenerateLast, gotoConfig: gotoConfig,
+    // 设置页改 Key 后同步本模块的输入缓存，避免回到本页显示旧 Key
+    setKeyCache: function (v) { _keyCache = (typeof v === 'string') ? v : ''; },
+    getKeyCache: function () { return _keyCache; }
   };
 })();
 
@@ -12466,6 +12696,7 @@ details.explanation-panel .explain {
       case 'about': (E.ui && E.ui.aboutPage) ? E.ui.aboutPage() : E.ui.home(); break;
       case 'challenge': E.quiz.mixedGate(); break;
       case 'ai': (E.aiUI && E.aiUI.aiPage) ? E.aiUI.aiPage() : E.ui.home(); break;
+      case 'settings': (E.ui && E.ui.settingsPage) ? E.ui.settingsPage() : E.ui.home(); break;
       case 'method': (E.ui && E.ui.methodPage) ? E.ui.methodPage() : E.ui.home(); break;
       default: E.ui.home(); break;
     }
@@ -12590,6 +12821,8 @@ details.explanation-panel .explain {
     E.ui.app = { view: viewEl };
     if (E.ui.setApp) E.ui.setApp(E.ui.app);
     E.ui.quizActive = false;
+    // 背景主题：<head> 里的首屏脚本已应用过一次，这里兜底再同步一遍
+    if (E.ui.applySavedBg) E.ui.applySavedBg();
     // 任意自动保存 → 右上角“已自动保存”提示（节流，1.4s 后消失）
     if (E.setSaveListener && U.savedNotice) E.setSaveListener(U.savedNotice);
     bindTopbar();

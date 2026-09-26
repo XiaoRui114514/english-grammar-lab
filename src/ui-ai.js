@@ -497,6 +497,9 @@
 
   E.aiUI = {
     aiPage: aiPage, resumeIfAny: resumeIfAny, resumeTraining: resumeTraining,
-    regenerateLast: regenerateLast, gotoConfig: gotoConfig
+    regenerateLast: regenerateLast, gotoConfig: gotoConfig,
+    // 设置页改 Key 后同步本模块的输入缓存，避免回到本页显示旧 Key
+    setKeyCache: function (v) { _keyCache = (typeof v === 'string') ? v : ''; },
+    getKeyCache: function () { return _keyCache; }
   };
 })();

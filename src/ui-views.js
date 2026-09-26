@@ -829,6 +829,157 @@
     bindNav(v);
   }
 
+  /* ============ 设置（背景 / API Key / 数据入口） ============ */
+  var LS_PREFS = 'EGL_UI_PREFS_v1';
+  var LS_AI_CFG = 'EGL_AI_CFG_v1';
+  var BG_PRESETS = [
+    { id: 'plain', name: '纸白', sw: 'sw-plain', note: '默认' },
+    { id: 'cream', name: '米黄', sw: 'sw-cream', note: '偏暖，长时间看更柔和' },
+    { id: 'slate', name: '灰青', sw: 'sw-slate', note: '偏冷，素净' },
+    { id: 'dark',  name: '墨夜', sw: 'sw-dark',  note: '夜间深色，字色自动反转' }
+  ];
+
+  function prefsGet() {
+    try {
+      var raw = localStorage.getItem(LS_PREFS);
+      var o = raw ? JSON.parse(raw) : null;
+      return (o && typeof o === 'object') ? o : {};
+    } catch (e) { return {}; }
+  }
+  function prefsSet(o) {
+    try { localStorage.setItem(LS_PREFS, JSON.stringify(o || {})); } catch (e) {}
+  }
+  // 切背景：写 html[data-bg]，同步浏览器地址栏配色（theme-color）
+  function applyBg(id) {
+    var el = document.documentElement;
+    if (!el) return;
+    if (id && id !== 'plain') el.setAttribute('data-bg', id);
+    else if (el.removeAttribute) el.removeAttribute('data-bg');
+    try {
+      var meta = document.querySelector('meta[name=theme-color]');
+      var bg = window.getComputedStyle ? window.getComputedStyle(el).backgroundColor : '';
+      if (meta && bg && meta.setAttribute) meta.setAttribute('content', bg);
+    } catch (e) {}
+  }
+  function applySavedBg() {
+    var p = prefsGet();
+    applyBg(p.bg || 'plain');
+  }
+  function readAiCfg() {
+    try {
+      var raw = localStorage.getItem(LS_AI_CFG);
+      var o = raw ? JSON.parse(raw) : null;
+      return (o && typeof o === 'object') ? o : {};
+    } catch (e) { return {}; }
+  }
+  // 与「AI 出题」页共用同一份 Key（EGL_AI_CFG_v1 + E.ai 的 Key 存储）
+  function writeAiKey(val, remember) {
+    var cfg = readAiCfg();
+    cfg.apiKey = val;
+    cfg.rememberKey = !!remember;
+    try { localStorage.setItem(LS_AI_CFG, JSON.stringify(cfg)); } catch (e) {}
+    try { if (E.ai && E.ai.saveKey) E.ai.saveKey(val, !!remember); } catch (e2) {}
+    if (E.aiUI && E.aiUI.setKeyCache) E.aiUI.setKeyCache(val);
+  }
+  function currentAiKey() {
+    if (E.aiUI && E.aiUI.getKeyCache) {
+      var c = E.aiUI.getKeyCache();
+      if (c) return c;
+    }
+    if (E.ai && E.ai.getKey) {
+      try { var k = E.ai.getKey(); if (k) return k; } catch (e) {}
+    }
+    return readAiCfg().apiKey || '';
+  }
+
+  function settingsPage() {
+    var v = app.view;
+    v.innerHTML = '';
+    v.appendChild(U.el('div', '', '<div class="page-title">设置</div>'
+      + '<div class="page-sub">所有设置只保存在本机浏览器，不上传、不联网。</div>'));
+
+    // —— 外观 ——
+    v.appendChild(U.el('div', 'sec-title', '外观'));
+    var prefs = prefsGet();
+    var curBg = prefs.bg || 'plain';
+    var cur = BG_PRESETS.filter(function (p) { return p.id === curBg; })[0] || BG_PRESETS[0];
+    var look = U.el('div', 'glass', '');
+    look.style.padding = '14px 16px';
+    look.innerHTML = '<div class="form-row"><label>背景</label>'
+      + '<div class="seg">'
+      + BG_PRESETS.map(function (p) {
+          return '<button type="button" data-bg="' + p.id + '" class="' + (p.id === curBg ? 'on' : '') + '">'
+            + '<i class="sw ' + p.sw + '"></i>' + p.name + '</button>';
+        }).join('')
+      + '</div>'
+      + '<div class="form-hint" data-bgnote="1">' + cur.note + '　·　纯色底，不画格子。</div>'
+      + '</div>';
+    v.appendChild(look);
+
+    $$('[data-bg]', look).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.dataset.bg;
+        var p = prefsGet();
+        p.bg = id;
+        prefsSet(p);
+        applyBg(id);
+        $$('[data-bg]', look).forEach(function (x) { x.classList.toggle('on', x.dataset.bg === id); });
+        var hit = BG_PRESETS.filter(function (x) { return x.id === id; })[0];
+        var note = $('[data-bgnote]', look);
+        if (note && hit) note.textContent = hit.note + '　·　纯色底，不画格子。';
+      });
+    });
+
+    // —— AI 出题 ——
+    v.appendChild(U.el('div', 'sec-title', 'AI 出题'));
+    var aiCfg = readAiCfg();
+    var box = U.el('div', 'glass', '');
+    box.style.padding = '14px 16px';
+    box.innerHTML = '<div class="form-row"><label for="setKey">DeepSeek API Key</label>'
+      + '<input type="password" id="setKey" data-set="key" autocomplete="off" spellcheck="false" placeholder="sk-…" value="' + esc(currentAiKey()) + '">'
+      + '<div class="form-hint">Key 只写在本机浏览器；「AI 出题」页用的是同一个 Key，两边改都一样。</div></div>'
+      + '<label class="ck-row"><input type="checkbox" data-set="remember"' + (aiCfg.rememberKey ? ' checked' : '') + '>记住 Key（取消勾选则只在本次会话临时使用）</label>'
+      + '<div class="btn-row" style="margin-top:12px">'
+      + '<button type="button" class="btn sm" data-set="save">保存</button>'
+      + '<button type="button" class="btn ghost sm" data-set="show">显示 Key</button>'
+      + '<button type="button" class="btn ghost sm" data-set="clear">清除</button>'
+      + '</div>';
+    v.appendChild(box);
+
+    var keyEl = $('[data-set=key]', box);
+    var remEl = $('[data-set=remember]', box);
+    $('[data-set=save]', box).addEventListener('click', function () {
+      var val = (keyEl.value || '').trim();
+      writeAiKey(val, !!(remEl && remEl.checked));
+      U.toast(val ? '已保存 API Key' : '已清空 API Key', val ? 'ok' : '');
+    });
+    $('[data-set=clear]', box).addEventListener('click', function () {
+      keyEl.value = '';
+      if (remEl) remEl.checked = false;
+      writeAiKey('', false);
+      U.toast('已清除本机保存的 API Key', '');
+    });
+    $('[data-set=show]', box).addEventListener('click', function () {
+      var on = keyEl.type === 'text';
+      keyEl.type = on ? 'password' : 'text';
+      this.textContent = on ? '显示 Key' : '隐藏 Key';
+    });
+
+    // —— 数据与关于 ——
+    v.appendChild(U.el('div', 'sec-title', '数据与关于'));
+    var dm = U.el('div', 'glass', '');
+    dm.style.padding = '14px 16px';
+    dm.innerHTML = '<div class="small faint">专题进度、错题本、学习记录都保存在本机 localStorage，换浏览器或清缓存会丢。'
+      + '导出备份 / 导入 / 重置都在「学习记录」页。</div>'
+      + '<div class="btn-row" style="margin-top:10px">'
+      + '<button class="btn ghost sm" data-nav="records">去学习记录页管理数据</button>'
+      + '<button class="btn ghost sm" data-nav="about">关于本工具</button>'
+      + '</div>';
+    v.appendChild(dm);
+
+    bindNav(v);
+  }
+
   E.ui = E.ui || {};
   E.ui.setApp = setApp;
   E.ui.home = home;
@@ -849,4 +1000,8 @@
   E.ui.topWeakTags = topWeakTags;
   E.ui.methodPage = methodPage;
   E.ui.aboutPage = aboutPage;
+  E.ui.settingsPage = settingsPage;
+  E.ui.applyBg = applyBg;
+  E.ui.applySavedBg = applySavedBg;
+  E.ui.prefsGet = prefsGet;
 })();
