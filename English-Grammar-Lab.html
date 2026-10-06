@@ -8449,7 +8449,7 @@ details.explanation-panel .explain {
   var CSS = "\n/* ==================== 品牌署名 · 授权（Hison） ====================\n   注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。\n   删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */\n/* 右下角署名印章：平时是一枚小方签，悬停 / 点击后原地展开署名卡片（无弹窗） */\n.egl-seal {\n  position: fixed; right: 12px; bottom: 12px; z-index: 46;\n  display: block; text-align: left; overflow: hidden;\n  padding: 5px 10px; border-radius: var(--radius-sm); cursor: pointer;\n  font-family: var(--font-body); color: var(--ink-dim);\n  background: var(--panel);\n  border: 1px solid var(--stroke-strong);\n  box-shadow: var(--shadow);\n  opacity: 0.88; transform-origin: 100% 100%;\n  transition: padding 0.3s var(--ease), background 0.24s var(--ease),\n              box-shadow 0.3s var(--ease), opacity 0.2s var(--ease), transform 0.3s var(--ease);\n}\n.egl-seal-face {\n  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;\n  font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;\n}\n.egl-seal-panel {\n  display: block; width: 0; max-height: 0; opacity: 0; margin-top: 0;\n  overflow: hidden; white-space: nowrap; transform: translateY(6px);\n  transition: width 0.3s var(--ease), max-height 0.3s var(--ease), opacity 0.24s var(--ease),\n              transform 0.3s var(--ease), margin-top 0.3s var(--ease);\n}\n.egl-seal-name { display: block; font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); }\n.egl-seal-row { display: block; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }\n.egl-seal-row i { font-style: normal; color: var(--ink-faint); margin-right: 6px; }\n.egl-seal-row b { color: var(--hl); font-weight: 700; letter-spacing: 0.02em; }\n/* 展开态：键盘聚焦 / 点击（触摸） */\n.egl-seal:focus-visible,\n.egl-seal.on {\n  padding: 11px 14px 12px; border-radius: var(--radius);\n  background: var(--panel);\n  border-color: var(--ink-dim);\n  box-shadow: var(--shadow-sheet);\n  opacity: 1; transform: translateY(-2px);\n}\n.egl-seal:focus-visible .egl-seal-panel,\n.egl-seal.on .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n/* 有鼠标的设备：悬停即展开 */\n@media (hover: hover) {\n  .egl-seal:hover {\n    padding: 11px 14px 12px; border-radius: var(--radius);\n    background: var(--panel);\n    border-color: var(--ink-dim);\n    box-shadow: var(--shadow-sheet);\n    opacity: 1; transform: translateY(-2px);\n  }\n  .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n}\n/* 题卡底纹已撤掉：部分机型浏览器（如荣耀浏览器）会把低透明度的水印墨迹\n   （SVG 图片版、文本 rgba 版都试过）自动提亮成实心白，糊在题干与选项上。\n   署名改由各处角标承担：题卡左下角 + 其它卡片右下角各一行小字，浓淡是\n   固定色 + 固定 opacity，与页面其它文字一致，各机型都不会被提亮，\n   截图、打印都带署名。 */\n/* 卡片角标 */\n.learn-head, .score-hero, .sq-card, .qbox { position: relative; }\n.learn-head { padding-bottom: 22px; }\n.sq-card { padding-bottom: 22px; }\n.score-hero { padding-bottom: 30px; }\n.learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {\n  content: \"by __EGL_NM__\";\n  position: absolute; right: 10px; bottom: 6px;\n  font-family: var(--font-body);\n  font-size: 10px; letter-spacing: 0.1em; font-weight: 700;\n  color: var(--ink-faint); opacity: 0.6;\n  pointer-events: none; user-select: none;\n}\n/* 题卡角标放左下：右下是固定印章的位置，靠太近会叠在一起 */\n.qbox::after { right: auto; left: 12px; }\n/* 页脚署名 */\n.egl-foot { text-align: center; padding: 30px 16px 24px; color: var(--ink-faint); font-size: 12px; }\n.egl-foot .egl-foot-main { color: var(--ink-faint); }\n.egl-foot .egl-foot-brand { margin-top: 5px; color: var(--ink-dim); letter-spacing: 0.01em; line-height: 1.8; }\n.egl-foot .egl-foot-links { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }\n.egl-foot .egl-link {\n  border: 0; background: transparent; color: var(--accent); cursor: pointer;\n  font-family: inherit; font-size: 12px; padding: 3px 4px; text-decoration: underline;\n}\n.egl-foot .egl-link:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }\n.egl-foot .egl-tip { color: var(--ink-faint); font-size: 11px; }\n/* 页脚版本号（构建时由 package.json 注入） */\n.egl-foot .egl-foot-ver {\n  margin-top: 4px; color: var(--ink-faint); font-size: 11px;\n  font-family: var(--font-mono); letter-spacing: 0.06em; opacity: 0.85;\n}\n/* 首页品牌小标签 */\n.egl-chip {\n  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;\n  font-size: 11.5px; letter-spacing: 0.02em; color: var(--ink-faint);\n  border: 1px dashed var(--stroke-strong); border-radius: 4px; padding: 3px 9px;\n}\n/* 授权说明弹窗 */\n.egl-lic p { margin: 6px 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.75; }\n.egl-lic p b { color: var(--ink); }\n@media print {\n  body::before { display: none; }\n  .egl-seal { display: none; }\n  .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after { color: #222; opacity: 0.75; }\n  .egl-foot { color: #333; }\n}\n";
   // 版本号：构建时由 build.js 用 package.json 的 version 替换（单一来源，
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
-  var VER = "v1.6.0";
+  var VER = "v1.6.1";
   if (VER.charAt(0) === '_') VER = '';
   var _guardTimer = null;
 
@@ -9674,6 +9674,11 @@ details.explanation-panel .explain {
       keyLabel: 'DeepSeek API Key', keyPlaceholder: 'sk-…',
       keyUrl: 'https://platform.deepseek.com/api_keys',
       note: '官方接口。' },
+    { id: 'teamorouter', name: 'TeamoRouter（OpenAI 兼容）', shortName: 'TeamoRouter',
+      baseUrl: 'https://api.teamorouter.cn/v1', defaultModel: 'deepseek-v4-flash',
+      keyLabel: 'TeamoRouter API Key', keyPlaceholder: 'sk-teamo-…',
+      keyUrl: '', reasoningEffort: 'low',
+      note: '已内置低推理加速；deepseek-v4-flash 长文生成可能需要 1–2 分钟。' },
     { id: 'openai', name: 'OpenAI', shortName: 'OpenAI',
       baseUrl: 'https://api.openai.com/v1', defaultModel: '',
       keyLabel: 'OpenAI API Key', keyPlaceholder: 'sk-…',
@@ -10091,6 +10096,7 @@ details.explanation-panel .explain {
       temperature: 0.7,
       stream: false
     };
+    if (provider.reasoningEffort) body.reasoning_effort = provider.reasoningEffort;
     var withJsonMode = true;
     function attempt() {
       if (!withJsonMode) delete body.response_format;
@@ -10101,7 +10107,7 @@ details.explanation-panel .explain {
           'Authorization': 'Bearer ' + key
         },
         body: JSON.stringify(body)
-      }, 90000, provider.shortName).then(function (resp) {
+      }, 180000, provider.shortName).then(function (resp) {
         if (resp.ok) {
           return resp.json().catch(function () { return null; });
         }
@@ -10432,10 +10438,10 @@ details.explanation-panel .explain {
     return {
       topicId: 'all',
       count: 10, customCount: 15,
-      apiKey: getKey(PROVIDERS[0].id), rememberKey: !!getKey(PROVIDERS[0].id),
-      providerId: PROVIDERS[0].id,
-      baseUrl: PROVIDERS[0].baseUrl,
-      modelId: PROVIDERS[0].defaultModel || '',
+      apiKey: getKey('teamorouter'), rememberKey: !!getKey('teamorouter'),
+      providerId: 'teamorouter',
+      baseUrl: (providerById('teamorouter') || PROVIDERS[0]).baseUrl,
+      modelId: (providerById('teamorouter') || PROVIDERS[0]).defaultModel || '',
       qtype: 'choice', structure: 'mixed'
     };
   }
@@ -12412,14 +12418,21 @@ details.explanation-panel .explain {
     if (saved && typeof saved === 'object') {
       for (var k in saved) if (saved.hasOwnProperty(k)) d[k] = saved[k];
     }
-    // 旧版本没有模型商字段：默认 DeepSeek，并尽量保留旧模型选择。
-    if (!saved || !saved.providerId) {
+    // 旧版本没有模型商字段：迁移到 DeepSeek 官方；全新配置则保留 TeamoRouter 默认。
+    if (saved && !saved.providerId) {
       d.providerId = 'deepseek';
-      if (saved && !saved.modelId && saved.modelUi) {
+      if (!saved.modelId && saved.modelUi) {
         var oldUi = String(saved.modelUi).toLowerCase();
         if (oldUi.indexOf('pro') >= 0 || oldUi.indexOf('v4-pro') >= 0) d.modelId = 'deepseek-v4-pro';
         else if (oldUi.indexOf('flash') >= 0 || oldUi.indexOf('v4-flash') >= 0) d.modelId = 'deepseek-flash';
       }
+    }
+    // 之前通过「自定义」填过 TeamoRouter 的配置，自动识别成预设，方便一键用 deepseek-v4-flash。
+    var teamo = E.ai.providerById('teamorouter');
+    if (teamo && saved && saved.providerId === 'custom' && String(saved.baseUrl || '').replace(/\/+$/, '') === teamo.baseUrl) {
+      d.providerId = 'teamorouter';
+      d.baseUrl = teamo.baseUrl;
+      if (!d.modelId) d.modelId = teamo.defaultModel || 'deepseek-v4-flash';
     }
     var provider = providerOf(d);
     d.providerId = provider.id;

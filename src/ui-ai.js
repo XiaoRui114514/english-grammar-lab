@@ -28,14 +28,21 @@
     if (saved && typeof saved === 'object') {
       for (var k in saved) if (saved.hasOwnProperty(k)) d[k] = saved[k];
     }
-    // 旧版本没有模型商字段：默认 DeepSeek，并尽量保留旧模型选择。
-    if (!saved || !saved.providerId) {
+    // 旧版本没有模型商字段：迁移到 DeepSeek 官方；全新配置则保留 TeamoRouter 默认。
+    if (saved && !saved.providerId) {
       d.providerId = 'deepseek';
-      if (saved && !saved.modelId && saved.modelUi) {
+      if (!saved.modelId && saved.modelUi) {
         var oldUi = String(saved.modelUi).toLowerCase();
         if (oldUi.indexOf('pro') >= 0 || oldUi.indexOf('v4-pro') >= 0) d.modelId = 'deepseek-v4-pro';
         else if (oldUi.indexOf('flash') >= 0 || oldUi.indexOf('v4-flash') >= 0) d.modelId = 'deepseek-flash';
       }
+    }
+    // 之前通过「自定义」填过 TeamoRouter 的配置，自动识别成预设，方便一键用 deepseek-v4-flash。
+    var teamo = E.ai.providerById('teamorouter');
+    if (teamo && saved && saved.providerId === 'custom' && String(saved.baseUrl || '').replace(/\/+$/, '') === teamo.baseUrl) {
+      d.providerId = 'teamorouter';
+      d.baseUrl = teamo.baseUrl;
+      if (!d.modelId) d.modelId = teamo.defaultModel || 'deepseek-v4-flash';
     }
     var provider = providerOf(d);
     d.providerId = provider.id;

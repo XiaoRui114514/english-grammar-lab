@@ -20,6 +20,11 @@
       keyLabel: 'DeepSeek API Key', keyPlaceholder: 'sk-…',
       keyUrl: 'https://platform.deepseek.com/api_keys',
       note: '官方接口。' },
+    { id: 'teamorouter', name: 'TeamoRouter（OpenAI 兼容）', shortName: 'TeamoRouter',
+      baseUrl: 'https://api.teamorouter.cn/v1', defaultModel: 'deepseek-v4-flash',
+      keyLabel: 'TeamoRouter API Key', keyPlaceholder: 'sk-teamo-…',
+      keyUrl: '', reasoningEffort: 'low',
+      note: '已内置低推理加速；deepseek-v4-flash 长文生成可能需要 1–2 分钟。' },
     { id: 'openai', name: 'OpenAI', shortName: 'OpenAI',
       baseUrl: 'https://api.openai.com/v1', defaultModel: '',
       keyLabel: 'OpenAI API Key', keyPlaceholder: 'sk-…',
@@ -437,6 +442,7 @@
       temperature: 0.7,
       stream: false
     };
+    if (provider.reasoningEffort) body.reasoning_effort = provider.reasoningEffort;
     var withJsonMode = true;
     function attempt() {
       if (!withJsonMode) delete body.response_format;
@@ -447,7 +453,7 @@
           'Authorization': 'Bearer ' + key
         },
         body: JSON.stringify(body)
-      }, 90000, provider.shortName).then(function (resp) {
+      }, 180000, provider.shortName).then(function (resp) {
         if (resp.ok) {
           return resp.json().catch(function () { return null; });
         }
@@ -778,10 +784,10 @@
     return {
       topicId: 'all',
       count: 10, customCount: 15,
-      apiKey: getKey(PROVIDERS[0].id), rememberKey: !!getKey(PROVIDERS[0].id),
-      providerId: PROVIDERS[0].id,
-      baseUrl: PROVIDERS[0].baseUrl,
-      modelId: PROVIDERS[0].defaultModel || '',
+      apiKey: getKey('teamorouter'), rememberKey: !!getKey('teamorouter'),
+      providerId: 'teamorouter',
+      baseUrl: (providerById('teamorouter') || PROVIDERS[0]).baseUrl,
+      modelId: (providerById('teamorouter') || PROVIDERS[0]).defaultModel || '',
       qtype: 'choice', structure: 'mixed'
     };
   }

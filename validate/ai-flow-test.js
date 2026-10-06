@@ -230,8 +230,15 @@ async function main() {
     ok(JSON.parse(asked[1].opts.body).model === 'gpt-b', '实际请求发送自选模型 ID');
     EA.ai.saveKey('sk-open', true, 'openai');
     ok(env.store['EGL_AI_KEYS_v2'] && env.store['EGL_AI_KEYS_v2'].indexOf('sk-open') >= 0, '多模型商按 provider 保存 Key');
+    const teamo = EA.ai.providerById('teamorouter');
+    ok(teamo && teamo.baseUrl === 'https://api.teamorouter.cn/v1' && teamo.defaultModel === 'deepseek-v4-flash', 'TeamoRouter 预设与 deepseek-v4-flash 就位');
+    const cfgTeamo = { providerId: 'teamorouter', baseUrl: teamo.baseUrl, apiKey: 'sk-teamo', modelId: 'deepseek-v4-flash' };
+    await EA.ai.callChat('hi', cfgTeamo);
+    const teamoReq = asked[asked.length - 1];
+    ok(teamoReq.url === 'https://api.teamorouter.cn/v1/chat/completions', 'TeamoRouter 使用对应 /chat/completions 地址');
+    ok(JSON.parse(teamoReq.opts.body).reasoning_effort === 'low', 'TeamoRouter 请求启用低推理加速参数');
     const def = EA.ai.defaultConfig();
-    ok(def.providerId === 'deepseek' && def.baseUrl === 'https://api.deepseek.com', '默认模型商为 DeepSeek');
+    ok(def.providerId === 'teamorouter' && def.baseUrl === 'https://api.teamorouter.cn/v1' && def.modelId === 'deepseek-v4-flash', '默认模型商为 TeamoRouter + deepseek-v4-flash');
   }
 
   console.log(`\n结果：${pass} 通过 / ${fail} 失败`);
