@@ -1,9 +1,9 @@
 /* ============================================================
- * src/ai.js — AI 出题子系统（DeepSeek）
+ * src/ai.js — AI 出题子系统（多模型商 · OpenAI 兼容协议）
  * 职责分区：
- *   A. 配置与 API Key 管理（本地安全提示）
+ *   A. 模型商 / Base URL / API Key / 模型选择（本机保存）
  *   B. 动态 Prompt 生成（buildPrompt）
- *   C. DeepSeek API 调用（唯一请求入口）
+ *   C. OpenAI 兼容协议调用（/chat/completions + /models）
  *   D. JSON 容错与 schema 校验
  *   E. AI 题目 → 现有题库结构 转换器（语篇+逐空）
  * 规则：AI 只出题数据，不生成页面代码；失败不破坏原题库。
@@ -13,35 +13,141 @@
   var E = window.EGL, U = E.u;
   var $ = U.$, $$ = U.$$, el = U.el, esc = U.esc;
 
-  var API_URL = 'https://api.deepseek.com/chat/completions';
-  // UI 显示名与真实 API model id 映射（避免硬编码不存在的 id）
-  var MODELS = [
-    { ui: 'DeepSeek V4 Flash（默认·快）', id: 'deepseek-flash', note: '对应 deepseek-flash' },
-    { ui: 'DeepSeek V4 Pro（强推理·更慢更贵）', id: 'deepseek-v4-pro', note: '对应 deepseek-v4-pro' }
+  // 所有预设都走 OpenAI 兼容协议：GET /models 取列表，POST /chat/completions 生成。
+  var PROVIDERS = [
+    { id: 'deepseek', name: 'DeepSeek（默认）', shortName: 'DeepSeek',
+      baseUrl: 'https://api.deepseek.com', defaultModel: 'deepseek-chat',
+      keyLabel: 'DeepSeek API Key', keyPlaceholder: 'sk-…',
+      keyUrl: 'https://platform.deepseek.com/api_keys',
+      note: '官方接口。' },
+    { id: 'openai', name: 'OpenAI', shortName: 'OpenAI',
+      baseUrl: 'https://api.openai.com/v1', defaultModel: '',
+      keyLabel: 'OpenAI API Key', keyPlaceholder: 'sk-…',
+      keyUrl: 'https://platform.openai.com/api-keys',
+      note: '需模型商允许浏览器跨域请求。' },
+    { id: 'dashscope', name: '通义千问（阿里云百炼）', shortName: '通义千问',
+      baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', defaultModel: '',
+      keyLabel: 'DashScope API Key', keyPlaceholder: 'sk-…',
+      keyUrl: 'https://bailian.console.aliyun.com/',
+      note: '使用百炼的 OpenAI 兼容地址。' },
+    { id: 'siliconflow', name: '硅基流动 SiliconFlow', shortName: '硅基流动',
+      baseUrl: 'https://api.siliconflow.cn/v1', defaultModel: '',
+      keyLabel: 'SiliconFlow API Key', keyPlaceholder: 'sk-…',
+      keyUrl: 'https://cloud.siliconflow.cn/account/ak',
+      note: '聚合多家开源模型。' },
+    { id: 'moonshot', name: '月之暗面 Kimi', shortName: 'Kimi',
+      baseUrl: 'https://api.moonshot.cn/v1', defaultModel: '',
+      keyLabel: 'Moonshot API Key', keyPlaceholder: 'sk-…',
+      keyUrl: 'https://platform.moonshot.cn/console/api-keys',
+      note: 'Kimi 官方接口。' },
+    { id: 'zhipu', name: '智谱 AI（BigModel）', shortName: '智谱 AI',
+      baseUrl: 'https://open.bigmodel.cn/api/paas/v4', defaultModel: '',
+      keyLabel: '智谱 API Key', keyPlaceholder: '…',
+      keyUrl: 'https://open.bigmodel.cn/usercenter/apikeys',
+      note: 'BigModel OpenAI 兼容接口。' },
+    { id: 'openrouter', name: 'OpenRouter', shortName: 'OpenRouter',
+      baseUrl: 'https://openrouter.ai/api/v1', defaultModel: '',
+      keyLabel: 'OpenRouter API Key', keyPlaceholder: 'sk-or-…',
+      keyUrl: 'https://openrouter.ai/settings/keys',
+      note: '一个 Key 可调用多家模型。' },
+    { id: 'custom', name: '自定义（OpenAI 兼容）', shortName: '自定义',
+      baseUrl: '', defaultModel: '',
+      keyLabel: 'API Key', keyPlaceholder: '输入模型商提供的 Key',
+      keyUrl: '',
+      note: '填写任意兼容 OpenAI 协议的 Base URL，例如公司网关、本地代理或其他模型商。' }
   ];
-  // 推理等级：低=Flash（快）、高=V4 Pro（强推理），与 UI 的两个选择一一对应
-  var REASON = { low: 'deepseek-flash', medium: 'deepseek-flash', high: 'deepseek-v4-pro' };
 
-  // 真实 model id：优先用 UI 显式选择的模型，其次按推理等级映射（不发送不存在的参数）
+  function providerById(id) {
+    var want = id || PROVIDERS[0].id;
+    for (var i = 0; i < PROVIDERS.length; i++) if (PROVIDERS[i].id === want) return PROVIDERS[i];
+    return null;
+  }
+  function providerIdOf(cfg) {
+    var p = providerById(cfg && cfg.providerId);
+    return p ? p.id : PROVIDERS[0].id;
+  }
+  function stripTrailingSlashes(u) {
+    var b = String(u || '').trim();
+    while (b && b.charAt(b.length - 1) === '/') b = b.slice(0, -1);
+    return b;
+  }
+  function hasEnd(b, suffix) {
+    return b.length >= suffix.length && b.slice(-suffix.length).toLowerCase() === suffix.toLowerCase();
+  }
+  function removeEnd(b, suffix) {
+    return hasEnd(b, suffix) ? b.slice(0, b.length - suffix.length) : b;
+  }
+  function cleanBaseUrl(u) { return stripTrailingSlashes(u); }
+  function baseUrlOf(cfg) {
+    var p = providerById(providerIdOf(cfg));
+    var raw = (cfg && cfg.baseUrl) || (p && p.baseUrl) || '';
+    return cleanBaseUrl(raw);
+  }
+  function modelsUrlOf(cfg) {
+    var b = baseUrlOf(cfg);
+    if (!b) return '';
+    if (hasEnd(b, '/models')) return b;
+    b = stripTrailingSlashes(removeEnd(b, '/chat/completions'));
+    return b + '/models';
+  }
+  function chatUrlOf(cfg) {
+    var b = baseUrlOf(cfg);
+    if (!b) return '';
+    if (hasEnd(b, '/chat/completions')) return b;
+    if (hasEnd(b, '/models')) b = removeEnd(b, '/models');
+    b = stripTrailingSlashes(b);
+    return b + '/chat/completions';
+  }
+  var API_URL = chatUrlOf({ providerId: PROVIDERS[0].id }); // 兼容旧调用方
+  // 真实 model id：优先用户选择的模型；旧版本配置按模型标签兼容迁移；DeepSeek 默认 deepseek-chat。
   function modelIdOf(cfg) {
-    var want = cfg && cfg.modelUi;
-    for (var i = 0; i < MODELS.length; i++) if (MODELS[i].ui === want) return MODELS[i].id;
-    return REASON[cfg && cfg.reasoning] || REASON.low;
+    var want = cfg && cfg.modelId;
+    if (want && String(want).trim()) return String(want).trim();
+    var old = String((cfg && cfg.modelUi) || '').toLowerCase();
+    if (old.indexOf('pro') >= 0 || old.indexOf('v4-pro') >= 0) return 'deepseek-v4-pro';
+    if (old.indexOf('flash') >= 0 || old.indexOf('v4-flash') >= 0) return 'deepseek-flash';
+    var p = providerById(providerIdOf(cfg));
+    return (p && p.defaultModel) || '';
   }
 
-  var KEY_LS = 'EGL_AI_KEY_v1';
+  var KEY_LS = 'EGL_AI_KEY_v1';       // 旧版 DeepSeek Key：继续兼容
+  var KEYS_LS = 'EGL_AI_KEYS_v2';     // 多模型商：{ providerId: key }
   var LAST_SESSION_LS = 'EGL_AI_LAST_v1'; // 结果缓存：sessionStorage 优先
 
-  function getKey() {
-    try { return localStorage.getItem(KEY_LS) || ''; } catch (e) { return ''; }
-  }
-  function saveKey(k, remember) {
+  function readKeyMap() {
     try {
-      if (remember && k) localStorage.setItem(KEY_LS, k);
-      else localStorage.removeItem(KEY_LS);
-    } catch (e) {}
+      var raw = localStorage.getItem(KEYS_LS);
+      var o = raw ? JSON.parse(raw) : null;
+      return (o && typeof o === 'object') ? o : {};
+    } catch (e) { return {}; }
   }
-  function clearKey() { try { localStorage.removeItem(KEY_LS); } catch (e) {} }
+  function writeKeyMap(o) {
+    try { localStorage.setItem(KEYS_LS, JSON.stringify(o || {})); } catch (e) {}
+  }
+  function getKey(providerId) {
+    var pid = (providerId && providerById(providerId)) ? providerId : PROVIDERS[0].id;
+    var map = readKeyMap();
+    if (map[pid]) return String(map[pid]);
+    if (pid === PROVIDERS[0].id) {
+      try { return localStorage.getItem(KEY_LS) || ''; } catch (e) { return ''; }
+    }
+    return '';
+  }
+  function saveKey(k, remember, providerId) {
+    var pid = (providerId && providerById(providerId)) ? providerId : PROVIDERS[0].id;
+    var val = String(k || '');
+    var map = readKeyMap();
+    if (remember && val) map[pid] = val;
+    else delete map[pid];
+    writeKeyMap(map);
+    if (pid === PROVIDERS[0].id) {
+      try {
+        if (remember && val) localStorage.setItem(KEY_LS, val);
+        else localStorage.removeItem(KEY_LS);
+      } catch (e) {}
+    }
+  }
+  function clearKey(providerId) { saveKey('', false, providerId); }
 
   function cacheSession(obj) {
     try { sessionStorage.setItem(LAST_SESSION_LS, JSON.stringify(obj)); } catch (e) {}
@@ -68,7 +174,7 @@
   function sanitizeCfg(cfg) {
     var c = {};
     if (!cfg) return c;
-    ['topicId', 'count', 'customCount', 'reasoning', 'qtype', 'structure', 'mode'].forEach(function (k) {
+    ['topicId', 'count', 'customCount', 'qtype', 'structure', 'mode', 'providerId', 'baseUrl', 'modelId'].forEach(function (k) {
       if (cfg[k] !== undefined) c[k] = cfg[k];
     });
     return c;
@@ -245,11 +351,82 @@
     return lines.join('\n');
   }
 
-  /* ---------- DeepSeek 调用（唯一入口） ---------- */
-  function callDeepSeek(promptText, cfg) {
-    var key = cfg.apiKey || getKey();
-    if (!key) return Promise.reject({ code: 'NO_KEY', msg: '请先输入 DeepSeek API Key。' });
+  /* ---------- OpenAI 兼容协议调用（唯一请求入口） ---------- */
+  function apiError(resp, providerName, forModels) {
+    var name = providerName || '模型商';
+    if (resp.status === 401 || resp.status === 403) {
+      return { code: 'BAD_KEY', msg: name + ' API Key 无效或没有权限，请检查后重试。' };
+    }
+    if (resp.status === 429) {
+      return { code: 'RATE', msg: name + ' 请求太频繁或余额不足，稍后再试。' };
+    }
+    if (forModels && (resp.status === 400 || resp.status === 404 || resp.status === 405)) {
+      return { code: 'NO_MODELS', msg: name + ' 没有提供可用的模型列表接口。可以手动输入模型 ID，再开始生成。' };
+    }
+    return { code: 'HTTP_' + resp.status, msg: name + ' API 返回错误（' + resp.status + '），请重试。' };
+  }
+
+  function requestFetch(url, options, timeoutMs, providerName) {
+    var ctrl = null;
+    if (typeof AbortController !== 'undefined') ctrl = new AbortController();
+    var timer = null;
+    if (ctrl) timer = setTimeout(function () { ctrl.abort(); }, timeoutMs || 90000);
+    var opts = {};
+    for (var k in options) if (options.hasOwnProperty(k)) opts[k] = options[k];
+    opts.signal = ctrl ? ctrl.signal : undefined;
+    return fetch(url, opts).then(function (resp) {
+      if (timer) clearTimeout(timer);
+      return resp;
+    }).catch(function (err) {
+      if (timer) clearTimeout(timer);
+      if (err && err.code) throw err;
+      if (err && err.name === 'AbortError') throw { code: 'TIMEOUT', msg: '请求超时，请检查网络或换一个模型商后重试。' };
+      throw { code: 'NET', msg: (providerName || '模型商') + ' 网络请求失败。请检查网络、Base URL 和浏览器跨域（CORS）限制后重试。' };
+    });
+  }
+
+  function readChatContent(json) {
+    var txt = '';
+    try {
+      var msg = json && json.choices && json.choices[0] && json.choices[0].message;
+      var c = msg && msg.content;
+      if (Array.isArray(c)) {
+        txt = c.map(function (part) {
+          if (typeof part === 'string') return part;
+          return (part && (part.text || part.content)) || '';
+        }).join('');
+      } else {
+        txt = c || (json && json.output_text) || '';
+      }
+    } catch (e) { txt = ''; }
+    return String(txt || '');
+  }
+
+  function extractModelIds(json) {
+    var arr = [];
+    if (Array.isArray(json)) arr = json;
+    else if (json && Array.isArray(json.data)) arr = json.data;
+    else if (json && Array.isArray(json.models)) arr = json.models;
+    else if (json && json.data && Array.isArray(json.data.models)) arr = json.data.models;
+    var out = [], seen = {};
+    arr.forEach(function (x) {
+      var id = (typeof x === 'string') ? x : (x && (x.id || x.model || x.name));
+      id = String(id || '').trim();
+      if (id && !seen[id]) { seen[id] = 1; out.push(id); }
+    });
+    out.sort(function (a, b) { return a.localeCompare(b); });
+    return out;
+  }
+
+  function callChat(promptText, cfg) {
+    cfg = cfg || {};
+    var provider = providerById(providerIdOf(cfg)) || PROVIDERS[0];
+    var key = cfg.apiKey || getKey(provider.id);
+    if (!key) return Promise.reject({ code: 'NO_KEY', msg: '请先输入 ' + provider.shortName + ' API Key。' });
+    var url = chatUrlOf(cfg);
+    if (!url) return Promise.reject({ code: 'NO_BASE', msg: '请先填写 API 地址（Base URL）。' });
     var modelId = modelIdOf(cfg);
+    if (!modelId) return Promise.reject({ code: 'NO_MODEL', msg: '请先获取模型列表并选择模型，或手动输入模型 ID。' });
     var body = {
       model: modelId,
       messages: [
@@ -260,43 +437,63 @@
       temperature: 0.7,
       stream: false
     };
-    var ctrl = null;
-    if (typeof AbortController !== 'undefined') { ctrl = new AbortController(); }
-    var timeoutMs = 90000;
-    var timer = null;
-    if (ctrl) timer = setTimeout(function () { ctrl.abort(); }, timeoutMs);
-    return fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key
-      },
-      body: JSON.stringify(body),
-      signal: ctrl ? ctrl.signal : undefined
-    }).then(function (resp) {
-      if (timer) clearTimeout(timer);
-      if (!resp.ok) {
-        if (resp.status === 401) throw { code: 'BAD_KEY', msg: 'DeepSeek API Key 无效，请检查后重试。' };
-        if (resp.status === 429) throw { code: 'RATE', msg: '请求太频繁或余额不足，稍后再试。' };
-        throw { code: 'HTTP_' + resp.status, msg: 'API 返回错误（' + resp.status + '），请重试。' };
-      }
-      return resp.json();
-    }).then(function (json) {
-      var txt = '';
-      try {
-        txt = json.choices && json.choices[0] && (json.choices[0].message.content || '');
-      } catch (e) { txt = ''; }
+    var withJsonMode = true;
+    function attempt() {
+      if (!withJsonMode) delete body.response_format;
+      return requestFetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + key
+        },
+        body: JSON.stringify(body)
+      }, 90000, provider.shortName).then(function (resp) {
+        if (resp.ok) {
+          return resp.json().catch(function () { return null; });
+        }
+        // 部分 OpenAI 兼容网关不支持 response_format：400 时自动去掉它重试一次。
+        if (resp.status === 400 && withJsonMode) {
+          withJsonMode = false;
+          return attempt();
+        }
+        throw apiError(resp, provider.shortName, false);
+      });
+    }
+    return attempt().then(function (json) {
+      var txt = readChatContent(json);
       if (!txt) throw { code: 'EMPTY', msg: 'AI 返回内容为空，请重试。' };
       return txt;
     }).catch(function (err) {
-      if (timer) clearTimeout(timer);
       if (err && err.code) throw err;
-      if (err && err.name === 'AbortError') throw { code: 'TIMEOUT', msg: '请求超时，请重试。' };
-      throw { code: 'NET', msg: '网络请求失败，请检查网络连接后重试。' };
+      throw { code: 'NET', msg: provider.shortName + ' 请求失败，请检查网络与 Base URL 后重试。' };
     });
   }
 
-  /* ---------- JSON 容错提取 ---------- */
+  // GET /models：返回模型 ID 数组；列表接口不可用时允许 UI 手动输入。
+  function fetchModels(cfg) {
+    cfg = cfg || {};
+    var provider = providerById(providerIdOf(cfg)) || PROVIDERS[0];
+    var key = cfg.apiKey || getKey(provider.id);
+    if (!key) return Promise.reject({ code: 'NO_KEY', msg: '请先输入 ' + provider.shortName + ' API Key。' });
+    var url = modelsUrlOf(cfg);
+    if (!url) return Promise.reject({ code: 'NO_BASE', msg: '请先填写 API 地址（Base URL）。' });
+    return requestFetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + key
+      }
+    }, 30000, provider.shortName).then(function (resp) {
+      if (!resp.ok) throw apiError(resp, provider.shortName, true);
+      return resp.json().catch(function () { return null; });
+    }).then(function (json) {
+      var list = extractModelIds(json);
+      if (!list.length) throw { code: 'NO_MODELS', msg: '没有解析到模型 ID。可以手动输入模型 ID，再开始生成。' };
+      return list;
+    });
+  }
+
+
   function extractJSON(text) {
     var t = String(text || '').trim();
     // 去掉 ```json ... ``` 围栏
@@ -581,22 +778,37 @@
     return {
       topicId: 'all',
       count: 10, customCount: 15,
-      apiKey: getKey(), rememberKey: !!getKey(),
-      reasoning: 'low', modelUi: MODELS[0].ui,
+      apiKey: getKey(PROVIDERS[0].id), rememberKey: !!getKey(PROVIDERS[0].id),
+      providerId: PROVIDERS[0].id,
+      baseUrl: PROVIDERS[0].baseUrl,
+      modelId: PROVIDERS[0].defaultModel || '',
       qtype: 'choice', structure: 'mixed'
     };
   }
 
   window.EGL = window.EGL || {};
   EGL.ai = {
-    MODELS: MODELS,
+    // 旧版兼容：保留固定模型列表；新界面统一通过 /models 动态获取。
+    MODELS: [
+      { ui: 'deepseek-chat', id: 'deepseek-chat', note: 'DeepSeek 对话模型别名' },
+      { ui: 'deepseek-reasoner', id: 'deepseek-reasoner', note: 'DeepSeek 推理模型别名' }
+    ],
+    PROVIDERS: PROVIDERS,
     API_URL: API_URL,
+    providerById: providerById,
+    providerIdOf: providerIdOf,
+    baseUrlOf: baseUrlOf,
+    modelsUrlOf: modelsUrlOf,
+    chatUrlOf: chatUrlOf,
+    modelIdOf: modelIdOf,
     defaultConfig: defaultConfig,
     getKey: getKey, saveKey: saveKey, clearKey: clearKey,
     cacheSession: cacheSession, readCachedSession: readCachedSession, clearCachedSession: clearCachedSession,
     getPool: getPool, pushToPool: pushToPool, removeFromPool: removeFromPool, clearPool: clearPool,
     buildPrompt: buildPrompt,
-    callDeepSeek: callDeepSeek,
+    fetchModels: fetchModels,
+    callChat: callChat,
+    callDeepSeek: callChat,
     extractJSON: extractJSON,
     validateAndNormalize: validateAndNormalize,
     papersToQuestions: papersToQuestions

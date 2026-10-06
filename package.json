@@ -1,8 +1,8 @@
 {
   "name": "english-grammar-lab",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "private": true,
-  "description": "上海初高语法填空：按上海命题风格整理的初高中英语语法填空学习系统（全国其他地区也能用）：单文件 HTML 应用 + 内置题库 + DeepSeek AI 出题",
+  "description": "上海初高语法填空：按上海命题风格整理的初高中英语语法填空学习系统（全国其他地区也能用）：单文件 HTML 应用 + 内置题库 + 多模型商 AI 出题",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=18"
@@ -13,7 +13,8 @@
     "shanghai",
     "education",
     "single-file-app",
-    "deepseek"
+    "deepseek",
+    "openai"
   ],
   "scripts": {
     "build": "node build.js",

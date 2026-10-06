@@ -208,6 +208,32 @@ async function main() {
     catch (e) { ok(/JSON|解析|失败/.test(e.msg), 'JSON 异常 → 明确提示'); }
   }
 
+  {
+    console.log('[ai] 多模型商：/models 获取与 OpenAI 兼容调用');
+    const asked = [];
+    const env = makeEnv(async (url, opts) => {
+      asked.push({ url: String(url), opts: opts || {} });
+      if (String(url).indexOf('/models') >= 0) {
+        return { ok: true, status: 200, json: () => Promise.resolve({ data: [{ id: 'gpt-b' }, { id: 'gpt-a' }] }) };
+      }
+      return chat('{"papers":[]}');
+    });
+    run(env.sb, 'src/core.js'); run(env.sb, 'src/ui-helpers.js'); run(env.sb, 'src/ai.js');
+    const EA = env.sb.EGL;
+    const cfgOpen = { providerId: 'openai', baseUrl: 'https://api.openai.com/v1', apiKey: 'sk-open', modelId: 'gpt-b' };
+    const models = await EA.ai.fetchModels(cfgOpen);
+    ok(models.length === 2 && models[0] === 'gpt-a' && models[1] === 'gpt-b', 'OpenAI /models 返回模型 ID 并排序');
+    ok(asked[0].url === 'https://api.openai.com/v1/models', '按模型商拼接 /models 地址');
+    ok(asked[0].opts.headers.Authorization === 'Bearer sk-open', '模型列表请求携带 Bearer Key');
+    await EA.ai.callChat('hi', cfgOpen);
+    ok(asked[1].url === 'https://api.openai.com/v1/chat/completions', '按模型商拼接 /chat/completions 地址');
+    ok(JSON.parse(asked[1].opts.body).model === 'gpt-b', '实际请求发送自选模型 ID');
+    EA.ai.saveKey('sk-open', true, 'openai');
+    ok(env.store['EGL_AI_KEYS_v2'] && env.store['EGL_AI_KEYS_v2'].indexOf('sk-open') >= 0, '多模型商按 provider 保存 Key');
+    const def = EA.ai.defaultConfig();
+    ok(def.providerId === 'deepseek' && def.baseUrl === 'https://api.deepseek.com', '默认模型商为 DeepSeek');
+  }
+
   console.log(`\n结果：${pass} 通过 / ${fail} 失败`);
   process.exit(fail ? 1 : 0);
 }

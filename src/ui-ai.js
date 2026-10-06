@@ -9,34 +9,57 @@
   var $ = U.$, $$ = U.$$, el = U.el, esc = U.esc;
 
   var LS_CFG = 'EGL_AI_CFG_v1';
-  var _curCfg = null;    // 当前配置（重绘后委托回调仍读最新）
-  var _lastCfg = null;   // 最近生成配置（重试/再生成复用）
-  var _genLive = null;   // 生成期状态 {stopped:false}
-  var _keyCache = '';    // 实时 Key 输入缓存（密码框可能被浏览器重绘/接管，不再回查 DOM.value）
+  var _curCfg = null;      // 当前配置（重绘后委托回调仍读最新）
+  var _lastCfg = null;     // 最近生成配置（重试/再生成复用）
+  var _genLive = null;     // 生成期状态 {stopped:false}
+  var _keyCache = {};      // providerId -> 实时 Key 输入缓存
+  var _modelCache = {};    // providerId -> 已获取的模型 ID 列表
 
   function cur() { return window.__EGL_CURRICULUM__; }
   function categoryList() { return cur() ? cur().categories : []; }
+  function providerOf(cfg) { return E.ai.providerById(cfg && cfg.providerId) || E.ai.PROVIDERS[0]; }
   function loadCfg() {
     var d = E.ai.defaultConfig();
+    var saved = null;
     try {
       var raw = localStorage.getItem(LS_CFG);
-      if (raw) {
-        var p = JSON.parse(raw);
-        for (var k in p) if (p.hasOwnProperty(k)) d[k] = p[k];
-      }
-    } catch (e) {}
-    d.apiKey = E.ai.getKey();
-    // 兼容旧版本保存的模型名（旧模型标签 → 新标签，避免下拉框与真实调用不一致）
-    if (d.modelUi !== E.ai.MODELS[0].ui && d.modelUi !== E.ai.MODELS[1].ui) {
-      d.modelUi = (d.reasoning === 'high') ? E.ai.MODELS[1].ui : E.ai.MODELS[0].ui;
+      if (raw) saved = JSON.parse(raw);
+    } catch (e) { saved = null; }
+    if (saved && typeof saved === 'object') {
+      for (var k in saved) if (saved.hasOwnProperty(k)) d[k] = saved[k];
     }
+    // 旧版本没有模型商字段：默认 DeepSeek，并尽量保留旧模型选择。
+    if (!saved || !saved.providerId) {
+      d.providerId = 'deepseek';
+      if (saved && !saved.modelId && saved.modelUi) {
+        var oldUi = String(saved.modelUi).toLowerCase();
+        if (oldUi.indexOf('pro') >= 0 || oldUi.indexOf('v4-pro') >= 0) d.modelId = 'deepseek-v4-pro';
+        else if (oldUi.indexOf('flash') >= 0 || oldUi.indexOf('v4-flash') >= 0) d.modelId = 'deepseek-flash';
+      }
+    }
+    var provider = providerOf(d);
+    d.providerId = provider.id;
+    if (!saved || !saved.baseUrl || saved.providerId !== d.providerId) d.baseUrl = provider.baseUrl;
+    d.apiKey = E.ai.getKey(d.providerId);
     return d;
   }
   function saveCfg(cfg) {
     var c = { topicId: cfg.topicId, count: cfg.count, customCount: cfg.customCount,
-              reasoning: cfg.reasoning, modelUi: cfg.modelUi, qtype: cfg.qtype, structure: cfg.structure };
+              qtype: cfg.qtype, structure: cfg.structure,
+              providerId: cfg.providerId, baseUrl: cfg.baseUrl, modelId: cfg.modelId,
+              rememberKey: !!cfg.rememberKey };
     try { localStorage.setItem(LS_CFG, JSON.stringify(c)); } catch (e) {}
   }
+  function keyFor(cfg) {
+    var pid = providerOf(cfg).id;
+    if (typeof _keyCache[pid] === 'string') return _keyCache[pid];
+    return E.ai.getKey(pid) || '';
+  }
+  function setCachedKey(providerId, val) {
+    var pid = E.ai.providerById(providerId) ? providerId : 'deepseek';
+    _keyCache[pid] = (typeof val === 'string') ? val : '';
+  }
+
   function appView() { return E.ui && E.ui.app ? E.ui.app.view : null; }
   function closestOf(node, sel) {
     while (node && node !== document) {
@@ -52,12 +75,13 @@
     if (!v) return;
     var cfg = loadCfg();
     _curCfg = cfg;
-    // Key 输入缓存与配置同步：本次会话已输入的 Key 优先保留（切换题型/结构重绘不清空）
-    if (!_keyCache) _keyCache = (typeof cfg.apiKey === 'string') ? cfg.apiKey : '';
-    cfg.apiKey = _keyCache;
+    // Key 按模型商分开缓存：切模型商、切题型重绘时都不会串 Key。
+    var pid = providerOf(cfg).id;
+    if (typeof _keyCache[pid] !== 'string') _keyCache[pid] = (typeof cfg.apiKey === 'string' && cfg.apiKey) ? cfg.apiKey : (E.ai.getKey(pid) || '');
+    cfg.apiKey = _keyCache[pid];
     v.innerHTML = '';
     v.appendChild(el('div', '', '<div class="page-title">AI 出题 · 语法填空</div>'
-      + '<div class="page-sub">按“专题 × 题数 × 结构”生成完整练习（初高中通用）；结果进入原做题界面，判分/解析/错题/统计全部通用。</div>'));
+      + '<div class="page-sub">支持 DeepSeek、OpenAI 及任意 OpenAI 兼容模型商；按“专题 × 题数 × 结构”生成完整练习，结果直接进入原做题界面。</div>'));
 
     var panel = el('div', 'glass', '');
     panel.style.padding = '18px';
@@ -110,17 +134,29 @@
           aiPage();
           return;
         }
+        var fm = closestOf(target, '[data-ai=fetchModels]');
+        if (fm) {
+          fetchModelsIntoView(v, fm);
+          return;
+        }
         var go = closestOf(target, '#aiGo');
         if (go) {
-          // 优先使用输入缓存（最可靠）；其次已存 Key
-          var keyVal = (_keyCache && _keyCache.length) ? _keyCache : (cfg.apiKey || '');
-          keyVal = keyVal.trim();
-          if (!keyVal) { U.toast('请先输入 DeepSeek API Key', 'bad'); return; }
+          // 点击生成前从当前 DOM 取一次值，避免输入后未触发 change 就提交。
+          var keyElGo = $('#aiKey', v);
+          var baseElGo = $('[data-f=baseUrl]', v);
+          var modelElGo = $('#aiModel', v);
+          var providerGo = providerOf(cfg);
+          if (keyElGo && keyElGo.value !== undefined) setCachedKey(providerGo.id, keyElGo.value || '');
+          if (baseElGo) cfg.baseUrl = String(baseElGo.value || '').trim();
+          if (modelElGo) cfg.modelId = String(modelElGo.value || '').trim();
+          cfg.apiKey = keyFor(cfg).trim();
+          if (!cfg.apiKey) { U.toast('请先输入 ' + providerGo.shortName + ' API Key', 'bad'); return; }
+          if (!cfg.baseUrl) { U.toast('请先填写 API 地址（Base URL）', 'bad'); return; }
+          if (!cfg.modelId) { U.toast('请先获取并选择模型，或手动输入模型 ID', 'bad'); return; }
           var cbx2 = $('[data-ai=rememberKey]', v);
           var remember = !!(cbx2 && cbx2.checked);
-          cfg.apiKey = keyVal;
           cfg.rememberKey = remember;
-          E.ai.saveKey(keyVal, remember);
+          E.ai.saveKey(cfg.apiKey, remember, cfg.providerId);
           saveCfg(cfg);
           _lastCfg = cfg;
           startGeneration(cfg);
@@ -165,45 +201,105 @@
       if (!cfg) return;
       var t = ev.target;
       try {
-        // 用户正在输入 Key → 实时缓存（不依赖重查询 DOM）
+        // 用户正在输入 Key → 按模型商实时缓存
         if (t && t.getAttribute && t.getAttribute('data-ai') === 'keyInput') {
-          _keyCache = (t.value && typeof t.value === 'string') ? t.value : '';
-          cfg.apiKey = _keyCache;
+          setCachedKey(cfg.providerId, t.value || '');
+          cfg.apiKey = keyFor(cfg);
           return;
         }
         var f = t && t.dataset ? t.dataset.f : null;
         if (f) {
           cfg[f] = t.type === 'checkbox' ? !!t.checked : t.value;
-          // 模型与推理等级是「同一设置」的两个视图：保持同步（模型决定真实 model id）
-          if (f === 'reasoning') {
-            cfg.modelUi = (cfg.reasoning === 'high') ? E.ai.MODELS[1].ui : E.ai.MODELS[0].ui;
-            var mSel = $('[data-f=modelUi]', v);
-            if (mSel) mSel.value = cfg.modelUi;
-          } else if (f === 'modelUi') {
-            cfg.reasoning = (cfg.modelUi === E.ai.MODELS[1].ui) ? 'high' : 'low';
-            var rSel = $('[data-f=reasoning]', v);
-            if (rSel) rSel.value = cfg.reasoning;
+          if (f === 'providerId') {
+            var provider = providerOf(cfg);
+            cfg.providerId = provider.id;
+            cfg.baseUrl = provider.baseUrl;
+            cfg.modelId = provider.defaultModel || '';
+            cfg.apiKey = keyFor(cfg);
+            saveCfg(cfg);
+            aiPage();
+            return;
           }
           saveCfg(cfg);
           return;
         }
         if (t && t.getAttribute && t.getAttribute('data-ai') === 'rememberKey') {
           cfg.rememberKey = !!t.checked;
-          // 用缓存或已存 Key，不再临时查 DOM（避免节点被替换导致 .value 缺失）
-          var kkVal = (_keyCache && _keyCache.length) ? _keyCache : (cfg.apiKey || '');
-          E.ai.saveKey(kkVal, cfg.rememberKey);
+          var kkVal = keyFor(cfg);
+          E.ai.saveKey(kkVal, cfg.rememberKey, cfg.providerId);
           saveCfg(cfg);
         }
       } catch (err) { /* 同上：设置项异常不打断交互 */ }
     });
 
-    // input 事件（每次击键即触发）：Key 框被浏览器接管/重绘时缓存仍保持最新
+    // input 事件：Key 按模型商缓存；Base URL / 模型 ID 也保持实时值。
     v.addEventListener('input', function (ev) {
+      var cfg = _curCfg;
       var t = ev.target;
-      if (!t || !t.getAttribute) return;
+      if (!cfg || !t || !t.getAttribute) return;
       if (t.getAttribute('data-ai') === 'keyInput') {
-        _keyCache = (t.value && typeof t.value === 'string') ? t.value : '';
+        setCachedKey(cfg.providerId, t.value || '');
+        cfg.apiKey = keyFor(cfg);
+      } else if (t.dataset && t.dataset.f === 'baseUrl') {
+        cfg.baseUrl = t.value || '';
+      } else if (t.dataset && t.dataset.f === 'modelId') {
+        cfg.modelId = t.value || '';
       }
+    });
+  }
+
+  /* ================= 模型列表获取 ================= */
+  function setModelStatus(v, msg) {
+    var st = $('[data-ai=modelStatus]', v);
+    if (st) st.textContent = msg || '';
+  }
+  function fillModelList(list, cfg, v) {
+    _modelCache[cfg.providerId] = list.slice();
+    var dl = $('#aiModelList', v);
+    if (dl) dl.innerHTML = list.map(function (id) { return '<option value="' + esc(id) + '"></option>'; }).join('');
+    var input = $('#aiModel', v);
+    if (input && !String(input.value || '').trim() && list.length) {
+      input.value = list[0];
+      cfg.modelId = list[0];
+    }
+    saveCfg(cfg);
+  }
+  function fetchModelsIntoView(v, btn) {
+    var cfg = _curCfg;
+    if (!cfg) return;
+    var provider = providerOf(cfg);
+    var keyEl = $('#aiKey', v);
+    var baseEl = $('[data-f=baseUrl]', v);
+    var modelEl = $('#aiModel', v);
+    if (keyEl && keyEl.value !== undefined) {
+      setCachedKey(provider.id, keyEl.value || '');
+      cfg.apiKey = keyFor(cfg);
+    }
+    if (baseEl) cfg.baseUrl = String(baseEl.value || '').trim();
+    if (modelEl) cfg.modelId = String(modelEl.value || '').trim();
+    if (!cfg.apiKey) {
+      U.toast('请先输入 ' + provider.shortName + ' API Key', 'bad');
+      setModelStatus(v, '请先填写 API Key，再获取模型列表。');
+      return;
+    }
+    if (!cfg.baseUrl) {
+      U.toast('请先填写 API 地址（Base URL）', 'bad');
+      setModelStatus(v, '请先填写 API 地址（Base URL）。');
+      return;
+    }
+    var oldText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '获取中…';
+    setModelStatus(v, '正在请求 ' + E.ai.modelsUrlOf(cfg) + ' …');
+    E.ai.fetchModels(cfg).then(function (list) {
+      fillModelList(list, cfg, v);
+      setModelStatus(v, '已获取 ' + list.length + ' 个模型；点击模型框下拉选择，也可以手动输入。');
+      btn.disabled = false;
+      btn.textContent = oldText;
+    }, function (err) {
+      setModelStatus(v, ((err && err.msg) || '获取模型失败。') + ' 也可以直接手动输入模型 ID。');
+      btn.disabled = false;
+      btn.textContent = oldText;
     });
   }
 
@@ -250,26 +346,39 @@
       + '<div class="form-hint">「单句」= 每题给一个提示词（动词按语境改成过去时/完成时/被动/非谓语等；形容词、副词改成比较级或最高级）；「语篇」= 整篇连贯文章挖空，满 10 空按“4 空给词 + 6 空纯空”配比。</div>'
       + '</div>';
 
-    var key = _keyCache || cfg.apiKey || '';
+    var provider = providerOf(cfg);
+    var providerHtml = '<div class="form-row"><label>API 模型商</label><select data-f="providerId">'
+      + E.ai.PROVIDERS.map(function (p) {
+          return '<option value="' + esc(p.id) + '"' + (p.id === provider.id ? ' selected' : '') + '>' + esc(p.name) + '</option>';
+        }).join('')
+      + '</select><div class="form-hint">' + esc(provider.note) + ' 不同模型商需要各自的 API Key。</div></div>';
+
+    var key = keyFor(cfg);
     var pwdVal = key ? ('value="' + esc(key) + '"') : '';
-    var kHtml = '<div class="form-row"><label>DeepSeek API Key（默认隐藏，仅供本页调用）</label>'
+    var keyLink = provider.keyUrl
+      ? '在<a href="' + esc(provider.keyUrl) + '" target="_blank" rel="noopener">模型商控制台</a>获取'
+      : '按模型商文档获取';
+    var keyHtml = '<div class="form-row"><label>' + esc(provider.keyLabel) + '（默认隐藏）</label>'
       + '<input type="password" id="aiKey" data-ai="keyInput" autocomplete="off" spellcheck="false" ' + pwdVal
-      + ' placeholder="sk-…（在 platform.deepseek.com 获取）">'
-      + '<div class="form-hint">Key 仅用于当前页面调用；勾选记住后保存在浏览器本地，请勿在公用电脑勾选。</div>'
+      + ' placeholder="' + esc(provider.keyPlaceholder) + '">'
+      + '<div class="form-hint">' + keyLink + '；Key 只在本机浏览器使用，勾选记住后才保存，请勿在公用电脑勾选。</div>'
       + '<label class="ck-row"><input type="checkbox" data-ai="rememberKey"' + (cfg.rememberKey ? ' checked' : '') + '>'
-      + '<span>记住 API Key（默认不记，关闭页面即不保留）</span></label>'
-      + '</div>';
+      + '<span>记住当前模型商的 API Key（默认不记）</span></label></div>';
 
-    var mHtml = '<div class="form-row"><label>模型</label><select data-f="modelUi">'
-      + '<option' + (cfg.modelUi !== E.ai.MODELS[1].ui ? ' selected' : '') + '>' + E.ai.MODELS[0].ui + '</option>'
-      + '<option' + (cfg.modelUi === E.ai.MODELS[1].ui ? ' selected' : '') + '>' + E.ai.MODELS[1].ui + '</option></select></div>'
-      + '<div class="form-row"><label>推理等级</label><select data-f="reasoning">'
-      + '<option value="low"' + (cfg.reasoning !== 'high' ? ' selected' : '') + '>低（默认·省时省钱）</option>'
-      + '<option value="high"' + (cfg.reasoning === 'high' ? ' selected' : '') + '>高（更慢，用于难题）</option>'
-      + '</select>'
-      + '<div class="form-hint">“推理等级”通过模型切换实现（不向 API 发送不存在的参数）。</div></div>';
+    var baseHtml = '<div class="form-row"><label>API 地址（Base URL）</label>'
+      + '<input type="text" data-f="baseUrl" value="' + esc(cfg.baseUrl || '') + '" placeholder="https://…/v1" spellcheck="false">'
+      + '<div class="form-hint">预设已自动填好；自定义模型商可粘贴兼容 OpenAI 协议的地址（通常以 /v1 结尾）。</div></div>';
 
-    panel.innerHTML += tHtml + nHtml + qtHtml + structHtml + kHtml + mHtml;
+    var cached = (_modelCache[provider.id] || []).slice();
+    if (cfg.modelId && cached.indexOf(cfg.modelId) < 0) cached.unshift(cfg.modelId);
+    var modelOptions = cached.map(function (id) { return '<option value="' + esc(id) + '"></option>'; }).join('');
+    var modelHtml = '<div class="form-row"><label>模型 ID</label><div style="display:flex;gap:8px;align-items:center">'
+      + '<input type="text" id="aiModel" data-f="modelId" list="aiModelList" value="' + esc(cfg.modelId || '') + '" spellcheck="false" placeholder="先点右侧获取，或手动输入" style="flex:1;min-width:0">'
+      + '<button type="button" class="btn ghost sm" data-ai="fetchModels" style="white-space:nowrap">获取模型列表</button>'
+      + '</div><datalist id="aiModelList">' + modelOptions + '</datalist>'
+      + '<div class="form-hint" data-ai="modelStatus">点击「获取模型列表」后可直接下拉选择；接口不提供列表时也可手动输入模型 ID。</div></div>';
+
+    panel.innerHTML += providerHtml + keyHtml + baseHtml + modelHtml + tHtml + nHtml + qtHtml + structHtml;
 
   }
 
@@ -291,11 +400,15 @@
       // 旧记录标题里可能带“高一/高二/高三”，展示时统一去掉
       var title = String(m.title || it.topicLabel || ('AI 出题 ' + (idx + 1))).replace(/^AI · 高[一二三] · /, 'AI · ');
       var n = it.questions ? it.questions.length : (it.count || 0);
+      var recProvider = it.cfg && it.cfg.providerId ? E.ai.providerById(it.cfg.providerId) : null;
+      var recModel = it.cfg && it.cfg.modelId ? String(it.cfg.modelId) : '';
       var row = el('div', 'glass ai-rec-item');
       row.innerHTML = '<span class="t">' + esc(title) + '</span>'
         + '<span class="badges">'
         + '<span class="badge gray">' + (it.date || '') + '</span>'
         + '<span class="badge blue">' + n + ' 空</span>'
+        + (recProvider ? '<span class="badge gray">' + esc(recProvider.shortName) + '</span>' : '')
+        + (recModel ? '<span class="badge gray">' + esc(recModel) + '</span>' : '')
         + '</span>'
         + '<span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">'
         + '<button type="button" class="btn sm ghost" data-pool-go="normal" data-id="' + esc(it.id) + '">▶ 普通模式</button>'
@@ -340,10 +453,12 @@
       catName = c ? c.name : cfg.topicId;
     }
     var structBadge = cfg.structure === 'sentence' ? '纯单句' : cfg.structure === 'passage' ? '纯语篇' : '单句+语篇';
+    var providerBadge = providerOf(cfg).shortName;
     $('#genSummary', v).innerHTML = '<span class="badge blue">' + esc(catName) + '</span> '
       + '<span class="badge gray">' + esc(structBadge) + '</span> '
       + '<span class="badge amber">' + (cfg.count || 10) + ' 空</span> '
-      + '<span class="badge green">' + (cfg.qtype === 'input' ? '填空输入' : '点选选择题') + '</span>';
+      + '<span class="badge green">' + (cfg.qtype === 'input' ? '填空输入' : '点选选择题') + '</span> '
+      + '<span class="badge gray">' + esc(providerBadge) + (cfg.modelId ? ' · ' + esc(cfg.modelId) : '') + '</span>';
     logLine(v, '正在分析命题要求…');
     runGeneration(cfg, v);
   }
@@ -364,8 +479,10 @@
   function stopped() { return !_genLive || _genLive.stopped; }
 
   function runGeneration(cfg, v) {
-    var key = cfg.apiKey || E.ai.getKey();
-    if (!key) { U.toast('请先输入 DeepSeek API Key', 'bad'); aiPage(); return; }
+    var provider = providerOf(cfg);
+    var key = cfg.apiKey || E.ai.getKey(cfg.providerId);
+    if (!key) { U.toast('请先输入 ' + provider.shortName + ' API Key', 'bad'); aiPage(); return; }
+    if (!cfg.modelId) { U.toast('请先获取并选择模型，或手动输入模型 ID', 'bad'); aiPage(); return; }
     var count = cfg.count || 10;
     var papersNeeded = Math.max(1, Math.ceil(count / 10));
     var allSections = [];
@@ -375,12 +492,12 @@
       if (stopped()) return Promise.resolve(null);
       idx++;
       var n = idx === papersNeeded ? Math.max(1, count - (papersNeeded - 1) * 10) : 10;
-      logLine(v, '⏳ 正在生成「单句+语篇」批次 ' + idx + '/' + papersNeeded + '（约 ' + n + ' 空）…');
+      logLine(v, '⏳ 正在生成「单句+语篇」批次 ' + idx + '/' + papersNeeded + '（约 ' + n + ' 空，' + esc(provider.shortName) + ' · ' + esc(cfg.modelId) + '）…');
       var cfg1 = {};
       for (var k in cfg) cfg1[k] = cfg[k];
       cfg1.count = n;
       var prompt = E.ai.buildPrompt(cfg1);
-      return E.ai.callDeepSeek(prompt, cfg1).then(function (text) {
+      return E.ai.callChat(prompt, cfg1).then(function (text) {
         if (stopped()) return null;
         logLine(v, '第 ' + idx + ' 批生成完成，正在校验…');
         var raw = E.ai.extractJSON(text);
@@ -407,7 +524,10 @@
       var structLabel = cfg.structure === 'sentence' ? '单句' : cfg.structure === 'passage' ? '语篇' : '单句+语篇';
       var meta = {
         mode: 'normal', title: 'AI · 语法填空(' + structLabel + ')' + catSel,
-        icon: ''
+        icon: '',
+        provider: provider.shortName,
+        providerId: provider.id,
+        modelId: cfg.modelId
       };
       E.ai.cacheSession({ questions: questions, meta: meta, cfg: cfg, papers: allSections, totalBlanks: totalBlanks });
       E.ai.pushToPool(allSections, questions, cfg, meta);
@@ -498,8 +618,14 @@
   E.aiUI = {
     aiPage: aiPage, resumeIfAny: resumeIfAny, resumeTraining: resumeTraining,
     regenerateLast: regenerateLast, gotoConfig: gotoConfig,
-    // 设置页改 Key 后同步本模块的输入缓存，避免回到本页显示旧 Key
-    setKeyCache: function (v) { _keyCache = (typeof v === 'string') ? v : ''; },
-    getKeyCache: function () { return _keyCache; }
+    // 设置页改 Key 后按模型商同步缓存，避免模型商之间串 Key。
+    setKeyCache: function (v, providerId) {
+      var pid = providerId || (_curCfg && _curCfg.providerId) || 'deepseek';
+      setCachedKey(pid, (typeof v === 'string') ? v : '');
+    },
+    getKeyCache: function (providerId) {
+      var pid = providerId || (_curCfg && _curCfg.providerId) || 'deepseek';
+      return _keyCache[pid] || '';
+    }
   };
 })();

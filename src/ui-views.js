@@ -872,24 +872,32 @@
       return (o && typeof o === 'object') ? o : {};
     } catch (e) { return {}; }
   }
-  // 与「AI 出题」页共用同一份 Key（EGL_AI_CFG_v1 + E.ai 的 Key 存储）
+  // 与「AI 出题」页共用同一份配置；Key 按模型商分开保存。
+  function currentAiProvider() {
+    var cfg = readAiCfg();
+    if (E.ai && E.ai.providerById) return E.ai.providerById(cfg.providerId) || E.ai.PROVIDERS[0];
+    return { id: 'deepseek', name: 'DeepSeek（默认）', shortName: 'DeepSeek', keyPlaceholder: 'sk-…', keyUrl: 'https://platform.deepseek.com/api_keys' };
+  }
   function writeAiKey(val, remember) {
     var cfg = readAiCfg();
-    cfg.apiKey = val;
+    var provider = currentAiProvider();
+    cfg.providerId = provider.id;
     cfg.rememberKey = !!remember;
+    if (cfg.apiKey !== undefined) delete cfg.apiKey; // Key 只按模型商存入 EGL_AI_KEYS_v2
     try { localStorage.setItem(LS_AI_CFG, JSON.stringify(cfg)); } catch (e) {}
-    try { if (E.ai && E.ai.saveKey) E.ai.saveKey(val, !!remember); } catch (e2) {}
-    if (E.aiUI && E.aiUI.setKeyCache) E.aiUI.setKeyCache(val);
+    try { if (E.ai && E.ai.saveKey) E.ai.saveKey(val, !!remember, provider.id); } catch (e2) {}
+    if (E.aiUI && E.aiUI.setKeyCache) E.aiUI.setKeyCache(val, provider.id);
   }
   function currentAiKey() {
+    var provider = currentAiProvider();
     if (E.aiUI && E.aiUI.getKeyCache) {
-      var c = E.aiUI.getKeyCache();
+      var c = E.aiUI.getKeyCache(provider.id);
       if (c) return c;
     }
     if (E.ai && E.ai.getKey) {
-      try { var k = E.ai.getKey(); if (k) return k; } catch (e) {}
+      try { var k = E.ai.getKey(provider.id); if (k) return k; } catch (e) {}
     }
-    return readAiCfg().apiKey || '';
+    return '';
   }
 
   function settingsPage() {
@@ -933,11 +941,12 @@
     // —— AI 出题 ——
     v.appendChild(U.el('div', 'sec-title', 'AI 出题'));
     var aiCfg = readAiCfg();
+    var aiProvider = currentAiProvider();
     var box = U.el('div', 'glass', '');
     box.style.padding = '14px 16px';
-    box.innerHTML = '<div class="form-row"><label for="setKey">DeepSeek API Key</label>'
-      + '<input type="password" id="setKey" data-set="key" autocomplete="off" spellcheck="false" placeholder="sk-…" value="' + esc(currentAiKey()) + '">'
-      + '<div class="form-hint">Key 只写在本机浏览器；「AI 出题」页用的是同一个 Key，两边改都一样。</div></div>'
+    box.innerHTML = '<div class="form-row"><label for="setKey">AI API Key（' + esc(aiProvider.shortName) + '）</label>'
+      + '<input type="password" id="setKey" data-set="key" autocomplete="off" spellcheck="false" placeholder="' + esc(aiProvider.keyPlaceholder || 'sk-…') + '" value="' + esc(currentAiKey()) + '">'
+      + '<div class="form-hint">切换模型商请到「AI 出题」页；这里管理当前模型商的 Key。Key 只写在本机浏览器，两边同步。</div></div>'
       + '<label class="ck-row"><input type="checkbox" data-set="remember"' + (aiCfg.rememberKey ? ' checked' : '') + '>记住 Key（取消勾选则只在本次会话临时使用）</label>'
       + '<div class="btn-row" style="margin-top:12px">'
       + '<button type="button" class="btn sm" data-set="save">保存</button>'
