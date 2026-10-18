@@ -140,6 +140,21 @@ check('wrongBook', () => EGL.ui.wrongBook());
 check('weak', () => EGL.ui.weak());
 check('records', () => EGL.ui.records());
 check('mixedGate', () => EGL.quiz.mixedGate());
+check('reviewPage（今日复习）', () => EGL.ui.reviewPage());
+check('customPage（我的专卷）', () => EGL.ui.customPage());
+check('settingsPage（字号/每日目标）', () => EGL.ui.settingsPage());
+check('打印模块已内联', () => {
+  if (!EGL.print || typeof EGL.print.paperSheet !== 'function' || typeof EGL.print.result !== 'function') {
+    throw new Error('EGL.print 缺失');
+  }
+});
+check('AI 默认填空输入', () => {
+  if (EGL.ai.defaultConfig().qtype !== 'input') throw new Error('默认仍是点选');
+});
+check('按薄弱点组卷', () => {
+  const c = EGL.buildCustomPaper();
+  if (!c || !c.items || c.items.length !== 10) throw new Error('组卷不是 10 空');
+});
 check('methodPage', () => EGL.ui.methodPage());
 check('papersPage（真题语篇列表）', () => {
   if (!EGL.availablePaperIds().length) throw new Error('产物里没有真题语篇数据');
@@ -155,6 +170,10 @@ check('startPaper（整篇 10 空进入卷面）', () => {
   const pid = EGL.availablePaperIds()[0];
   EGL.quiz.startPaper(pid);
   if (!EGL.quiz.isActive()) throw new Error('startPaper 未激活 quiz');
+});
+check('startCustom（专卷进入整篇卷面）', () => {
+  EGL.quiz.startCustom({});
+  if (!EGL.quiz.isActive()) throw new Error('startCustom 未激活 quiz');
 });
 
 console.log('[build] AI 界面（产物级）');

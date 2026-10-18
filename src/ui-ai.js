@@ -52,10 +52,23 @@
   }
   function saveCfg(cfg) {
     var c = { topicId: cfg.topicId, count: cfg.count, customCount: cfg.customCount,
-              qtype: cfg.qtype, structure: cfg.structure,
+              qtype: cfg.qtype, structure: cfg.structure, focus: cfg.focus,
               providerId: cfg.providerId, baseUrl: cfg.baseUrl, modelId: cfg.modelId,
               rememberKey: !!cfg.rememberKey };
     try { localStorage.setItem(LS_CFG, JSON.stringify(c)); } catch (e) {}
+  }
+  /* 最近错得最多的考点（按正确率从低到高，给“按我的薄弱点命题”用） */
+  function weakTagTexts() {
+    var list = E.tagList().filter(function (t) { return t.attempts >= 2 && t.pct !== null; });
+    list.sort(function (a, b) { return a.pct - b.pct; });
+    var out = [], seen = {};
+    list.forEach(function (t) {
+      var name = E.catLabelOf(E.catOfTopicId(t.topicId)) + ' · ' + t.tag;
+      if (seen[name]) return;
+      seen[name] = 1;
+      out.push(name + '（' + Math.round(t.pct * 100) + '%）');
+    });
+    return out.slice(0, 6);
   }
   function keyFor(cfg) {
     var pid = providerOf(cfg).id;
@@ -164,9 +177,26 @@
           var remember = !!(cbx2 && cbx2.checked);
           cfg.rememberKey = remember;
           E.ai.saveKey(cfg.apiKey, remember, cfg.providerId);
+          // 按薄弱点命题：把最近错得多的考点带进 prompt
+          if (cfg.focus === 'weak') {
+            var weak = weakTagTexts();
+            if (!weak.length) {
+              U.toast('还没有足够的错题记录，先按常规配比生成', 'bad');
+              cfg.weakTags = [];
+            } else {
+              cfg.weakTags = weak;
+            }
+          } else {
+            cfg.weakTags = [];
+          }
           saveCfg(cfg);
           _lastCfg = cfg;
           startGeneration(cfg);
+          return;
+        }
+        var pexp = closestOf(target, '[data-pool-export]');
+        if (pexp) {
+          exportPoolEntry(pexp.dataset.poolExport);
           return;
         }
         var pgo = closestOf(target, '[data-pool-go]');
@@ -331,15 +361,27 @@
       + ' style="margin-top:8px;' + (customOn ? '' : 'display:none') + '">';
     nHtml += '</div>';
 
-    // 题型：默认点选选择题（不打字）；可切填空输入
-    var qtChoice = cfg.qtype !== 'input' ? ' on' : '';
-    var qtInput = cfg.qtype === 'input' ? ' on' : '';
-    var qtHtml = '<div class="form-row"><label>答题形式（默认点选，不用打字）</label><div class="seg">'
-      + '<button type="button" data-qtype="choice" class="' + qtChoice + '">点选选择题（n 选 1，推荐）</button>'
-      + '<button type="button" data-qtype="input" class="' + qtInput + '">填空输入（打字）</button>'
+    // 题型：上海真卷是纯填空 → 默认填空输入；点选只作为“不方便打字”的备选
+    var qtChoice = cfg.qtype === 'choice' ? ' on' : '';
+    var qtInput = cfg.qtype !== 'choice' ? ' on' : '';
+    var qtHtml = '<div class="form-row"><label>答题形式（默认填空，点选可选）</label><div class="seg">'
+      + '<button type="button" data-qtype="input" class="' + qtInput + '">填空输入（和真卷一致，推荐）</button>'
+      + '<button type="button" data-qtype="choice" class="' + qtChoice + '">点选选择题（不方便打字时）</button>'
       + '</div>'
-      + '<div class="form-hint">点选模式：每个空给 3~6 个选项（A/B/C…），由 AI 按考点灵活决定个数；做错同样进错题本+中文解析。</div>'
+      + '<div class="form-hint">填空：每个空给 answer / accepted 与六项解析，做错自动进错题本。点选：每空 3~6 个选项，适合手机快速刷题，但练的是“认选项”不是“写答案”。</div>'
       + '</div>';
+
+    // 侧重：全部专题随机，或按最近错得最多的考点定向命题
+    var focusWeak = cfg.focus === 'weak';
+    var weakList = weakTagTexts();
+    var focusHtml = '<div class="form-row"><label>命题侧重</label><select data-f="focus">'
+      + '<option value="all"' + (!focusWeak ? ' selected' : '') + '>按上海真卷常规配比</option>'
+      + '<option value="weak"' + (focusWeak ? ' selected' : '') + '>按我的薄弱点命题（' + weakList.length + ' 个考点）</option>'
+      + '</select>'
+      + '<div class="form-hint">' + (weakList.length
+          ? '会写进 prompt 的必考清单：' + esc(weakList.join('；'))
+          : '还没有足够的错题数据（同一考点至少练 2 题才会统计）。先做题，这里会自动出现你的薄弱点。')
+      + '</div></div>';
 
     // 结构：单句 + 语篇（推荐，贴近上海卷考查方式）
     var stC = cfg.structure !== 'sentence' ? ' on' : '';
@@ -385,7 +427,7 @@
       + '</div><datalist id="aiModelList">' + modelOptions + '</datalist>'
       + '<div class="form-hint" data-ai="modelStatus">点击「获取模型列表」后可直接下拉选择；接口不提供列表时也可手动输入模型 ID。</div></div>';
 
-    panel.innerHTML += providerHtml + keyHtml + baseHtml + modelHtml + tHtml + nHtml + qtHtml + structHtml;
+    panel.innerHTML += providerHtml + keyHtml + baseHtml + modelHtml + tHtml + nHtml + qtHtml + structHtml + focusHtml;
 
   }
 
@@ -420,6 +462,7 @@
         + '<span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">'
         + '<button type="button" class="btn sm ghost" data-pool-go="normal" data-id="' + esc(it.id) + '">▶ 普通模式</button>'
         + '<button type="button" class="btn sm ghost" data-pool-go="blind" data-id="' + esc(it.id) + '">盲做</button>'
+        + '<button type="button" class="btn sm ghost" data-pool-export="' + esc(it.id) + '" title="导出为 data/bank-papers-*.js，可直接放进项目">导出题库</button>'
         + '<button type="button" class="btn sm danger" data-pool-del="' + esc(it.id) + '" style="box-shadow:none;padding:6px 12px">删除</button>'
         + '</span>';
       listWrap.appendChild(row);
@@ -428,12 +471,52 @@
     v.appendChild(box);
   }
 
+  /* ================= 导出为题库文件（bank-papers-*.js） ================= */
+  function downloadText(filename, text, mime) {
+    try {
+      var blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      return true;
+    } catch (e) { return false; }
+  }
+  function modalClose(ov) {
+    var btn = null;
+    try { btn = ov.querySelector('[data-close]'); } catch (e) {}
+    if (btn) btn.addEventListener('click', function () { if (ov.close) ov.close(); });
+  }
+  function exportPoolEntry(id) {
+    var entry = (E.ai.getPool() || []).filter(function (e) { return e.id === id; })[0];
+    if (!entry) { U.toast('该记录已不存在', 'bad'); return; }
+    var res = E.ai.buildBankFile(entry);
+    if (!res.ok) {
+      var ov = U.modal('<h3>暂时不能导出</h3>'
+        + '<p class="muted">这份记录没有通过题库校验：</p>'
+        + '<ul class="why-others">' + (res.errors || []).slice(0, 8).map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>'
+        + '<p class="faint small" style="margin-top:8px">题库要求每篇 10 空、提示词紧跟空位、答案不出现在正文里；单句题不能直接入库。</p>'
+        + '<div class="btn-row" style="margin-top:12px"><button class="btn ghost" data-close="1">知道了</button></div>');
+      modalClose(ov);
+      return;
+    }
+    var ok = downloadText(res.filename, res.js, 'application/javascript;charset=utf-8');
+    if (!ok) { U.toast('下载失败，请换浏览器重试', 'bad'); return; }
+    var warns = res.warnings || [];
+    var ov2 = U.modal('<h3>已导出 ' + res.count + ' 篇语篇</h3>'
+      + '<p class="muted">文件名：<b>' + esc(res.filename) + '</b>。放进项目的 <code>data/</code> 目录，运行 <code>npm run build</code> 就会打进单文件，并成为内置题库。</p>'
+      + (warns.length ? '<div class="small faint" style="margin-top:8px">提醒（不阻止导出）：<ul>' + warns.slice(0, 6).map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></div>' : '')
+      + '<div class="btn-row" style="margin-top:12px"><button class="btn" data-close="1">关闭</button></div>');
+    modalClose(ov2);
+  }
+
   /* ================= 生成进度页 ================= */
   function startGeneration(cfg) {
     var v = appView();
     if (!v) return;
     _lastCfg = cfg;
-    _genLive = { stopped: false };
+    _genLive = { stopped: false, t0: Date.now() };
     // 切换到独立进度页
     v.innerHTML = '';
     var card = el('div', 'glass', '');
@@ -444,13 +527,24 @@
       + '<div id="genLog" style="min-height:130px;font-size:15px;line-height:2"></div>'
       + '<div class="btn-row" style="margin-top:16px">'
       + '<button type="button" class="btn ghost" data-gen="back">← 返回配置</button>'
+      + '<button type="button" class="btn ghost" data-gen="stop" style="color:var(--bad)">停止生成</button>'
       + '</div>';
     v.appendChild(card);
     v.addEventListener('click', function genBack(ev) {
+      var stopBtn = closestOf(ev.target, '[data-gen=stop]');
+      if (stopBtn) {
+        var did = (E.ai.cancelActive && E.ai.cancelActive());
+        if (_genLive) _genLive.stopped = true;
+        stopBtn.disabled = true;
+        stopBtn.textContent = '已停止';
+        logLine(v, '<div class="fb bad">已停止生成（不会再继续消耗额度）。已经生成的部分没有入池。</div>');
+        return;
+      }
       var btn = closestOf(ev.target, '[data-gen=back]');
       if (!btn) return;
       v.removeEventListener('click', genBack);
       if (_genLive) _genLive.stopped = true; // 返回后不再自动跳题
+      if (E.ai.cancelActive) E.ai.cancelActive();
       aiPage();
     });
 
@@ -465,6 +559,7 @@
       + '<span class="badge gray">' + esc(structBadge) + '</span> '
       + '<span class="badge amber">' + (cfg.count || 10) + ' 空</span> '
       + '<span class="badge green">' + (cfg.qtype === 'input' ? '填空输入' : '点选选择题') + '</span> '
+      + (cfg.focus === 'weak' ? '<span class="badge red">按薄弱点</span> ' : '')
       + '<span class="badge gray">' + esc(providerBadge) + (cfg.modelId ? ' · ' + esc(cfg.modelId) : '') + '</span>';
     logLine(v, '正在分析命题要求…');
     runGeneration(cfg, v);
@@ -499,14 +594,18 @@
       if (stopped()) return Promise.resolve(null);
       idx++;
       var n = idx === papersNeeded ? Math.max(1, count - (papersNeeded - 1) * 10) : 10;
-      logLine(v, '⏳ 正在生成「单句+语篇」批次 ' + idx + '/' + papersNeeded + '（约 ' + n + ' 空，' + esc(provider.shortName) + ' · ' + esc(cfg.modelId) + '）…');
+      var used = _genLive && _genLive.t0 ? Math.round((Date.now() - _genLive.t0) / 1000) : 0;
+      var eta = idx > 1 ? Math.round(used / (idx - 1) * (papersNeeded - idx + 1)) : 0;
+      logLine(v, '⏳ 正在生成批次 ' + idx + '/' + papersNeeded + '（约 ' + n + ' 空，' + esc(provider.shortName) + ' · ' + esc(cfg.modelId) + '）'
+        + (idx > 1 ? '… 已用 ' + used + ' 秒，预计还需约 ' + eta + ' 秒' : '…')
+        + '　<span class="faint small">长文生成一般 20–90 秒/批，可以点「停止生成」</span>');
       var cfg1 = {};
       for (var k in cfg) cfg1[k] = cfg[k];
       cfg1.count = n;
       var prompt = E.ai.buildPrompt(cfg1);
       return E.ai.callChat(prompt, cfg1).then(function (text) {
         if (stopped()) return null;
-        logLine(v, '第 ' + idx + ' 批生成完成，正在校验…');
+        logLine(v, '第 ' + idx + ' 批生成完成（' + Math.round((Date.now() - _genLive.t0) / 1000) + ' 秒），正在校验…');
         var raw = E.ai.extractJSON(text);
         var sections = E.ai.validateAndNormalize(raw, cfg1);
         sections.forEach(function (s) { allSections.push(s); });
@@ -537,10 +636,10 @@
         modelId: cfg.modelId
       };
       E.ai.cacheSession({ questions: questions, meta: meta, cfg: cfg, papers: allSections, totalBlanks: totalBlanks });
-      E.ai.pushToPool(allSections, questions, cfg, meta);
+      var poolEntry = E.ai.pushToPool(allSections, questions, cfg, meta);
       if (U.savedNotice) U.savedNotice();
       setBar(v, 100);
-      finishPage(v, true, allSections.length, totalBlanks, questions, meta, null);
+      finishPage(v, true, allSections.length, totalBlanks, questions, meta, null, poolEntry);
     }).catch(function (err) {
       if (stopped()) return;
       setBar(v, 100);
@@ -548,15 +647,16 @@
     });
   }
 
-  function finishPage(v, ok, papersN, blanksN, questions, meta, errMsg) {
+  function finishPage(v, ok, papersN, blanksN, questions, meta, errMsg, poolEntry) {
     var lg = $('#genLog', v);
     if (!lg) return;
     if (ok) {
       lg.appendChild(el('div', '', '<div class="fb ok" style="margin-top:8px"><span class="big">✅</span>生成完成：'
-        + papersN + ' 组（单句+语篇） · ' + blanksN + ' 空（已自动保存到「AI 出题题目列表」）</div>'));
+        + papersN + ' 组（单句+语篇） · ' + blanksN + ' 空 · 用时 ' + Math.round((Date.now() - (_genLive ? _genLive.t0 : Date.now())) / 1000) + ' 秒'
+        + '（已自动保存到「AI 出题题目列表」）</div>'));
       if (questions && questions.fallbackCount) {
         lg.appendChild(el('div', '', '<div class="fb bad" style="margin-top:6px">' + questions.fallbackCount
-          + ' 空 AI 未给出选项，已按填空输入呈现（其余为点选）。可重试生成一次。</div>'));
+          + ' 空 AI 未给出选项，已按填空输入呈现。可重试生成一次。</div>'));
       }
     } else {
       lg.appendChild(el('div', '', '<div class="fb bad" style="margin-top:8px"><span class="big">❌</span>' + esc(errMsg || '') + '</div>'));
@@ -572,6 +672,21 @@
         E.quiz.startAI(questions, m);
       });
       btnRow.appendChild(start);
+      var timedBtn = el('button', 'btn ghost', '限时 10 分钟做');
+      timedBtn.type = 'button';
+      timedBtn.addEventListener('click', function () {
+        var m2 = meta || {};
+        m2.mode = 'normal';
+        m2.timed = true;
+        E.quiz.startAI(questions, m2);
+      });
+      btnRow.appendChild(timedBtn);
+    }
+    if (ok && poolEntry && poolEntry.id) {
+      var expBtn = el('button', 'btn ghost', '导出为题库文件');
+      expBtn.type = 'button';
+      expBtn.addEventListener('click', function () { exportPoolEntry(poolEntry.id); });
+      btnRow.appendChild(expBtn);
     }
     var retry = el('button', 'btn', ok ? '再生成一组（同配置）' : '重试生成');
     retry.type = 'button';

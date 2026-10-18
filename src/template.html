@@ -9,7 +9,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#f7f4ed">
 <meta name="author" content="Hison">
 <meta name="copyright" content="Hison · 抖音 XRuiiiiii · 小红书 xiaoruiaaa520 · 仅供个人免费学习，禁止商用">
@@ -21,6 +21,7 @@
   try {
     var p = JSON.parse(localStorage.getItem('EGL_UI_PREFS_v1') || '{}');
     if (p && p.bg && p.bg !== 'plain') document.documentElement.setAttribute('data-bg', p.bg);
+    if (p && p.font && p.font !== 'std') document.documentElement.setAttribute('data-font', p.font);
   } catch (e) { /* localStorage 不可用时按默认纸白 */ }
 })();
 </script>

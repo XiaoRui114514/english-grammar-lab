@@ -22,6 +22,14 @@ const checks = [
   ['题干空位只有一条虚线（无下划线字符）', '<span class="blank"></span>'],
   ['编号空位只有一条虚线（无下划线字符）', '<i class="pb-u"></i>'],
   ['同路由导航不再整页重绘（首页点图标不抽搐）', 'function go(route, force)'],
+  ['打印稿容器与打印样式已内联', '#printRoot { display: none; }'],
+  ['字号档位样式已内联', 'html[data-font="lg"] .qtext'],
+  ['只看错题开关样式已内联', '.rev-list.only-wrong'],
+  ['复习队列样式已内联', '.review-item'],
+  ['打印模块已内联', 'paperAnswers: paperAnswers'],
+  ['键盘操作已内联', 'function onKeyDown(e)'],
+  ['复习排期(SRS)已内联', 'SRS_STEPS'],
+  ['数据版本已升到 v3', 'var DATA_VERSION = 3'],
 ];
 let failed = 0;
 for (const [name, needle] of checks) {

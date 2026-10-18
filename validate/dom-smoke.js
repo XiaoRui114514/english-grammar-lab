@@ -83,8 +83,12 @@ function synth(sel) {
 const document = {
   readyState: 'complete',
   _els: [],
+  _byId: {},
   createElement(tag) { const e = new FakeEl(tag); this._els.push(e); return e; },
-  getElementById(id) { const r = this._root || (this._root = new FakeEl('div')); r.id = id; return r; },
+  getElementById(id) {
+    if (!this._byId[id]) { const e = new FakeEl('div'); e.id = id; this._byId[id] = e; }
+    return this._byId[id];
+  },
   querySelector() { return null; },
   querySelectorAll() { return [] },
   addEventListener() { },
@@ -106,10 +110,14 @@ const sb = {
   URL: { createObjectURL: () => 'blob:x', revokeObjectURL() { } },
   Blob: function () { },
   FileReader: function () { this.readAsText = () => { }; },
-  setTimeout, clearTimeout, Promise
+  setTimeout, clearTimeout,
+  // 计时器用桩：只验证代码路径，不让测试挂住
+  setInterval: () => 0, clearInterval: () => {},
+  Promise
 };
 sb.window = sb;
 sb.globalThis = sb;
+sb.print = function () { /* 桩：打印调用不真的弹窗 */ };
 
 function run(name) {
   const code = fs.readFileSync(path.join(ROOT, name), 'utf8').replace(/^\uFEFF/, '');
@@ -127,6 +135,7 @@ function loadAll() {
   run('src/brand.js');
   run('src/core.js');
   run('src/ui-helpers.js');
+  run('src/print.js');
   run('src/ai.js');
   run('src/ui-views.js');
   run('src/ui-quiz.js');
@@ -152,6 +161,19 @@ function check(name, fn) {
 
 loadAll();
 const EGL = sb.window.EGL;
+function resetView() {
+  const v = EGL.ui.app && EGL.ui.app.view;
+  if (v) v.children.length = 0;
+}
+function viewHas(text) {
+  let found = false;
+  (function walk(n) {
+    if (!n) return;
+    if (n._innerHTML && String(n._innerHTML).indexOf(text) >= 0) found = true;
+    if (n.children) n.children.forEach(walk);
+  })(EGL.ui.app.view);
+  return found;
+}
 // 诊断
 console.log('[diag] EGL.u.$$ =', typeof EGL.u.$$, ' EGL.u.$ =', typeof EGL.u.$);
 console.log('[diag] EGL.ui.app =', EGL.ui.app && typeof EGL.ui.app.view);
@@ -278,6 +300,55 @@ check('AI 整篇卷面：点选全部空并交卷', () => {
   if (!hasScore) throw new Error('交卷后未出现成绩页');
 });
 
+console.log('[dom] 新功能渲染与打印稿');
+check('首页：连续学习 + 最近 7 天', () => {
+  resetView(); EGL.ui.home();
+  if (!viewHas('连续学习') || !viewHas('最近 7 天')) throw new Error('缺新账目行 / 柱图');
+});
+check('设置页：字号 + 每日目标', () => {
+  resetView(); EGL.ui.settingsPage();
+  if (!viewHas('字号') || !viewHas('每日目标')) throw new Error('缺设置项');
+});
+check('语篇页：真题考点频次', () => {
+  resetView(); EGL.ui.papersPage();
+  if (!viewHas('真题考点频次')) throw new Error('缺频次表');
+});
+check('错题本：筛选 / 笔记 / 打印', () => {
+  resetView(); EGL.ui.wrongBook();
+  if (!viewHas('打印当前筛选结果') || !viewHas('我为什么错')) throw new Error('缺筛选条或笔记');
+});
+check('限时卷面：右上角计时器', () => {
+  resetView(); EGL.quiz.startPaper('paper01', { timed: true });
+  if (!viewHas('quizTimer')) throw new Error('缺倒计时');
+});
+check('打印：练习卷含答题区', () => {
+  EGL.print.paperSheet('paper01');
+  const pr = document.getElementById('printRoot');
+  const html = String(pr._innerHTML);
+  if (html.indexOf('答题区') < 0 || html.indexOf('pr-blank') < 0) throw new Error('打印稿内容缺失');
+});
+check('打印：答案页含解析', () => {
+  EGL.print.paperAnswers('paper01');
+  const html = String(document.getElementById('printRoot')._innerHTML);
+  if (html.indexOf('线索') < 0 || html.indexOf('判断') < 0) throw new Error('答案页缺解析');
+});
+check('打印：错题单含我的答案', () => {
+  EGL.print.wrongList(EGL.data.wrongBook, '错题单');
+  const html = String(document.getElementById('printRoot')._innerHTML);
+  if (html.indexOf('我的答案') < 0 || html.indexOf('正确答案') < 0) throw new Error('错题单缺答案行');
+});
+check('打印：成绩单含得分', () => {
+  EGL.print.result({
+    title: '测试成绩单', date: '2026-10-18', correct: 1, total: 2, seconds: 10,
+    modeLabel: '普通模式', answers: [
+      { q: { tag: '考点A', answerText: 'a', type: 'input', accepted: ['a'] }, userText: 'a', ok: true },
+      { q: { tag: '考点B', answerText: 'b', type: 'input', accepted: ['b'] }, userText: 'c', ok: false }
+    ]
+  });
+  const html = String(document.getElementById('printRoot')._innerHTML);
+  if (html.indexOf('得分') < 0 || html.indexOf('考点B') < 0) throw new Error('成绩单缺得分/逐题');
+});
+
 console.log('[dom] 真题语篇');
 check('papersPage 渲染', () => {
   EGL.ui.papersPage();
@@ -320,6 +391,30 @@ check('startPaper 进入整篇卷面并渲染 10 空卡片', () => {
 });
 check('startPaper 未知 id 不崩', () => {
   EGL.quiz.startPaper('paper_not_exist');
+});
+
+console.log('[dom] 新增页面（复习 / 专卷 / 设置 / 打印模块）');
+check('reviewPage 渲染', () => EGL.ui.reviewPage());
+check('customPage 空态渲染', () => EGL.ui.customPage());
+check('buildCustomPaper 组卷', () => {
+  const c = EGL.buildCustomPaper();
+  if (!c || !c.items || !c.items.length) throw new Error('组卷为空');
+  if (c.items.length !== 10) throw new Error('组卷应为 10 空，实际 ' + c.items.length);
+});
+check('customPage 有卷子时渲染', () => EGL.ui.customPage());
+check('settingsPage 渲染（字号/每日目标）', () => EGL.ui.settingsPage());
+check('打印模块已加载', () => {
+  if (!EGL.print || typeof EGL.print.paperSheet !== 'function') throw new Error('EGL.print 缺失');
+  if (typeof EGL.print.wrongList !== 'function' || typeof EGL.print.result !== 'function') throw new Error('打印入口不全');
+});
+check('startReview / startCustom 不崩', () => {
+  EGL.quiz.startReview();
+  EGL.quiz.startCustom({ timed: true });
+  if (!EGL.quiz.isActive()) throw new Error('专卷未进入做题流程');
+});
+check('限时模拟考：startPaper(timed)', () => {
+  EGL.quiz.startPaper('paper01', { timed: true });
+  if (!EGL.quiz.isActive()) throw new Error('限时卷面未激活');
 });
 
 console.log('[dom] localStorage 持久化');

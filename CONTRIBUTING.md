@@ -24,8 +24,8 @@ node -v          # 需要 >= 18
 3. 跑测试：
 
    ```bash
-   npm test              # 题库结构 + 引擎 + 练习流程 + DOM 渲染 + AI 转换
-   npm run test:build    # 构建产物完整性（$$ 选择器、品牌水印、AI 进度日志）
+   npm test              # 题库结构 + 引擎 + 练习流程 + 迁移/复习/组卷/画像 + DOM 渲染 + AI 转换
+   npm run test:build    # 构建产物完整性（$$ 选择器、品牌水印、打印/字号/复习样式）
    npm run test:browser  # 真实 Chrome 冒烟（未装 Chrome 会自动跳过）
    ```
 
@@ -37,10 +37,11 @@ node -v          # 需要 >= 18
 
 | 路径 | 作用 |
 | --- | --- |
-| `src/core.js` | 引擎：存储 / 判分 / 分析 / 大专题统计 / 来源标记 |
-| `src/ui-views.js` | 首页、专题页、方法课、错题本、薄弱点、学习记录 |
-| `src/ui-quiz.js` | 练习流程、盲做、成绩页、AI 语篇进入原流程 |
-| `src/ai.js` | Key 管理 / Prompt 组装 / DeepSeek 调用 / JSON 校验 |
+| `src/core.js` | 引擎：存储 / 判分 / 分析 / 复习排期 / 组卷 / 大专题统计 / 来源标记 |
+| `src/ui-views.js` | 首页、专题页、方法课、错题本、复习、专卷、薄弱点、学习记录 |
+| `src/ui-quiz.js` | 练习流程、盲做、限时、成绩页、AI 语篇进入原流程 |
+| `src/print.js` | 打印稿：练习卷 / 答案页 / 错题单 / 专卷 / 成绩单 |
+| `src/ai.js` | Key 管理 / Prompt 组装 / 调用 / JSON 校验 / AI 讲解 / 导出题库 |
 | `src/ui-ai.js` | AI 出题配置界面 + 生成编排 + 缓存 |
 | `src/boot.js` | hash 路由 |
 | `data/bank-*.js` | 内置题库（元数据文件须先于题库加载） |

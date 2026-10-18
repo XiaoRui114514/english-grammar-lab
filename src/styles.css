@@ -910,8 +910,170 @@ details.explanation-panel .explain {
 @media (min-width: 980px) { .sq-opt { font-size: 15px; } }
 
 
-/*__BRAND_CSS_START__*/
-/* ==================== 品牌署名 · 授权（Hison） ====================
+/* ============ 最近 7 天小柱图 ============ */
+.week-wrap { background: var(--panel); border: 1px solid var(--stroke); border-radius: var(--radius); margin-top: var(--space-sm); padding: 10px 14px 8px; }
+.week-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 12.5px; font-weight: 700; color: var(--ink-dim); }
+.week-cols { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+.week-col { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
+.week-col .wc-bar { width: 100%; max-width: 34px; height: 46px; display: flex; align-items: flex-end; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+.week-col .wc-bar > i { display: block; width: 100%; background: var(--accent); border-radius: 0; transition: height 0.4s var(--ease-out); }
+.week-col.today .wc-bar { outline: 1px solid var(--accent); outline-offset: 1px; }
+.week-col .wc-d { font-size: 11px; color: var(--ink-faint); }
+.week-col .wc-n { font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+
+/* ============ 错题本筛选 / 笔记 / 掌握态 ============ */
+.filter-bar {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
+  background: var(--panel); border: 1px solid var(--stroke); border-radius: var(--radius);
+  padding: 10px 12px; margin-bottom: var(--space-sm);
+}
+.filter-bar label { display: block; font-size: 11.5px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.03em; }
+.filter-bar select {
+  width: 100%; margin-top: 3px; padding: 7px 9px; font-size: 13px; font-family: inherit;
+  border: 1px solid var(--stroke-strong); border-radius: var(--radius-sm);
+  background: var(--panel); color: var(--ink); outline: none;
+}
+.filter-bar select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+@media (max-width: 640px) { .filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.wb-item.mastered { border-left-color: var(--ok); opacity: 0.82; }
+.wb-note-wrap { display: block; margin-top: 10px; }
+.wb-note-wrap .lb { display: block; font-size: 12px; font-weight: 700; color: var(--ink-faint); margin-bottom: 4px; letter-spacing: 0.03em; }
+.wb-note {
+  width: 100%; resize: vertical; min-height: 38px; padding: 8px 11px;
+  border: 1px solid var(--stroke); border-radius: var(--radius-sm);
+  background: var(--bg2); color: var(--ink); font-family: inherit; font-size: 13.5px; line-height: 1.6;
+  outline: none;
+}
+.wb-note:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* ============ 答题画像 ============ */
+.profile-row { display: flex; align-items: center; gap: 10px; margin: 7px 0; }
+.profile-row .lb { width: 74px; flex: 0 0 74px; font-size: 12.5px; color: var(--ink-dim); font-weight: 700; }
+.profile-row .pbar { flex: 1; margin: 0; }
+.profile-row .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; min-width: 48px; text-align: right; }
+
+/* ============ 备份提醒 ============ */
+.backup-note {
+  background: var(--warn-bg); border: 1px solid var(--warn); color: var(--warn);
+  border-radius: var(--radius-sm); padding: 9px 12px; font-size: 12.5px; margin-bottom: 10px; line-height: 1.65;
+}
+
+/* ============ 键盘提示 / 空位提示 ============ */
+.kbd-hint { margin-top: 8px; font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0.02em; }
+.kbd-hint b { color: var(--ink-dim); font-family: var(--font-mono); font-weight: 700; }
+.pos-hint-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.pos-hint {
+  flex: 1 1 220px; min-width: 0; background: var(--bg2); border: 1px dashed var(--stroke-strong);
+  border-radius: var(--radius-sm); padding: 7px 10px; font-family: var(--font-en); font-size: 14px;
+}
+.pos-hint .slot-mark { color: var(--accent); letter-spacing: 0.06em; }
+@media (max-width: 560px) { .pos-hint-row { align-items: flex-start; flex-direction: column; } }
+
+/* ============ AI 讲解 ============ */
+.ai-explain-row { margin-top: 8px; }
+.ai-explain-body { font-size: 14px; line-height: 1.75; max-height: 56vh; overflow: auto; }
+.ai-explain-body .ex-simple { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.ai-explain-body .ex-pitfall { background: var(--warn-bg); border-left: 3px solid var(--warn); padding: 8px 10px; border-radius: var(--radius-sm); margin: 8px 0; }
+.ai-explain-body .ex-examples { background: var(--bg2); border-radius: var(--radius-sm); padding: 8px 12px; margin: 8px 0; }
+.ai-explain-body .ex-examples ul { margin: 4px 0 0 18px; }
+.ai-explain-body .ex-examples li { margin: 3px 0; font-family: var(--font-en); }
+.ai-explain-body .ex-tip { color: var(--hl); font-weight: 700; }
+
+/* ============ 成绩页：只看错题 / 复习卡片 ============ */
+.rev-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: var(--space-xl) 0 var(--space-sm); padding-top: var(--space-xs); border-top: 1px solid var(--ink); }
+.rev-head .rev-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+.rev-toggle { display: inline-flex; gap: 6px; }
+.rev-toggle button {
+  border: 1px solid var(--stroke-strong); background: var(--panel); color: var(--ink-dim);
+  border-radius: var(--radius-sm); padding: 6px 11px; font-size: 12.5px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+}
+.rev-toggle button:hover { border-color: var(--ink-dim); color: var(--ink); }
+.rev-toggle button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.rev-toggle button:disabled { opacity: 0.45; pointer-events: none; }
+.rev-toggle button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.rev-list.only-wrong .wb-item.ok { display: none; }
+.review-item { padding: 12px 14px; margin-bottom: 8px; border-left: 3px solid var(--warn); }
+.review-item .head { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.review-item .q { font-family: var(--font-en); font-size: 15px; margin-top: 7px; }
+
+/* ============ 限时模拟考计时 ============ */
+.learn-head .timer {
+  color: var(--accent); border: 1px solid var(--stroke); border-radius: 4px;
+  padding: 1px 7px; background: var(--accent-soft);
+}
+.learn-head .timer.urgent { color: var(--bad); border-color: var(--bad); background: var(--bad-bg); }
+
+/* ============ 字号档位（设置页：标准 / 大 / 特大） ============ */
+html[data-font="lg"] .qtext { font-size: 19.5px; }
+html[data-font="lg"] .passage-body { font-size: 17px; }
+html[data-font="lg"] .kblock p, html[data-font="lg"] .kblock li { font-size: 15px; }
+html[data-font="lg"] .ex-mod, html[data-font="lg"] .ex-mod .chain { font-size: 15px; }
+html[data-font="lg"] .wb-item .q, html[data-font="lg"] .review-item .q { font-size: 16px; }
+html[data-font="lg"] .mini-table { font-size: 14.5px; }
+html[data-font="lg"] .ledger-row .v { font-size: 20.5px; }
+html[data-font="lg"] .answer-input input { font-size: 19px; }
+html[data-font="xl"] .qtext { font-size: 21px; }
+html[data-font="xl"] .passage-body { font-size: 18.5px; }
+html[data-font="xl"] .kblock p, html[data-font="xl"] .kblock li { font-size: 16px; }
+html[data-font="xl"] .ex-mod, html[data-font="xl"] .ex-mod .chain { font-size: 16px; }
+html[data-font="xl"] .wb-item .q, html[data-font="xl"] .review-item .q { font-size: 17px; }
+html[data-font="xl"] .mini-table { font-size: 15.5px; }
+html[data-font="xl"] .ledger-row .v { font-size: 22px; }
+html[data-font="xl"] .answer-input input { font-size: 20px; }
+
+/* ============ 屏幕阅读器专用 ============ */
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ============ 打印（练习卷 / 答案页 / 错题单 / 专卷 / 成绩单） ============
+   打印稿放在 #printRoot；屏幕上隐藏，@media print 时只输出它。 */
+#printRoot { display: none; }
+@media print {
+  html, body { background: #fff !important; color: #111 !important; }
+  body::before, .topbar, #app, .egl-foot, .egl-seal, .overlay, .save-notice, .fb { display: none !important; }
+  #printRoot { display: block !important; }
+  #printRoot .pr-doc { font-family: var(--font-body); color: #111; font-size: 10.5pt; line-height: 1.7; }
+  #printRoot .pr-head { border-bottom: 1.5pt solid #111; padding-bottom: 6pt; margin-bottom: 8pt; }
+  #printRoot .pr-kicker { font-size: 8.5pt; letter-spacing: 0.14em; color: #555; }
+  #printRoot .pr-title { font-family: var(--font-display); font-size: 17pt; font-weight: 700; margin: 3pt 0; }
+  #printRoot .pr-sub { font-size: 9pt; color: #444; }
+  #printRoot .pr-meta { display: flex; gap: 14pt; flex-wrap: wrap; margin-top: 8pt; font-size: 9.5pt; color: #333; }
+  #printRoot .pr-note { font-size: 9pt; color: #555; margin: 6pt 0 10pt; }
+  #printRoot .pr-passage { font-family: var(--font-en); font-size: 11.5pt; line-height: 2.05; text-align: justify; }
+  #printRoot .pr-passage p { margin: 0 0 6pt; }
+  #printRoot .pr-blank { display: inline-block; min-width: 62pt; border-bottom: 0.8pt solid #333; margin: 0 2pt; text-align: center; }
+  #printRoot .pr-hint { font-family: var(--font-en); }
+  #printRoot .pr-answers { margin-top: 14pt; border-top: 0.8pt dashed #999; padding-top: 8pt; }
+  #printRoot .pr-ans-title { font-size: 9.5pt; font-weight: 700; margin-bottom: 6pt; }
+  #printRoot .pr-lines { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10pt 22pt; }
+  #printRoot .pr-line { display: flex; align-items: flex-end; gap: 6pt; font-size: 10pt; }
+  #printRoot .pr-line span { flex: 1; border-bottom: 0.8pt solid #777; height: 16pt; }
+  #printRoot .pr-table { width: 100%; border-collapse: collapse; margin-top: 6pt; }
+  #printRoot .pr-table th { text-align: left; font-size: 8.5pt; color: #444; border-bottom: 1pt solid #111; padding: 4pt 4pt 3pt; }
+  #printRoot .pr-table td { font-size: 9pt; border-bottom: 0.5pt solid #bbb; padding: 5pt 4pt; vertical-align: top; }
+  #printRoot .pr-table td.c { font-family: var(--font-mono); width: 18pt; }
+  #printRoot .pr-table td.ans { font-weight: 700; }
+  #printRoot .pr-table td.ok { color: #1d6a4c; }
+  #printRoot .pr-table td.bad { color: #b23a2c; }
+  #printRoot .pr-table .tiny { font-weight: 400; font-size: 8pt; color: #666; }
+  #printRoot .pr-item { border-bottom: 0.5pt dashed #bbb; padding: 7pt 0; page-break-inside: avoid; }
+  #printRoot .pr-item-head { font-size: 8.5pt; color: #444; margin-bottom: 3pt; }
+  #printRoot .pr-item-head .badge { border: 0; background: transparent; padding: 0 6pt 0 0; color: #444; font-size: 8.5pt; }
+  #printRoot .pr-q { font-family: var(--font-en); font-size: 10.5pt; margin: 2pt 0; }
+  #printRoot .pr-ansline { font-size: 9.5pt; margin-top: 3pt; }
+  #printRoot .pr-note-inline { font-size: 9pt; color: #444; margin-top: 2pt; }
+  #printRoot .pr-explain { font-size: 9pt; color: #333; margin-top: 3pt; }
+  #printRoot .pr-score { font-size: 13pt; font-weight: 700; margin-top: 7pt; }
+  #printRoot .pr-ans-row { font-size: 10pt; margin: 3pt 0; }
+  #printRoot .pr-pagebreak { page-break-before: always; }
+  #printRoot .pr-foot { margin-top: 16pt; padding-top: 6pt; border-top: 0.5pt solid #999; font-size: 8pt; color: #666; text-align: center; }
+  @page { margin: 14mm 12mm; }
+}
+
+/*__BRAND_CSS_START__*//* ==================== 品牌署名 · 授权（Hison） ====================
    注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。
    删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */
 /* 右下角署名印章：平时是一枚小方签，悬停 / 点击后原地展开署名卡片（无弹窗） */

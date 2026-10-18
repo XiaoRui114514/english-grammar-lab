@@ -22,6 +22,8 @@
       case 'topic': E.ui.topicPage(parts[1] || ''); break;
       case 'papers': E.ui.papersPage(); break;
       case 'paper': E.ui.paperPage(parts[1] || ''); break;
+      case 'review': (E.ui && E.ui.reviewPage) ? E.ui.reviewPage() : E.ui.wrongBook(); break;
+      case 'custom': (E.ui && E.ui.customPage) ? E.ui.customPage() : E.ui.home(); break;
       case 'wrong': E.ui.wrongBook(); break;
       case 'weak': E.ui.weak(); break;
       case 'records': E.ui.records(); break;
@@ -36,8 +38,13 @@
   }
 
   function highlightNav(route) {
+    // 二级页面（topic/paper/review/custom）高亮到对应一级导航
+    var parent = route === 'topic' ? 'topics' : route === 'paper' ? 'papers'
+      : (route === 'review' || route === 'custom') ? 'home' : route;
     $$('.nav-btn').forEach(function (b) {
-      b.classList.toggle('on', b.dataset.nav === route);
+      var on = b.dataset.nav === parent;
+      b.classList.toggle('on', on);
+      if (b.setAttribute) b.setAttribute('aria-current', on ? 'page' : 'false');
     });
   }
 
@@ -76,7 +83,7 @@
         var nav = b.dataset.nav;
         if (nav === 'challenge') {
           if (!(E.ui.allCoreFinished && E.ui.allCoreFinished())) {
-            U.toast('需先完成全部 12 个专题（每题一轮）', 'bad');
+            U.toast('需先完成全部 ' + E.availableTopicIds().length + ' 个专题（每个一整轮）', 'bad');
             return;
           }
         }
@@ -156,6 +163,16 @@
     E.ui.quizActive = false;
     // 背景主题：<head> 里的首屏脚本已应用过一次，这里兜底再同步一遍
     if (E.ui.applySavedBg) E.ui.applySavedBg();
+    if (E.ui.applySavedFont) E.ui.applySavedFont();
+    // 屏幕阅读器播报区：判题反馈 / 提示只播报，不抢焦点
+    if (document.body && document.body.appendChild && document.getElementById && !document.getElementById('eglLive')) {
+      var live = document.createElement('div');
+      live.id = 'eglLive';
+      live.className = 'sr-only';
+      live.setAttribute('aria-live', 'polite');
+      live.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(live);
+    }
     // 任意自动保存 → 右上角“已自动保存”提示（节流，1.4s 后消失）
     if (E.setSaveListener && U.savedNotice) E.setSaveListener(U.savedNotice);
     bindTopbar();

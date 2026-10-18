@@ -226,7 +226,16 @@
     var t = el('div', 'fb ' + (type === 'ok' ? 'ok' : type === 'bad' ? 'bad' : ''),
       '<span class="big">' + (type === 'ok' ? '✓' : type === 'bad' ? '✕' : '·') + '</span>' + esc(msg));
     t.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:99;box-shadow:var(--shadow)';
+    if (t.setAttribute) {
+      t.setAttribute('role', type === 'bad' ? 'alert' : 'status');
+      t.setAttribute('aria-live', type === 'bad' ? 'assertive' : 'polite');
+    }
     document.body.appendChild(t);
+    // 同步到屏幕阅读器播报区（#eglLive 在 boot 时创建）
+    try {
+      var live = document.getElementById ? document.getElementById('eglLive') : null;
+      if (live) live.textContent = String(msg || '');
+    } catch (e) {}
     setTimeout(function () { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 2200);
     setTimeout(function () { t.remove(); }, 2600);
   }

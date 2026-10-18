@@ -10,12 +10,30 @@
   window.EGL = window.EGL || {};
 
   var LS_KEY = 'EGL_LAB_DATA_v1';
+  var DATA_VERSION = 3;
+  /* 错题复习排期：刚错的当天到期；之后每答对一次，到期日往后推 1/2/4/7/15 天；
+     连续答对 5 次算掌握（不再进今日复习队列，但仍留在错题本里）。 */
+  var SRS_STEPS = [1, 2, 4, 7, 15];
 
   /* ---------- 工具 ---------- */
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function todayStr() {
     var d = new Date();
     return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  function dayKey(ts) {
+    var d = new Date(ts || Date.now());
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  function startOfDay(ts) {
+    var d = new Date(ts || Date.now());
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }
+  function addDays(ts, n) {
+    var d = new Date(ts || Date.now());
+    d.setDate(d.getDate() + n);
+    return d.getTime();
   }
   function nowTs() { return Date.now(); }
   function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -84,7 +102,7 @@
   /* ---------- 默认数据 ---------- */
   function emptyData() {
     return {
-      version: 2,
+      version: DATA_VERSION,
       global: { answered: 0, correct: 0 },
       topics: {},
       tags: {},
@@ -95,19 +113,68 @@
       usedPool: {},
       challengeUnlocked: {},
       lastStudyAt: 0,
-      createdAt: nowTs()
+      createdAt: nowTs(),
+      goal: 12,                                     // 每日目标题量（设置页可改）
+      agg: {                                        // 答题画像（v3 新增）
+        byType: { choice: { a: 0, c: 0 }, input: { a: 0, c: 0 } },
+        byDiff: {},
+        timeSum: 0, timeCount: 0
+      },
+      custom: null                                  // 最近一次「我的专卷」
     };
+  }
+
+  /* 老错题补齐 v3 字段（不丢原数据，只补默认值） */
+  function normalizeWrongEntry(w) {
+    if (!w || typeof w !== 'object') return w;
+    if (!w.times) w.times = 1;
+    if (typeof w.stage !== 'number') w.stage = 0;
+    if (typeof w.mastered !== 'boolean') w.mastered = false;
+    if (!w.dueAt && !w.mastered) w.dueAt = nowTs();   // 老错题：立刻排进今日复习（已掌握的不再排期）
+    if (!w.notes) w.notes = '';
+    if (!w.catId) w.catId = catOfTopicId(w.topicId || '');
+    if (!('snapshot' in w)) w.snapshot = null;
+    return w;
+  }
+  function ensureDataShape(d) {
+    if (!d.global) d.global = { answered: 0, correct: 0 };
+    if (!d.topics) d.topics = {};
+    if (!d.tags) d.tags = {};
+    if (!d.errorTypes) d.errorTypes = {};
+    if (!Array.isArray(d.wrongBook)) d.wrongBook = [];
+    if (!Array.isArray(d.sessions)) d.sessions = [];
+    if (!d.daily) d.daily = {};
+    if (!d.usedPool) d.usedPool = {};
+    if (!d.challengeUnlocked) d.challengeUnlocked = {};
+    if (typeof d.goal !== 'number' || !(d.goal >= 1)) d.goal = 12;
+    if (!d.agg || typeof d.agg !== 'object') {
+      d.agg = { byType: { choice: { a: 0, c: 0 }, input: { a: 0, c: 0 } }, byDiff: {}, timeSum: 0, timeCount: 0 };
+    }
+    if (!d.agg.byType) d.agg.byType = { choice: { a: 0, c: 0 }, input: { a: 0, c: 0 } };
+    if (!d.agg.byType.choice) d.agg.byType.choice = { a: 0, c: 0 };
+    if (!d.agg.byType.input) d.agg.byType.input = { a: 0, c: 0 };
+    if (!d.agg.byDiff) d.agg.byDiff = {};
+    if (typeof d.agg.timeSum !== 'number') d.agg.timeSum = 0;
+    if (typeof d.agg.timeCount !== 'number') d.agg.timeCount = 0;
+    if (!('custom' in d)) d.custom = null;
+    d.wrongBook.forEach(normalizeWrongEntry);
+    return d;
+  }
+  /* v1 / v2 → v3：只补字段，不删任何历史记录 */
+  function migrateData(d) {
+    if (!d || typeof d !== 'object') return null;
+    if (d.version !== 1 && d.version !== 2 && d.version !== 3) return null;
+    ensureDataShape(d);
+    d.version = DATA_VERSION;
+    return d;
   }
 
   function loadData() {
     try {
       var raw = localStorage.getItem(LS_KEY);
       if (!raw) return emptyData();
-      var d = JSON.parse(raw);
-      if (!d || (d.version !== 1 && d.version !== 2)) return emptyData();
-      if (d.version === 1) d.version = 2;              // 平滑升级
-      if (!d.global) d.global = { answered: 0, correct: 0 };
-      return d;
+      var d = migrateData(JSON.parse(raw));
+      return d || emptyData();
     } catch (e) {
       try { localStorage.removeItem(LS_KEY); } catch (e2) {}
       return emptyData();
@@ -273,13 +340,47 @@
     }
     return null;
   }
+  /* 题目快照：AI 题 / 组卷题离开原上下文后仍能复习或重做 */
+  function snapshotQuestion(q) {
+    if (!q) return null;
+    q = q || {};
+    return {
+      type: q.type === 'choice' ? 'choice' : 'input',
+      question: q.question || '',
+      hint: q.hint || '',
+      accepted: (q.accepted || []).slice(0, 8),
+      options: q.options ? q.options.slice(0, 8) : null,
+      answerIndex: (typeof q.answerIndex === 'number') ? q.answerIndex : null,
+      answerText: q.answerText || '',
+      tag: q.tag || '',
+      wrongType: q.wrongType || '',
+      difficulty: q.difficulty || 3,
+      catId: (q.aiMeta && q.aiMeta.catId) || '',
+      catName: (q.aiMeta && q.aiMeta.catName) || '',
+      knowledgePoint: (q.aiMeta && q.aiMeta.knowledgePoint) || '',
+      explanation: q.explanation ? {
+        answer: q.explanation.answer || '',
+        keyPoint: q.explanation.keyPoint || '',
+        clue: q.explanation.clue || '',
+        chain: q.explanation.chain || '',
+        why: q.explanation.why || '',
+        whyOthers: q.explanation.whyOthers || '',
+        memory: q.explanation.memory || ''
+      } : null
+    };
+  }
   function addWrong(item) {
     var found = findWrongEntry(item.qid);
     if (found) {
-      found.entry.times++;
+      // 又错了：错误次数累加，并把复习计划打回第一阶（当天再到期）
+      found.entry.times = (found.entry.times || 1) + 1;
       found.entry.lastDate = todayStr();
       found.entry.lastAt = nowTs();
       found.entry.myAnswer = item.myAnswer;
+      found.entry.stage = 0;
+      found.entry.mastered = false;
+      found.entry.dueAt = nowTs();
+      if (item.snapshot && !found.entry.snapshot) found.entry.snapshot = item.snapshot;
       bumpErrorType(item.wrongType);
       save();
       return found.entry;
@@ -291,16 +392,21 @@
       qid: item.qid,
       question: markText(item.question),   // 错题记录同样带作者隐形指纹
       tag: item.tag || '',
+      kp: item.kp || '',
       myAnswer: item.myAnswer,
       correctAnswer: item.correctAnswer,
       wrongType: item.wrongType || 'VERB_FORM_ERROR',
-      source: item.source || 'bank',          // 'bank' | 'ai'
-      grade: item.grade || '',                // 年级
-      stage: item.stage || '',                // 阶段
+      source: item.source || 'bank',          // 'bank' | 'paper' | 'ai' | 'review' | 'custom'
       catId: item.catId || catOfTopicId(item.topicId || ''), // 大专题
       times: 1,
       lastDate: todayStr(),
-      lastAt: nowTs()
+      lastAt: nowTs(),
+      // —— v3：复习计划 ——
+      stage: 0,              // 0 = 刚错；1..5 = 已连续答对次数
+      mastered: false,
+      dueAt: nowTs(),        // 当天就排进「今日复习」
+      notes: '',             // 我的笔记：我为什么错
+      snapshot: item.snapshot || null
     };
     data.wrongBook.unshift(entry);
     if (data.wrongBook.length > 400) data.wrongBook.pop();
@@ -317,6 +423,139 @@
   }
   function clearWrong() { data.wrongBook = []; save(); }
 
+  /* ---------- 复习计划（间隔重复） ---------- */
+  function setWrongNote(qid, note) {
+    var f = findWrongEntry(qid);
+    if (!f) return null;
+    f.entry.notes = String(note || '').slice(0, 500);
+    save();
+    return f.entry;
+  }
+  // 复习一题：答对升阶（第 5 次答对 → 掌握），答错回到第一阶、当天再到期
+  function reviewWrong(qid, correct, userText) {
+    var f = findWrongEntry(qid);
+    if (!f) return null;
+    var e = f.entry;
+    e.lastReviewAt = nowTs();
+    if (correct) {
+      e.stage = Math.min((e.stage || 0) + 1, SRS_STEPS.length);
+      if (e.stage >= SRS_STEPS.length) {
+        e.mastered = true;
+        e.dueAt = 0;
+      } else {
+        e.dueAt = addDays(nowTs(), SRS_STEPS[e.stage - 1]);
+      }
+    } else {
+      e.stage = 0;
+      e.mastered = false;
+      e.dueAt = nowTs();
+      e.times = (e.times || 1) + 1;
+      e.lastDate = todayStr();
+      e.lastAt = nowTs();
+      if (userText !== undefined) e.myAnswer = userText;
+    }
+    save();
+    return e;
+  }
+  function wrongStats() {
+    var total = data.wrongBook.length;
+    var mastered = 0, due = 0;
+    data.wrongBook.forEach(function (w) {
+      if (w.mastered) mastered++;
+      else if (w.dueAt && w.dueAt <= nowTs()) due++;
+    });
+    return { total: total, mastered: mastered, due: due, active: total - mastered };
+  }
+  function dueWrong() {
+    var now = nowTs();
+    var arr = data.wrongBook.filter(function (w) {
+      return !w.mastered && w.dueAt && w.dueAt <= now;
+    });
+    arr.sort(function (a, b) { return (a.dueAt || 0) - (b.dueAt || 0); });
+    return arr;
+  }
+  /* 把错题记录还原成一道可重做的题：
+     1) 有快照用快照（AI 题 / 组卷题 / 真题语篇）
+     2) 题库题直接反查
+     3) 真题语篇按 qid 里的 paperId 重建
+     4) 都不行返回 null（老数据只做"看解析"） */
+  function resolveWrongQuestion(w) {
+    if (!w) return null;
+    var q = null;
+    if (w.snapshot && w.snapshot.question) {
+      var s = w.snapshot;
+      q = {
+        id: w.qid,
+        source: 'review',
+        isReview: true,
+        type: s.type === 'choice' ? 'choice' : 'input',
+        question: s.question,
+        hint: s.hint || '',
+        accepted: (s.accepted && s.accepted.length) ? s.accepted : [w.correctAnswer],
+        options: s.options || null,
+        answerIndex: (typeof s.answerIndex === 'number') ? s.answerIndex : 0,
+        answerText: s.answerText || w.correctAnswer,
+        tag: s.tag || w.tag || '',
+        wrongType: s.wrongType || w.wrongType || '',
+        difficulty: s.difficulty || 3,
+        aiMeta: { catId: s.catId || w.catId || '', catName: s.catName || catLabelOf(s.catId || w.catId), knowledgePoint: s.knowledgePoint || w.kp || '' },
+        explanation: s.explanation || { answer: w.correctAnswer, keyPoint: w.kp || '', why: w.explText || '' }
+      };
+      if (q.type === 'choice' && (!q.options || q.options.length < 2)) {
+        q.type = 'input';
+        q.options = null;
+      }
+      q._reviewTid = w.topicId;
+      return q;
+    }
+    var m = /^paper_(.+)_b(\d+)$/.exec(String(w.qid || ''));
+    if (m) {
+      var p = paperById(m[1]);
+      if (p) {
+        var list = paperToQuestions(p);
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].id === w.qid) { list[i]._reviewTid = w.topicId; return list[i]; }
+        }
+      }
+    }
+    var bankQ = findQuestion(w.topicId, w.qid);
+    if (bankQ) {
+      // 复制一份再挂复习标记：不要污染题库原对象（同一题还会在专题训练里用）
+      var copy = {};
+      for (var bk in bankQ) if (bankQ.hasOwnProperty(bk)) copy[bk] = bankQ[bk];
+      copy._reviewTid = w.topicId;
+      copy.aiMeta = {
+        catId: w.catId || catOfTopicId(w.topicId || ''),
+        catName: catLabelOf(w.catId || catOfTopicId(w.topicId || '')),
+        knowledgePoint: w.kp || w.tag || ''
+      };
+      return copy;
+    }
+    var pool = (window.EGL && window.EGL.ai && window.EGL.ai.getPool) ? window.EGL.ai.getPool() : [];
+    for (var pi = 0; pi < pool.length; pi++) {
+      var qs = (pool[pi] && pool[pi].questions) || [];
+      for (var qi = 0; qi < qs.length; qi++) {
+        if (qs[qi] && qs[qi].id === w.qid) {
+          var pq = {};
+          for (var pk in qs[qi]) if (qs[qi].hasOwnProperty(pk)) pq[pk] = qs[qi][pk];
+          pq._reviewTid = w.topicId;
+          return pq;
+        }
+      }
+    }
+    return null;
+  }
+  function reviewQueue(limit) {
+    limit = limit || 12;
+    var out = [];
+    var due = dueWrong();
+    for (var i = 0; i < due.length && out.length < limit; i++) {
+      var q = resolveWrongQuestion(due[i]);
+      if (q) out.push(q);
+    }
+    return out;
+  }
+
   /* ---------- 每日与总览 ---------- */
   function dailyToday() {
     var t = todayStr();
@@ -329,6 +568,102 @@
     d.correct += correct;
     save();
   }
+  /* 每日目标（设置页可改，默认 12 题） */
+  function dailyGoal() { return (data.goal >= 1 && data.goal <= 100) ? data.goal : 12; }
+  function setGoal(n) {
+    n = parseInt(n, 10);
+    if (!(n >= 1 && n <= 100)) return dailyGoal();
+    data.goal = n;
+    save();
+    return data.goal;
+  }
+  /* 连续学习天数：今天还没做就从昨天开始数（不让"今天还没开始"把记录清零） */
+  function streak() {
+    var todayK = todayStr();
+    var cursor = startOfDay(nowTs());
+    var todayDone = !!(data.daily[todayK] && data.daily[todayK].answered > 0);
+    if (!todayDone) cursor = addDays(cursor, -1);
+    var days = 0;
+    for (var guard = 0; guard < 4000; guard++) {
+      var k = dayKey(cursor);
+      var d = data.daily[k];
+      if (d && d.answered > 0) {
+        days++;
+        cursor = addDays(cursor, -1);
+      } else break;
+    }
+    return { days: days, today: todayDone };
+  }
+  /* 近 n 天：用于首页小柱图 / 记录页 */
+  function weekSeries(n) {
+    n = n || 7;
+    var out = [];
+    var labels = ['日', '一', '二', '三', '四', '五', '六'];
+    var base = startOfDay(nowTs());
+    for (var i = n - 1; i >= 0; i--) {
+      var ts = addDays(base, -i);
+      var k = dayKey(ts);
+      var d = data.daily[k] || { answered: 0, correct: 0 };
+      out.push({ key: k, label: labels[new Date(ts).getDay()], answered: d.answered, correct: d.correct, today: i === 0 });
+    }
+    return out;
+  }
+  /* 答题画像：选择/输入、难度分层、平均每题耗时 */
+  function noteAgg(type, difficulty, correct, seconds) {
+    var a = data.agg;
+    var t = type === 'choice' ? 'choice' : 'input';
+    if (!a.byType[t]) a.byType[t] = { a: 0, c: 0 };
+    a.byType[t].a++;
+    if (correct) a.byType[t].c++;
+    var d = Math.max(1, Math.min(5, parseInt(difficulty, 10) || 3));
+    if (!a.byDiff[d]) a.byDiff[d] = { a: 0, c: 0 };
+    a.byDiff[d].a++;
+    if (correct) a.byDiff[d].c++;
+    var sec = Number(seconds);
+    if (sec > 0 && sec < 600) { a.timeSum += sec; a.timeCount++; }
+    save();
+  }
+  function profileStats() {
+    var a = data.agg;
+    function p(x) { return x && x.a ? x.c / x.a : null; }
+    var byDiff = [];
+    for (var d = 1; d <= 5; d++) {
+      var x = a.byDiff[d];
+      byDiff.push({ difficulty: d, attempts: x ? x.a : 0, correct: x ? x.c : 0, pct: p(x) });
+    }
+    return {
+      choice: { attempts: a.byType.choice.a, correct: a.byType.choice.c, pct: p(a.byType.choice) },
+      input: { attempts: a.byType.input.a, correct: a.byType.input.c, pct: p(a.byType.input) },
+      byDiff: byDiff,
+      avgSeconds: a.timeCount ? (a.timeSum / a.timeCount) : null,
+      totalAttempts: a.byType.choice.a + a.byType.input.a
+    };
+  }
+  function papersDone() {
+    var n = 0;
+    papers().forEach(function (p) {
+      if (p && p.id && topicStat('paper:' + p.id).attempts > 0) n++;
+    });
+    return n;
+  }
+  /* 真题考点频次：8 篇语篇按大专题聚合（哪类考点年年考） */
+  function paperFreq() {
+    var map = {};
+    papers().forEach(function (p) {
+      var seen = {};
+      (p.blanks || []).forEach(function (b) {
+        var cid = b.catId || 'extra';
+        if (!map[cid]) map[cid] = { catId: cid, name: catLabelOf(cid), blanks: 0, papers: 0, points: [] };
+        map[cid].blanks++;
+        if (b.point && map[cid].points.indexOf(b.point) < 0 && map[cid].points.length < 5) map[cid].points.push(b.point);
+        if (!seen[cid]) { seen[cid] = 1; map[cid].papers++; }
+      });
+    });
+    var out = [];
+    Object.keys(map).forEach(function (k) { out.push(map[k]); });
+    out.sort(function (a, b) { return b.blanks - a.blanks; });
+    return out;
+  }
   function overallStats() {
     var tids = availableTopicIds();
     var finished = 0;
@@ -336,6 +671,7 @@
       var s = topicStat(tid);
       if (s.finished && s.attempts >= 12) finished++;
     });
+    var ws = wrongStats();
     return {
       answered: data.global.answered,
       correct: data.global.correct,
@@ -344,7 +680,15 @@
       available: tids.length,
       totalPlan: roadmap() ? roadmap().total : 60,
       todayAnswered: dailyToday().answered,
-      todayCorrect: dailyToday().correct
+      todayCorrect: dailyToday().correct,
+      goal: dailyGoal(),
+      streak: streak(),
+      week: weekSeries(7),
+      due: ws.due,
+      wrongTotal: ws.total,
+      wrongMastered: ws.mastered,
+      papersTotal: availablePaperIds().length,
+      papersDone: papersDone()
     };
   }
   function addSession(tid, kind, correct, total, seconds, label) {
@@ -581,6 +925,110 @@
     return out;
   }
 
+  /* ---------- 我的专卷（按薄弱点组 10 题） ---------- */
+  function customCatOf(q) {
+    if (q && q.aiMeta && q.aiMeta.catId) return q.aiMeta.catId;
+    var tid = (q && q._reviewTid) || '';
+    var m = /^(tense\d\d)/.exec(String((q && q.id) || ''));
+    if (!tid && m) tid = m[1];
+    return catOfTopicId(tid);
+  }
+  function customItemOf(q) {
+    var snap = snapshotQuestion(q);
+    snap.catId = customCatOf(q);
+    snap.catName = catLabelOf(snap.catId);
+    return snap;
+  }
+  // 最近一次组卷 → 可做题（每题都按“单句卡”呈现，自带提示词与解析）
+  function customToQuestions(cust) {
+    cust = cust || data.custom;
+    if (!cust || !cust.items || !cust.items.length) return [];
+    var n = cust.items.length;
+    return cust.items.map(function (it, i) {
+      return {
+        id: it.id,
+        source: 'custom',
+        isCustom: true,
+        type: it.type === 'choice' ? 'choice' : 'input',
+        question: it.question,
+        hint: it.hint || '',
+        accepted: (it.accepted && it.accepted.length) ? it.accepted : [it.answerText],
+        options: it.options || null,
+        answerIndex: (typeof it.answerIndex === 'number') ? it.answerIndex : 0,
+        answerText: it.answerText,
+        tag: it.tag || it.knowledgePoint || '',
+        wrongType: it.wrongType || 'CONTEXT_ERROR',
+        difficulty: it.difficulty || 3,
+        aiMeta: { catId: it.catId, catName: it.catName, knowledgePoint: it.knowledgePoint || '' },
+        aiCtx: {
+          kind: 'sentence', isSentence: true,
+          paperIndex: i, paperCount: n, title: '第 ' + (i + 1) + ' 题',
+          passage: it.question, total: 1, blankN: 1, given: it.hint || ''
+        },
+        explanation: it.explanation || { answer: it.answerText, keyPoint: it.knowledgePoint || '', why: '' }
+      };
+    });
+  }
+  /* 组卷：先取未掌握错题（最多 4 题）→ 再按薄弱大专题取真题语篇空 → 最后用题库扩展题补满 10 题 */
+  function buildCustomPaper() {
+    var items = [], used = {};
+    function addQ(q) {
+      if (!q || !q.id || used[q.id] || items.length >= 10) return;
+      used[q.id] = 1;
+      items.push(q);
+    }
+    var wrongs = data.wrongBook.filter(function (w) { return !w.mastered; }).slice();
+    wrongs.sort(function (a, b) { return (a.dueAt || 0) - (b.dueAt || 0); });
+    for (var i = 0; i < wrongs.length && items.length < 4; i++) {
+      var wq = resolveWrongQuestion(wrongs[i]);
+      if (wq) addQ(wq);
+    }
+    var weakCats = [];
+    categoryStats().forEach(function (c) {
+      if (c.attempts >= 3 && weakCats.length < 3) weakCats.push(c.catId);
+    });
+    if (!weakCats.length) {
+      categoryStats().forEach(function (c) { if (c.attempts > 0 && weakCats.length < 3) weakCats.push(c.catId); });
+    }
+    var paperPool = [];
+    papers().forEach(function (p) {
+      paperToQuestions(p).forEach(function (q) { paperPool.push(q); });
+    });
+    var byCat = {};
+    paperPool.forEach(function (q) {
+      var cid = (q.aiMeta && q.aiMeta.catId) || 'extra';
+      (byCat[cid] = byCat[cid] || []).push(q);
+    });
+    weakCats.forEach(function (cid) {
+      var list = shuffle(byCat[cid] || []);
+      for (var j = 0; j < list.length && items.length < 8; j++) addQ(list[j]);
+    });
+    var bankPool = [];
+    availableTopicIds().forEach(function (tid) {
+      bankPool = bankPool.concat(poolQuestions(tid));
+    });
+    shuffle(bankPool).forEach(function (q) { addQ(q); });
+    shuffle(paperPool).forEach(function (q) { addQ(q); });
+    var finalItems = shuffle(items).slice(0, 10);
+    var dist = {};
+    finalItems.forEach(function (q) {
+      var cid = customCatOf(q);
+      dist[cid] = (dist[cid] || 0) + 1;
+    });
+    var cust = {
+      id: 'custom_' + nowTs(),
+      ts: nowTs(),
+      date: todayStr(),
+      items: finalItems.map(customItemOf),
+      dist: dist
+    };
+    data.custom = cust;
+    save();
+    return cust;
+  }
+  function getCustomPaper() { return data.custom || null; }
+  function clearCustomPaper() { data.custom = null; save(); }
+
   // 数据导入导出（防丢数据）
   function exportData() {
     var out = data;
@@ -597,25 +1045,36 @@
     } catch (e) { out = data; }
     return JSON.stringify(out, null, 1);
   }
+  /* 用新数据替换当前数据对象（保持 EGL.data 这个外部引用仍然有效） */
+  function replaceData(next) {
+    Object.keys(data).forEach(function (k) { delete data[k]; });
+    Object.keys(next).forEach(function (k) { data[k] = next[k]; });
+    if (window.EGL) window.EGL.data = data;
+    save();
+  }
   function importData(json) {
     try {
       var d = JSON.parse(json);
       if (!d || !d.global) return false;
       delete d._brand; delete d._notice;
-      data = d;
-      save();
+      var next = migrateData(d);
+      if (!next) return false;
+      replaceData(next);
       return true;
     } catch (e) { return false; }
   }
-  function resetData() { data = emptyData(); save(); }
+  function resetData() { replaceData(emptyData()); }
 
   /* ---------- 对外 API ---------- */
-  EGL.util = { pad2: pad2, todayStr: todayStr, nowTs: nowTs, deepClone: deepClone, shuffle: shuffle,
+  EGL.DATA_VERSION = DATA_VERSION;
+  EGL.util = { pad2: pad2, todayStr: todayStr, dayKey: dayKey, startOfDay: startOfDay, addDays: addDays,
+               nowTs: nowTs, deepClone: deepClone, shuffle: shuffle,
                normalizeAnswer: normalizeAnswer, checkInputAnswer: checkInputAnswer };
   EGL.data = data;
   EGL.save = save;
   EGL.setSaveListener = setSaveListener;
   EGL.loadData = loadData;
+  EGL.migrateData = migrateData;
   EGL.bank = bank;
   EGL.roadmap = roadmap;
   EGL.topicMeta = topicMeta;
@@ -632,7 +1091,22 @@
   EGL.addWrong = addWrong;
   EGL.removeWrong = removeWrong;
   EGL.clearWrong = clearWrong;
+  EGL.snapshotQuestion = snapshotQuestion;
+  EGL.setWrongNote = setWrongNote;
+  EGL.reviewWrong = reviewWrong;
+  EGL.wrongStats = wrongStats;
+  EGL.dueWrong = dueWrong;
+  EGL.resolveWrongQuestion = resolveWrongQuestion;
+  EGL.reviewQueue = reviewQueue;
   EGL.addDaily = addDaily;
+  EGL.dailyGoal = dailyGoal;
+  EGL.setGoal = setGoal;
+  EGL.streak = streak;
+  EGL.weekSeries = weekSeries;
+  EGL.noteAgg = noteAgg;
+  EGL.profileStats = profileStats;
+  EGL.papersDone = papersDone;
+  EGL.paperFreq = paperFreq;
   EGL.overallStats = overallStats;
   EGL.addSession = addSession;
   EGL.sessionsOfTopic = sessionsOfTopic;
@@ -647,6 +1121,10 @@
   EGL.pickRetrain = pickRetrain;
   EGL.pickChallenge = pickChallenge;
   EGL.pickWrongRetrain = pickWrongRetrain;
+  EGL.buildCustomPaper = buildCustomPaper;
+  EGL.getCustomPaper = getCustomPaper;
+  EGL.clearCustomPaper = clearCustomPaper;
+  EGL.customToQuestions = customToQuestions;
   EGL.papers = papers;
   EGL.availablePaperIds = availablePaperIds;
   EGL.paperById = paperById;

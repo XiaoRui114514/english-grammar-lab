@@ -118,6 +118,7 @@
   var KEY_LS = 'EGL_AI_KEY_v1';       // 旧版 DeepSeek Key：继续兼容
   var KEYS_LS = 'EGL_AI_KEYS_v2';     // 多模型商：{ providerId: key }
   var LAST_SESSION_LS = 'EGL_AI_LAST_v1'; // 结果缓存：sessionStorage 优先
+  var _activeCtrl = null;             // 当前进行中的请求控制器（支持“停止生成”）
 
   function readKeyMap() {
     try {
@@ -304,6 +305,13 @@
     lines.push('- 题目结构：' + (structure === 'sentence' ? '纯单句题（无语篇）' : structure === 'passage' ? '纯语篇题（无单句）' : '单句题 + 语篇题'));
     lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇 10 空，250-330 词；按“有提示词 5 空 + 无提示词 5 空”配比）'));
     lines.push('- 总空数：' + targetCount + '（整套练习的空数之和）');
+    // 按薄弱点命题（D 组功能）：把学生最近错得多的考点写进“必考清单”
+    if (cfg.weakTags && cfg.weakTags.length) {
+      lines.push('');
+      lines.push('【按我的薄弱点命题：以下考点必须尽量覆盖（至少覆盖 4 个）】');
+      lines.push(cfg.weakTags.map(function (t, i) { return (i + 1) + '. ' + t; }).join('；'));
+      lines.push('这些来自学生最近的错题统计。仍然要保证语篇自然连贯，不许为了塞考点写出病句；同一考点全篇最多 2 次。');
+    }
     lines.push('');
     lines.push('【命题蓝图：先在心里排好，再动笔写】');
     lines.push('1. 语篇：先定体裁与话题（多篇之间不重复），再定 10 个空的考点，最后成文；不要边写边凑考点。');
@@ -409,21 +417,36 @@
     return { code: 'HTTP_' + resp.status, msg: name + ' API 返回错误（' + resp.status + '），请重试。' };
   }
 
-  function requestFetch(url, options, timeoutMs, providerName) {
+  function requestFetch(url, options, timeoutMs, providerName, externalSignal) {
     var ctrl = null;
     if (typeof AbortController !== 'undefined') ctrl = new AbortController();
     var timer = null;
+    var onExternalAbort = null;
     if (ctrl) timer = setTimeout(function () { ctrl.abort(); }, timeoutMs || 90000);
+    if (ctrl && externalSignal) {
+      onExternalAbort = function () { try { ctrl.abort(); } catch (e) {} };
+      if (externalSignal.aborted) onExternalAbort();
+      else if (externalSignal.addEventListener) externalSignal.addEventListener('abort', onExternalAbort);
+    }
+    function done() {
+      if (timer) clearTimeout(timer);
+      if (ctrl && externalSignal && onExternalAbort && externalSignal.removeEventListener) {
+        externalSignal.removeEventListener('abort', onExternalAbort);
+      }
+    }
     var opts = {};
     for (var k in options) if (options.hasOwnProperty(k)) opts[k] = options[k];
     opts.signal = ctrl ? ctrl.signal : undefined;
     return fetch(url, opts).then(function (resp) {
-      if (timer) clearTimeout(timer);
+      done();
       return resp;
     }).catch(function (err) {
-      if (timer) clearTimeout(timer);
+      done();
       if (err && err.code) throw err;
-      if (err && err.name === 'AbortError') throw { code: 'TIMEOUT', msg: '请求超时，请检查网络或换一个模型商后重试。' };
+      if (err && err.name === 'AbortError') {
+        if (externalSignal && externalSignal.aborted) throw { code: 'ABORT', msg: '已停止生成。' };
+        throw { code: 'TIMEOUT', msg: '请求超时，请检查网络或换一个模型商后重试。' };
+      }
       throw { code: 'NET', msg: (providerName || '模型商') + ' 网络请求失败。请检查网络、Base URL 和浏览器跨域（CORS）限制后重试。' };
     });
   }
@@ -470,10 +493,12 @@
     if (!url) return Promise.reject({ code: 'NO_BASE', msg: '请先填写 API 地址（Base URL）。' });
     var modelId = modelIdOf(cfg);
     if (!modelId) return Promise.reject({ code: 'NO_MODEL', msg: '请先获取模型列表并选择模型，或手动输入模型 ID。' });
+    var extCtrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    _activeCtrl = extCtrl;
     var body = {
       model: modelId,
       messages: [
-        { role: 'system', content: '你是上海春考/高考语法填空 Section A 的命题引擎（初高中通用）：按真卷规格出一篇 10 空、250-330 词的语篇，有提示词与无提示词各半，解析照市教研室答案详解写（句意/考查点/线索/判断/其它形式/记忆六项）。只输出严格合法的 json 对象：不要解释文字、不要 Markdown、不要代码围栏。' },
+        { role: 'system', content: cfg.systemPrompt || '你是上海春考/高考语法填空 Section A 的命题引擎（初高中通用）：按真卷规格出一篇 10 空、250-330 词的语篇，有提示词与无提示词各半，解析照市教研室答案详解写（句意/考查点/线索/判断/其它形式/记忆六项）。只输出严格合法的 json 对象：不要解释文字、不要 Markdown、不要代码围栏。' },
         { role: 'user', content: promptText }
       ],
       response_format: { type: 'json_object' },
@@ -491,7 +516,7 @@
           'Authorization': 'Bearer ' + key
         },
         body: JSON.stringify(body)
-      }, 180000, provider.shortName).then(function (resp) {
+      }, 180000, provider.shortName, extCtrl ? extCtrl.signal : null).then(function (resp) {
         if (resp.ok) {
           return resp.json().catch(function () { return null; });
         }
@@ -503,14 +528,25 @@
         throw apiError(resp, provider.shortName, false);
       });
     }
+    function release() { if (_activeCtrl === extCtrl) _activeCtrl = null; }
     return attempt().then(function (json) {
+      release();
       var txt = readChatContent(json);
       if (!txt) throw { code: 'EMPTY', msg: 'AI 返回内容为空，请重试。' };
       return txt;
     }).catch(function (err) {
+      release();
       if (err && err.code) throw err;
       throw { code: 'NET', msg: provider.shortName + ' 请求失败，请检查网络与 Base URL 后重试。' };
     });
+  }
+
+  /* 停止正在进行的生成请求（返回是否真的取消了） */
+  function cancelActive() {
+    if (!_activeCtrl) return false;
+    try { _activeCtrl.abort(); } catch (e) {}
+    _activeCtrl = null;
+    return true;
   }
 
   // GET /models：返回模型 ID 数组；列表接口不可用时允许 UI 手动输入。
@@ -737,7 +773,7 @@
     var idx = 0;
     // 每次生成一个唯一 genId：避免不同批次/不同内容生成出相同 qid（错题本按 qid 去重会误合并）
     var genId = cfg.genId || nowId();
-    var wantChoice = cfg.qtype !== 'input';
+    var wantChoice = cfg.qtype === 'choice';
     var fallbackCount = 0;
     var cur = window.__EGL_CURRICULUM__;
     function catIdOfName(name) {
@@ -843,6 +879,218 @@
     return qs;
   }
 
+  /* ---------- AI 讲解：把已有解析换成更简单的话（按 qid 缓存，避免重复花钱） ---------- */
+  var EXPLAIN_LS = 'EGL_AI_EXPLAIN_v1';
+  var CFG_LS = 'EGL_AI_CFG_v1';
+  function readExplainAll() {
+    try {
+      var raw = localStorage.getItem(EXPLAIN_LS);
+      var o = raw ? JSON.parse(raw) : null;
+      return (o && typeof o === 'object') ? o : {};
+    } catch (e) { return {}; }
+  }
+  function writeExplainAll(o) {
+    try { localStorage.setItem(EXPLAIN_LS, JSON.stringify(o || {})); } catch (e) {}
+  }
+  function getExplainCache(qid) {
+    var all = readExplainAll();
+    return all[qid] ? all[qid].data : null;
+  }
+  function setExplainCache(qid, data) {
+    if (!qid) return;
+    var all = readExplainAll();
+    all[qid] = { ts: nowTs(), data: data };
+    var keys = Object.keys(all);
+    if (keys.length > 200) {
+      keys.sort(function (a, b) { return (all[a].ts || 0) - (all[b].ts || 0); });
+      keys.slice(0, keys.length - 200).forEach(function (k) { delete all[k]; });
+    }
+    writeExplainAll(all);
+  }
+  function clearExplainCache() { try { localStorage.removeItem(EXPLAIN_LS); } catch (e) {} }
+  /* 读取当前 AI 配置（含 Key），供“AI 讲解”等轻量功能直接调用 */
+  function quickCfg() {
+    var d = defaultConfig();
+    try {
+      var raw = localStorage.getItem(CFG_LS);
+      var saved = raw ? JSON.parse(raw) : null;
+      if (saved && typeof saved === 'object') {
+        for (var k in saved) if (saved.hasOwnProperty(k)) d[k] = saved[k];
+      }
+    } catch (e) {}
+    var p = providerById(providerIdOf(d)) || PROVIDERS[0];
+    d.providerId = p.id;
+    if (!d.baseUrl) d.baseUrl = p.baseUrl;
+    if (!d.modelId) d.modelId = p.defaultModel || '';
+    // Key 优先取 AI 页内存里的临时 Key（用户可能没勾“记住”），再退回本机保存的 Key
+    var tmpKey = '';
+    try {
+      if (window.EGL && window.EGL.aiUI && window.EGL.aiUI.getKeyCache) tmpKey = window.EGL.aiUI.getKeyCache(p.id) || '';
+    } catch (e) { tmpKey = ''; }
+    d.apiKey = tmpKey || getKey(p.id);
+    return d;
+  }
+  function explainQuestion(q, cfg) {
+    cfg = cfg || quickCfg();
+    if (!cfg.apiKey) return Promise.reject({ code: 'NO_KEY', msg: '请先在「AI 出题」页填 API Key。' });
+    if (!cfg.modelId) return Promise.reject({ code: 'NO_MODEL', msg: '请先在「AI 出题」页选择模型。' });
+    q = q || {};
+    var ex = q.explanation || {};
+    var ans = q.type === 'choice' ? (q.options && q.options[q.answerIndex]) : (q.answerText || (q.accepted && q.accepted[0]));
+    var prompt = [
+      '学生做错了一道语法填空题（面向初高中）。请用更简单的中文把这道题讲明白，不要堆语法术语；术语第一次出现要顺手解释。',
+      '只输出 JSON 对象，不要 Markdown、不要代码围栏，字段如下：',
+      '{"simple":"两句话以内讲清为什么填这个（最多 60 字）","pitfall":"最容易和什么混淆，一句话","examples":["同类例句 1（英文，可带中文括注）","同类例句 2"],"tip":"一句能背下来的口诀"}',
+      '',
+      '【题目】' + String(q.question || ''),
+      '【提示词】' + String(q.hint || '无'),
+      '【正确答案】' + String(ans || ''),
+      '【现有解析】' + String(ex.why || ex.keyPoint || '（无）'),
+      '【学生易错】' + String(ex.whyOthers || ex.commonError || '（无）')
+    ].join('\n');
+    var cfg2 = {};
+    for (var k in cfg) cfg2[k] = cfg[k];
+    cfg2.systemPrompt = '你是高中英语老师，专门把语法填空的解析讲成初中生也能听懂的话。只输出严格合法的 JSON，不要任何解释文字。';
+    return callChat(prompt, cfg2).then(function (text) {
+      var raw = null;
+      try { raw = extractJSON(text); } catch (e) { raw = null; }
+      var o = raw || {};
+      var simple = String(o.simple || o.oneLine || o.summary || o.why || '').trim();
+      var examples = Array.isArray(o.examples) ? o.examples.slice(0, 3).map(function (x) { return String(x); }) : [];
+      var pitfall = String(o.pitfall || o.trap || o.confusion || '').trim();
+      var tip = String(o.tip || o.memory || '').trim();
+      if (!simple && !examples.length) throw { code: 'EMPTY', msg: 'AI 没有返回可用内容，请重试。' };
+      return { simple: simple, examples: examples, pitfall: pitfall, tip: tip };
+    });
+  }
+
+  /* ---------- 导出为题库文件（bank-papers-NN.js 规范，可直接放进 data/） ---------- */
+  var CAT_IDS = ['verb', 'nonfinite', 'transform', 'attrib', 'nominal', 'adverbial', 'prep', 'article', 'pronoun', 'coord', 'extra'];
+  function catIdOfName(name) {
+    var cur = window.__EGL_CURRICULUM__;
+    var key = String(name || '').trim();
+    if (cur && cur.categories) {
+      for (var i = 0; i < cur.categories.length; i++) {
+        if (cur.categories[i].name === key || cur.categories[i].id === key) return cur.categories[i].id;
+      }
+    }
+    return CAT_IDS.indexOf(key) >= 0 ? key : 'extra';
+  }
+  function bankWords(text) {
+    var m = String(text || '').replace(/\([^)]*\)/g, ' ').replace(/_{4,}/g, ' ')
+      .match(/[A-Za-z][A-Za-z'’-]*/g);
+    return m ? m.length : 0;
+  }
+  function indentJs(s) {
+    return String(s).split('\n').map(function (l) { return '  ' + l; }).join('\n');
+  }
+  /* 把 AI 生成记录转成合法的 bank-papers 文件文本；结构不过关就返回 errors，不导出 */
+  function buildBankFile(entry) {
+    entry = entry || {};
+    var errors = [], warnings = [], papersOut = [];
+    var sections = entry.papers || [];
+    var stamp = todayStr().replace(/-/g, '');
+    var base = 'ai' + String(entry.ts || nowTs()) + stamp;
+    sections.forEach(function (sec, si) {
+      var label = '第 ' + (si + 1) + ' 组';
+      if (!sec || sec.kind !== 'passage') {
+        warnings.push(label + '是单句题，题库只收整篇语篇，已跳过');
+        return;
+      }
+      var blanks = sec.blanks || [];
+      var marks = (String(sec.passage || '').match(/______/g) || []).length;
+      if (blanks.length !== 10) errors.push(label + '：空数 ' + blanks.length + '，题库要求 10 空');
+      if (marks !== blanks.length) errors.push(label + '：正文空位 ' + marks + ' 个，与空数 ' + blanks.length + ' 不一致');
+      var givenN = 0;
+      blanks.forEach(function (b, bi) {
+        var q = label + ' 第 ' + (bi + 1) + ' 空';
+        if (!b || !b.answer) { errors.push(q + '：缺 answer'); return; }
+        var ans = String(b.answerRaw || b.answer || '');
+        if (!b.accepted || !b.accepted.length) warnings.push(q + '：accepted 不足，导出时只写标准答案');
+        if (b.isGivenWord) {
+          givenN++;
+          if (!b.givenWord) errors.push(q + '：标了有提示词但缺 givenWord');
+          else {
+            var g = String(b.givenWord).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            if (!new RegExp('_{4,}\\s*\\(\\s*' + g + '\\s*\\)', 'i').test(String(sec.passage || ''))) {
+              errors.push(q + '：正文里找不到紧跟空位的提示词（' + b.givenWord + '）');
+            }
+          }
+        }
+        if (ans.length >= 6 || ans.indexOf(' ') >= 0) {
+          var re = new RegExp('\\b' + ans.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+          if (re.test(String(sec.passage || '').replace(/\([^)]*\)/g, ' '))) {
+            errors.push(q + '：答案「' + ans + '」出现在了正文里');
+          }
+        }
+        ['sense', 'clue', 'why', 'others', 'tip'].forEach(function (f) {
+          if (!b[f] || !String(b[f]).trim()) warnings.push(q + '：解析缺 ' + f + '，导出后需要人工补');
+        });
+      });
+      if (givenN < 4 || givenN > 6) warnings.push(label + '：有提示词 ' + givenN + ' 空（真卷 4-6 空）');
+      if (bankWords(sec.passage) < 180) warnings.push(label + '：语篇 ' + bankWords(sec.passage) + ' 词，真卷一般 250-330 词');
+      if (errors.length) return;
+      var pid = 'paper' + base + (si + 1);
+      var blanksOut = blanks.map(function (b, bi) {
+        var ansRaw = String(b.answerRaw || b.answer || '');
+        var acc = [ansRaw];
+        (b.accepted || []).forEach(function (a) {
+          var s = String(a || '').trim();
+          if (s && !acc.some(function (x) { return x.toLowerCase() === s.toLowerCase(); })) acc.push(s);
+        });
+        return {
+          n: bi + 1,
+          answer: ansRaw,
+          accepted: acc,
+          given: b.givenWord || '',
+          isGiven: !!b.isGivenWord,
+          catId: catIdOfName(b.category),
+          point: b.knowledgePoint || b.rule || b.category || '',
+          wrongType: 'CONTEXT_ERROR',
+          difficulty: (b.difficulty >= 1 && b.difficulty <= 5) ? b.difficulty : 3,
+          sense: b.sense || '',
+          clue: b.clue || '',
+          why: b.why || '',
+          others: b.others || '',
+          tip: b.tip || ''
+        };
+      });
+      papersOut.push({
+        id: pid,
+        no: 'AI' + (papersOut.length + 1),
+        title: sec.title || ('AI 语篇 ' + (si + 1)),
+        source: 'AI 生成 · ' + (entry.date || todayStr()) + ' · ' + ((entry.cfg && entry.cfg.modelId) || 'AI') + '（发布前需人工复核）',
+        level: '高三',
+        genre: '说明文',
+        words: bankWords(sec.passage),
+        topic: sec.title || '',
+        readGuide: '先通读一遍：看每空所在句的主语、时间或逻辑线索，再逐空判断；不要只盯着空所在的词。',
+        passage: sec.passage,
+        blanks: blanksOut
+      });
+    });
+    if (!papersOut.length && !errors.length) errors.push('没有可导出的整篇语篇（单句题不能直接入库）');
+    if (errors.length) return { ok: false, errors: errors, warnings: warnings, js: '', filename: '' };
+    var header = '/* ============================================================\n'
+      + ' * data/bank-papers-ai-' + stamp + '.js — AI 生成的上海语法填空语篇\n'
+      + ' * 生成时间：' + new Date().toLocaleString() + '　·　模型：' + String((entry.cfg && entry.cfg.modelId) || 'AI') + '\n'
+      + ' * 说明：导出前已校验空数 / 提示词位置 / 答案泄漏 / 解析字段；\n'
+      + ' *       正式发布前仍请人工核对语言地道性与答案唯一性，并按需补全解析。\n'
+      + ' * ============================================================ */\n';
+    var parts = papersOut.map(function (p) {
+      var lines = JSON.stringify(p, null, 2).split('\n');
+      var body = lines.map(function (l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
+      return '  P.push(' + body + ');';
+    });
+    var js = header + '(function () {\n  "use strict";\n  var P = window.__EGL_PAPERS__ = window.__EGL_PAPERS__ || [];\n\n'
+      + parts.join('\n\n') + '\n})();\n';
+    return {
+      ok: true, js: js, errors: [], warnings: warnings,
+      filename: 'bank-papers-ai-' + stamp + '.js',
+      count: papersOut.length
+    };
+  }
+
   /* ---------- 配置面板默认值 ---------- */
   function defaultConfig() {
     return {
@@ -852,7 +1100,8 @@
       providerId: 'teamorouter',
       baseUrl: (providerById('teamorouter') || PROVIDERS[0]).baseUrl,
       modelId: (providerById('teamorouter') || PROVIDERS[0]).defaultModel || '',
-      qtype: 'choice', structure: 'mixed'
+      // 上海真卷是纯填空、没有选项：默认按填空生成，点选只作为“不方便打字”时的备选
+      qtype: 'input', structure: 'mixed', focus: 'all'
     };
   }
 
@@ -878,9 +1127,17 @@
     buildPrompt: buildPrompt,
     fetchModels: fetchModels,
     callChat: callChat,
+    cancelActive: cancelActive,
     callDeepSeek: callChat,
     extractJSON: extractJSON,
     validateAndNormalize: validateAndNormalize,
-    papersToQuestions: papersToQuestions
+    papersToQuestions: papersToQuestions,
+    quickCfg: quickCfg,
+    explainQuestion: explainQuestion,
+    getExplainCache: getExplainCache,
+    setExplainCache: setExplainCache,
+    clearExplainCache: clearExplainCache,
+    buildBankFile: buildBankFile,
+    catIdOfName: catIdOfName
   };
 })();
