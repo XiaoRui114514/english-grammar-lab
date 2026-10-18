@@ -718,7 +718,7 @@
       pr.style.marginTop = '12px';
       pr.style.padding = '14px 16px';
       var chips = tagKeys.map(function (k) {
-        return '<span class="problem-chip"><b>' + m.errByTag[k] + '</b> 题 · ' + esc(k) + '</span>';
+        return '<span class="problem-chip"><b>' + m.errByTag[k] + '</b> 空 · ' + esc(k) + '</span>';
       }).join('');
       pr.innerHTML = '<div class="sec-title" style="margin-top:0">你的主要问题</div><div>' + chips + '</div>';
       v.appendChild(pr);
@@ -726,11 +726,27 @@
       var topTag = tagKeys[0];
       var sug = el('div', 'glass rec-card');
       sug.style.marginTop = '12px';
-      sug.innerHTML = '<div class="sec-title" style="margin-top:0">建议</div>'
-        + '<p class="muted small">先回看知识卡 → 再用「再练 5 题」专攻 <b>' + esc(topTag) + '</b>（会生成全新句子，不重复）。</p>'
-        + '<div class="btn-row" style="margin-top:10px">'
-        + '<button class="btn ok sm" data-retrain="1">再练 5 题</button>'
-        + '<button class="btn ghost sm" data-topic="' + S.topicId + '">回看知识卡</button></div>';
+      // 真题语篇 / AI 题没有题库可回炉，给它们自己的下一步
+      if (S.kind === 'paper') {
+        sug.innerHTML = '<div class="sec-title" style="margin-top:0">建议</div>'
+          + '<p class="muted small">先对着解析把 <b>' + esc(topTag) + '</b> 那几空想明白，再把整篇重做一遍——'
+          + '同一篇能全对，才说明这个考点真的会了。</p>'
+          + '<div class="btn-row" style="margin-top:10px">'
+          + '<button class="btn ok sm" data-repaper="1">整篇再做一遍</button>'
+          + '<button class="btn ghost sm" data-goto="papers">返回真题语篇</button></div>';
+      } else if (S.kind === 'ai') {
+        sug.innerHTML = '<div class="sec-title" style="margin-top:0">建议</div>'
+          + '<p class="muted small">针对 <b>' + esc(topTag) + '</b> 再生成一组新题，比重复做同一套更有效。</p>'
+          + '<div class="btn-row" style="margin-top:10px">'
+          + '<button class="btn ok sm" data-goto="ai">再生成一组 AI 题</button>'
+          + '<button class="btn ghost sm" data-goto="wrong">去错题本</button></div>';
+      } else {
+        sug.innerHTML = '<div class="sec-title" style="margin-top:0">建议</div>'
+          + '<p class="muted small">先回看知识卡 → 再用「再练 5 题」专攻 <b>' + esc(topTag) + '</b>（会生成全新句子，不重复）。</p>'
+          + '<div class="btn-row" style="margin-top:10px">'
+          + '<button class="btn ok sm" data-retrain="1">再练 5 题</button>'
+          + '<button class="btn ghost sm" data-topic="' + S.topicId + '">回看知识卡</button></div>';
+      }
       v.appendChild(sug);
     }
 
@@ -742,7 +758,7 @@
       var card = el('div', 'glass wb-item');
       card.style.borderLeftColor = a.ok ? 'var(--ok)' : 'var(--bad)';
       var unit = (S.kind === 'paper' || S.kind === 'ai') ? '空' : '题';
-      var head = '<div class="head"><span class="badge ' + (a.ok ? 'green' : 'red') + '">第' + (i + 1) + unit + ' ' + (a.ok ? '对' : '错') + '</span>'
+      var head = '<div class="head"><span class="badge ' + (a.ok ? 'green' : 'red') + '">第' + (i + 1) + unit + ' · ' + (a.ok ? '对' : '错') + '</span>'
         + (a.q.tag ? '<span class="badge blue">' + esc(a.q.tag) + '</span>' : '')
         + (a.q.type === 'choice' ? '<span class="badge gray">选择</span>' : '<span class="badge gray">输入</span>') + '</div>';
       var corText = a.q.type === 'choice' ? a.q.options[a.q.answerIndex] : (a.q.answerText || (a.q.accepted && a.q.accepted[0]));
@@ -892,6 +908,12 @@
     });
     $$('[data-topic]', v).forEach(function (b) {
       b.addEventListener('click', function () { E.ui.go('topic/' + b.dataset.topic, true); });
+    });
+    $$('[data-repaper]', v).forEach(function (b) {
+      b.addEventListener('click', function () { if (S._paperId) startPaper(S._paperId); });
+    });
+    $$('[data-goto]', v).forEach(function (b) {
+      b.addEventListener('click', function () { E.ui.go(b.dataset.goto, true); });
     });
     v.scrollIntoView({ block: 'start' });
   }
