@@ -49,7 +49,7 @@
       + '<h1>初高中英语语法填空学习系统</h1>'
       + '<p>先懂方法 → 学专题 → 做句子级基础 → 练 10 空语篇 → 错题复盘 → AI 按薄弱点巩固</p>'
       + '<div class="hero-tags"><span class="hot">上海命题风格</span><span>初高中通用</span><span>全国其他地区也能用</span>'
-      + '<span>10 空 = 4 空给词 + 6 空纯空</span><span>有提示词不考词性转换</span></div>';
+      + '<span>10 空 = 5 空给词 + 5 空纯空</span><span>有提示词不考词性转换</span></div>';
     v.appendChild(hero);
 
     // 今日 / 进度 / 累计：一张账目表（左标签、右数字，进度画成一条细线）
@@ -75,11 +75,13 @@
 
     // 快捷入口：目录式列表（一行一件事，右侧细箭头）
     var chalDone = E.isChallengeAvailable() && allCoreFinished();
+    var paperN = E.availablePaperIds().length;
     var idx = U.el('nav', 'index-list');
     idx.setAttribute('aria-label', '快捷入口');
     idx.innerHTML =
       '<button class="index-row" data-nav="go-learn"><span class="tt">继续学习</span><span class="ar">→</span></button>'
-      + '<button class="index-row" data-nav="topics"><span class="tt">专题学习</span><span class="meta">' + st.available + ' 个专题</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="papers"><span class="tt">上海真题语篇 · 整篇 10 空</span><span class="meta">' + paperN + ' 篇</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="topics"><span class="tt">单句专题训练</span><span class="meta">' + st.available + ' 个专题</span><span class="ar">→</span></button>'
       + '<button class="index-row" data-nav="ai"><span class="tt">AI 出题</span><span class="ar">→</span></button>'
       + '<button class="index-row" data-nav="method"><span class="tt">解题方法课</span><span class="ar">→</span></button>'
       + '<button class="index-row" data-nav="wrong"><span class="tt">错题本</span><span class="meta">' + d.wrongBook.length + ' 题</span><span class="ar">→</span></button>'
@@ -206,13 +208,14 @@
     v.innerHTML = '';
     var cur = window.__EGL_CURRICULUM__;
     v.appendChild(U.el('div', '', '<div class="page-title">专题学习 · 语法填空</div>'
-      + '<div class="page-sub">初高中通用：按大专题学习，内置题库直接开练；尚未内置的专题可用「AI 出题」生成练习。</div>'));
+      + '<div class="page-sub">初高中通用：按大专题学习，内置题库直接开练；整篇 10 空的真题语篇在「上海真题语篇」里练。</div>'));
 
-    // 顶部：解题方法课 + AI 出题 快捷入口
-    var topRow = U.el('div', 'grid cards2', '');
+    // 顶部：真题语篇 + 解题方法课 + AI 出题 快捷入口
+    var topRow = U.el('div', 'grid cards3', '');
     topRow.style.marginBottom = '14px';
-    topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><h4>解题方法课</h4><p>先学上海语法填空的做题顺序（数谓语 → 连词优先 → 5 类排查）与高频坑，再开练。</p></button>'
-      + '<button class="mode-card glass" data-nav="ai"><h4>AI 出题</h4><p>按专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
+    topRow.innerHTML = '<button class="mode-card glass" data-nav="papers"><h4>上海真题语篇</h4><p>' + E.availablePaperIds().length + ' 篇真卷 · 每篇整篇 10 空一起做，交卷后逐空看解析。</p></button>'
+      + '<button class="mode-card glass" data-nav="method"><h4>解题方法课</h4><p>先学上海语法填空的做题顺序（数谓语 → 连词优先 → 5 类排查）与高频坑，再开练。</p></button>'
+      + '<button class="mode-card glass" data-nav="ai"><h4>AI 出题</h4><p>按专题/题数生成同规格整篇，做完自动判分与错题入库。</p></button>';
     v.appendChild(topRow);
 
     // 大专题卡片
@@ -296,6 +299,129 @@
     out.sort(function (a, b) { return a.no.localeCompare(b.no); });
     return out;
   }
+
+  /* ============ 上海真题语篇（整篇 10 空） ============ */
+  function papersPage() {
+    var v = app.view;
+    v.innerHTML = '';
+    var ids = E.availablePaperIds();
+    v.appendChild(U.el('div', '', '<div class="page-title">上海真题语篇 · 整篇 10 空</div>'
+      + '<div class="page-sub">历年上海春考/高考与各区一模二模的语法填空（个别空位为唯一答案做了微调）。'
+      + '按真卷规格整篇作答：10 个空一起填，交卷后逐空看解析；解析照区教研室答案详解写——考查点 → 句意 → 线索 → 判断 → 其它形式为何不行 → 一句话记忆。</div>'));
+
+    var top = U.el('div', 'grid cards2', '');
+    top.style.marginBottom = '14px';
+    top.innerHTML = '<button class="mode-card glass" data-nav="topics"><h4>单句专题训练</h4><p>按 12 大专题练句子级填空，先打基础再看语篇。</p></button>'
+      + '<button class="mode-card glass" data-nav="ai"><h4>AI 出新题</h4><p>按专题生成同规格的整篇练习，做完自动判分与入库。</p></button>';
+    v.appendChild(top);
+
+    if (!ids.length) {
+      v.appendChild(U.el('div', 'empty', '还没有载入真题语篇。'));
+      bindNav(v);
+      return;
+    }
+
+    var card = U.el('div', 'glass cat-card');
+    card.style.setProperty('--c', 'var(--accent)');
+    card.appendChild(U.el('div', '', '<h4>题源列表 <span class="faint small" style="font-weight:500">共 ' + ids.length + ' 篇 · 每篇 10 空</span></h4>'
+      + '<div class="desc">点开一篇即可整篇作答；做完会在“我的语法填空能力”里按大专题记分。</div>'));
+    var rows = U.el('div', '');
+    ids.forEach(function (pid) {
+      var p = E.paperById(pid);
+      if (!p) return;
+      var s = E.paperStat(pid);
+      var acc = s.attempts ? s.correct / s.attempts : null;
+      var wrongN = E.data.wrongBook.filter(function (w) { return String(w.qid || '').indexOf('paper_' + pid + '_') === 0; }).length;
+      var r = U.el('div', 'topic-row');
+      r.dataset.pid = pid;
+      r.style.alignItems = 'flex-start';
+      r.innerHTML = '<span class="no">' + esc(p.no) + '</span>'
+        + '<span class="tt" style="flex:1;min-width:0">' + esc(p.title)
+        + '<span class="faint small" style="display:block;font-weight:500;margin-top:2px">'
+        + esc(p.source || '') + (p.genre ? ' · ' + esc(p.genre) : '') + (p.words ? ' · ' + p.words + ' 词' : '')
+        + '</span></span>'
+        + '<span class="sub">' + (acc === null ? '未做' : pct(acc)) + '</span>'
+        + '<span class="st">' + (wrongN ? '<span class="badge red">错 ' + wrongN + '</span>' : '<i class="dot none"></i>') + '</span>';
+      rows.appendChild(r);
+    });
+    card.appendChild(rows);
+    v.appendChild(card);
+
+    v.appendChild(U.el('div', 'glass', '<div class="sec-title" style="margin-top:0">做完一篇怎么用</div>'
+      + '<p style="font-size:14px">① 先按“通读一遍 → 判断每个空缺什么 → 再动笔”的顺序做；② 交卷后逐个空看解析，重点看“为什么其他形式不行”；'
+      + '③ 做错的空已自动进错题本，可以在错题本里按大专题回炉；④ 想再练同规格的新语篇，用「AI 出题」把专题选到那一类。</p>'));
+
+    $$('.topic-row[data-pid]', v).forEach(function (row) {
+      row.addEventListener('click', function () { E.ui.go('paper/' + row.dataset.pid); });
+    });
+    bindNav(v);
+  }
+
+  function paperPage(pid) {
+    var v = app.view;
+    var p = E.paperById(pid);
+    if (!p) { v.innerHTML = '<div class="empty">语篇未找到</div>'; return; }
+    var s = E.paperStat(pid);
+    var acc = s.attempts ? s.correct / s.attempts : null;
+    var wrongN = E.data.wrongBook.filter(function (w) { return String(w.qid || '').indexOf('paper_' + pid + '_') === 0; }).length;
+    var parts = E.paperBreakdown(p);
+
+    v.innerHTML = '';
+    v.appendChild(U.el('div', '', '<button class="btn ghost sm" data-nav="papers">← 返回真题语篇</button>'));
+
+    var head = U.el('div', 'glass', '');
+    head.style.marginTop = '10px';
+    head.style.padding = '16px 18px';
+    head.innerHTML = '<div class="page-title" style="font-size:20px">' + esc(p.title) + '</div>'
+      + '<div class="page-sub">' + esc(p.source || '') + ' · ' + esc(p.level || '') + ' · ' + esc(p.genre || '')
+      + (p.words ? ' · ' + p.words + ' 词' : '') + (p.topic ? ' · ' + esc(p.topic) : '') + '</div>'
+      + '<div class="grid cards4" style="margin-top:14px">'
+      + '<div class="stat-card" style="padding:8px"><div class="k">空数</div><div class="v" style="font-size:19px">' + (p.blanks || []).length + '</div></div>'
+      + '<div class="stat-card" style="padding:8px"><div class="k">正确率</div><div class="v" style="font-size:19px">' + (acc === null ? '未做' : pct(acc)) + '</div></div>'
+      + '<div class="stat-card" style="padding:8px"><div class="k">累计作答</div><div class="v" style="font-size:19px">' + s.attempts + '</div></div>'
+      + '<div class="stat-card" style="padding:8px"><div class="k">错题</div><div class="v" style="font-size:19px">' + wrongN + '</div></div>'
+      + '</div>';
+    v.appendChild(head);
+
+    if (p.readGuide) {
+      v.appendChild(U.el('div', 'glass', '<div class="sec-title" style="margin-top:0">通读提示</div>'
+        + '<p style="font-size:14px">' + esc(p.readGuide) + '</p>'
+        + '<p class="faint small">先按整篇读一遍再动笔：上海卷的空多数要靠上下文，不看全篇很容易只凭一个词猜。</p>'));
+    }
+
+    var mode = U.el('div', 'glass', '');
+    mode.style.marginTop = '14px';
+    mode.style.padding = '18px';
+    mode.innerHTML = '<div class="sec-title" style="margin-top:0">开始整篇作答</div>'
+      + '<div class="mode-grid"><div class="mode-card glass" data-start="1">'
+      + '<h4>整篇卷面 · 10 空一起填</h4><p>与真卷一致：先通读，再逐空填写，全部答完统一交卷，交卷后逐空看解析。</p></div></div>';
+    v.appendChild(mode);
+
+    var kp = U.el('div', 'glass', '');
+    kp.style.marginTop = '14px';
+    kp.style.padding = '14px 16px';
+    var rows = '<table class="mini-table"><tr><th>空</th><th>考点</th><th>大类</th><th>提示词</th></tr>';
+    (p.blanks || []).forEach(function (b, i) {
+      rows += '<tr><td>' + (i + 1) + '</td><td>' + esc(b.point || '') + '</td><td>' + esc(E.catLabelOf(b.catId))
+        + '</td><td>' + (b.isGiven && b.given ? esc(b.given) : '<span class="faint">无</span>') + '</td></tr>';
+    });
+    rows += '</table>';
+    var chips = parts.map(function (c) {
+      return '<span class="problem-chip"><b>' + c.count + '</b> 空 · ' + esc(c.name) + '</span>';
+    }).join('');
+    kp.innerHTML = '<div class="sec-title" style="margin-top:0">考点分布（' + (p.blanks || []).length + ' 空）</div>'
+      + '<div style="margin-bottom:10px">' + chips + '</div>' + rows
+      + '<p class="faint small" style="margin-top:8px">提示词“无”的空是纯逻辑填空，只填 1 个词（个别固定搭配 2 个词，如 instead of / so that）。</p>';
+    v.appendChild(kp);
+
+    $$('[data-start]', mode).forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (E.quiz && E.quiz.startPaper) E.quiz.startPaper(pid);
+      });
+    });
+    bindNav(v);
+  }
+
 
   /* ============ 专题页（含模式选择） ============ */
   function topicPage(tid) {
@@ -388,13 +514,16 @@
     var box = U.el('div', '');
     wb.forEach(function (w) {
       var isAI = w.source === 'ai';
-      var q = isAI ? null : E.findQuestion(w.topicId, w.qid); // AI 题已存快照，不入库
+      // AI 题与真题语篇都存了解析快照，不进题库反查
+      var isRich = isAI || w.source === 'paper';
+      var q = isRich ? null : E.findQuestion(w.topicId, w.qid);
       var card = U.el('div', 'glass wb-item');
-      var meta = isAI ? null : metaById(w.topicId);
-      var icon = isAI ? '' : (meta && meta.icon ? meta.icon : '');
+      var meta = isRich ? null : metaById(w.topicId);
+      var icon = isRich ? '' : (meta && meta.icon ? meta.icon : '');
       card.innerHTML = '<div class="head">'
         + (isAI ? '<span class="badge gray">AI 训练</span> ' : '')
-        + '<span class="badge gray">' + (icon ? icon + ' ' : '') + esc(w.topicTitle || (isAI ? 'AI出题' : topicName(w.topicId))) + '</span>'
+        + (w.source === 'paper' ? '<span class="badge gray">真题语篇</span> ' : '')
+        + '<span class="badge gray">' + (icon ? icon + ' ' : '') + esc(w.topicTitle || (isRich ? 'AI出题' : topicName(w.topicId))) + '</span>'
         + (w.kp ? '<span class="badge blue">' + esc(w.kp) + '</span>' : (w.tag ? '<span class="badge blue">' + esc(w.tag) + '</span>' : ''))
         + '<span class="badge red">' + wtZh(w.wrongType) + '</span>'
         + '<span class="badge amber">错 ' + w.times + ' 次</span>'
@@ -404,7 +533,7 @@
         + '<div class="q">' + esc(w.question) + '</div>'
         + '<div class="wb-meta"><span>我的答案：<span class="mya">' + esc(w.myAnswer === undefined || w.myAnswer === null || w.myAnswer === '' ? '（未作答）' : w.myAnswer) + '</span></span>'
         + '<span>正确答案：<span class="cora">' + esc(w.correctAnswer) + '</span></span></div>';
-      if (isAI && w.explText) {
+      if (isRich && w.explText) {
         var dAI = U.el('details', 'qa explanation-panel');
         dAI.style.marginTop = '10px';
         var pseudo = {
@@ -418,7 +547,9 @@
             chain: '',
             why: w.explText,
             whyOthers: '',
-            commonError: 'AI 生成题，重做可到「AI 出题」按薄弱点再生成。',
+            commonError: w.source === 'paper'
+              ? '真题语篇的错题：回「上海真题语篇」把整篇再做一遍，比单看这一空更有效。'
+              : 'AI 生成题，重做可到「AI 出题」按薄弱点再生成。',
             memory: '',
             cue: '',
             examMind: ''
@@ -994,6 +1125,8 @@
   E.ui.home = home;
   E.ui.topics = topics;
   E.ui.topicPage = topicPage;
+  E.ui.papersPage = papersPage;
+  E.ui.paperPage = paperPage;
   E.ui.wrongBook = wrongBook;
   E.ui.weak = weak;
   E.ui.records = records;

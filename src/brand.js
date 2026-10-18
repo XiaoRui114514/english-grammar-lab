@@ -124,6 +124,32 @@
     return n;
   }
 
+  // 真题语篇（整篇 10 空）：正文与逐空解析同样打指纹
+  function markPapers(list) {
+    list = list || W.__EGL_PAPERS__;
+    if (!list || !list.length) return 0;
+    var n = 0;
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i];
+      if (!p || typeof p !== 'object') continue;
+      if (typeof p.passage === 'string') {
+        var m = mark(p.passage);
+        if (m !== p.passage) { p.passage = m; n++; }
+      }
+      var bl = p.blanks || [];
+      for (var j = 0; j < bl.length; j++) {
+        var b = bl[j];
+        if (!b) continue;
+        ['sense', 'why', 'tip'].forEach(function (f) {
+          if (typeof b[f] !== 'string') return;
+          var mm = mark(b[f]);
+          if (mm !== b[f]) { b[f] = mm; n++; }
+        });
+      }
+    }
+    return n;
+  }
+
   /* ================= 3) 可见水印 ================= */
   var SEAL = 'eglSeal', FOOT = 'eglFooter', STYLE = 'eglBrandStyle';
   // 产品署名（品牌名统一在 brand.js 维护：页面标题 / 页脚 / 授权弹窗共用）
@@ -504,6 +530,7 @@
     mark: mark,
     inspect: inspect,
     markBank: markBank,
+    markPapers: markPapers,
     identity: function () {
       var id = ident();
       return id ? { name: id.n, tag: id.tag, douyin: id.dy, xhs: id.xhs, lab: id.lab } : null;

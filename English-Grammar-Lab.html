@@ -1249,9 +1249,9 @@ details.explanation-panel .explain {
 
 /* ============================================================
  * data/method-course.js — 语法填空 · 解题方法课（上海命题风格，初高中通用）
- * 上海卷 10 空 = 约 4 空有提示词 + 6 空无提示词：
+ * 上海卷 10 空 = 有提示词 4-6 空（多数 5 空）+ 无提示词 4-6 空（多数 5 空）：
  *   · 有提示词只有两种任务：动词（谓语/非谓语）、形容词/副词（比较级/最高级），不考词性转换；
- *   · 无提示词只有 5 类：连词 / 介词 / 冠词 / 代词 / 情态·助动词，每空 1 个单词。
+ *   · 无提示词只有 5 类：连词 / 介词 / 冠词 / 代词 / 情态·助动词，每空 1 个单词（个别固定搭配 2 词）。
  * 这是"自学课程"模块：先把做题顺序学明白，再进专题练。
  * ============================================================ */
 (function () {
@@ -1261,14 +1261,14 @@ details.explanation-panel .explain {
     id: 'method',
     title: '上海语法填空 · 解题方法课',
     icon: '🧭',
-    intro: '上海卷固定 10 空：约 4 空有提示词（括号给词）+ 6 空无提示词（纯空格）。先记住两条铁律——有提示词只考动词变形与形副比较等级，不考词性转换；无提示词跑不出"连词 / 介词 / 冠词 / 代词 / 情态·助动词"这 5 类，且每空只填 1 个单词。下面 5 步就是固定做题顺序。',
+    intro: '上海卷固定 10 空：有提示词 4-6 空（多数是 5 空，括号给词）+ 无提示词 4-6 空（多数 5 空，纯空格）。先记住两条铁律——有提示词只考动词变形与形副比较等级，不考词性转换；无提示词跑不出"连词 / 介词 / 冠词 / 代词 / 情态·助动词"这 5 类，且每空只填 1 个单词（个别固定搭配 2 个词，如 instead of / so that）。下面 5 步就是固定做题顺序。',
 
     /* 上海卷结构速览（页面顶部卡片） */
     facts: [
-      { k: '10 空结构', v: '约 4 空有提示词（括号给词）+ 6 空无提示词（纯空格），模考与真题都按这个配比出。' },
-      { k: '有提示词（两类任务）', v: '① 括号给动词 → 谓语（时态/语态/主谓一致）或非谓语（to do / doing / done）；② 括号给形容词/副词 → 只考比较级、最高级，原词性不变。' },
+      { k: '10 空结构', v: '有提示词 4-6 空（括号给词）+ 无提示词 4-6 空（纯空格），近年真卷多为 5+5，模考按同一配比出。' },
+      { k: '有提示词（两类任务）', v: '① 括号给动词 → 谓语（时态/语态/主谓一致）或非谓语（to do / doing / done）；② 括号给形容词/副词 → 只考比较级、最高级，原词性不变。答案可以带助动词（was cut / would be / has been studied）。' },
       { k: '不考什么（重要）', v: '上海语法填空不考词性转换：不会给 care 让你写 carefully，也不考名词化、否定前缀、名词单复数变形。拿全国卷思路做上海题，第一步就会跑偏。' },
-      { k: '无提示词（5 类）', v: '候选池固定为：连词、介词、冠词、代词、情态动词/助动词。排查优先级：连词 > 介词 > 冠词 > 代词 > 情态，每空只填 1 个单词。' }
+      { k: '无提示词（5 类）', v: '候选池固定为：连词、介词、冠词、代词、情态动词/助动词。排查优先级：连词 > 介词 > 冠词 > 代词 > 情态，每空 1 个单词（固定搭配可 2 词，全篇最多 2 空）。' }
     ],
 
     steps: [
@@ -1313,8 +1313,8 @@ details.explanation-panel .explain {
       },
       {
         no: 4, title: '无提示词：连词优先，再按 5 类排查',
-        goal: '把 6 个纯空格逐一锁定进"连词 / 介词 / 冠词 / 代词 / 情态·助动词"这 5 类。',
-        why: '上海纯空格不会跑出这 5 类，而且每空只填 1 个单词。邪修顺序：连词 > 介词 > 冠词 > 代词 > 情态——先把最高频的连词排除掉，再往下试。',
+        goal: '把 4-6 个纯空格逐一锁定进"连词 / 介词 / 冠词 / 代词 / 情态·助动词"这 5 类。',
+        why: '上海纯空格不会跑出这 5 类，而且每空基本只填 1 个单词（只有 so that、instead of、as long as 这类固定搭配才 2 个词，一篇最多 2 空）。邪修顺序：连词 > 介词 > 冠词 > 代词 > 情态——先把最高频的连词排除掉，再往下试。',
         do: [
           '数这句话的谓语：出现 2 个及以上谓语（或空后跟的是一个从句）→ 优先填连词。',
           '只有 1 个谓语、主干完整 → 看空格后面：+ 名词/动名词 → 优先试介词；+ 可数名词单数 → 试冠词；+ 动词原形 → 情态动词/助动词。',
@@ -1333,7 +1333,7 @@ details.explanation-panel .explain {
           '回头确认重点判断：谓语还是非谓语？主动还是被动？'
         ],
         check: [
-          '无提示词空：每空是不是只有 1 个单词？',
+          '无提示词空：是不是只有 1 个单词（固定搭配最多 2 个词，如 so that / instead of）？',
           '有提示词空：答案还是同一个词（只是变形），没有换词性、换单词？',
           '主谓一致：三单加 s、be 动词形式对吗？',
           '被动语态：动作承受者做主语时，be + done 写全了吗？',
@@ -1343,7 +1343,7 @@ details.explanation-panel .explain {
           '固定搭配：介词对吗（如 look forward to + doing）？',
           '全文时态基调一致吗？'
         ],
-        tip: '检查完每空只填 1 个单词，这道题才算做完。'
+        tip: '检查完每个空（1 个词，或 2 词的固定搭配）都说得通，这道题才算做完。'
       }
     ],
 
@@ -1426,6 +1426,248 @@ details.explanation-panel .explain {
   };
 
   window.__EGL_METHOD_COURSE__ = COURSE;
+})();
+
+/* ============================================================
+ * data/bank-papers-01.js — 上海真题语篇 01-02（整篇 10 空 · 真卷口径）
+ * 注册到 window.__EGL_PAPERS__（与 tenseNN 单句题库分开存放，互不影响）
+ * 字段：id/no/title/source/level/genre/words/topic/passage/blanks[]
+ * 每个 blank：answer/accepted/given/isGiven/catId/point/sense/clue/why/others/tip
+ * 解析写法照上海区教研室答案详解：句意 → 考查点 → 线索 → 判断 → 其它形式为何不行 → 记忆
+ * ============================================================ */
+(function () {
+  'use strict';
+  var P = window.__EGL_PAPERS__ = window.__EGL_PAPERS__ || [];
+
+  P.push({
+    id: 'paper01',
+    no: '01',
+    title: 'A Quilt with a History',
+    source: '2024 · 上海春考',
+    level: '高三',
+    genre: '记叙文',
+    words: 292,
+    topic: '家庭记忆与代际传承',
+    readGuide: '先通读一遍：作者先从姑妈的旧被子写起，再写自己讲给孙女听，最后落回“教与学让祖孙更近”。时态主线是过去，最后一段转现在。',
+    passage: 'While visiting my husband’s relatives years ago, I admired his Aunt Doris’ collection of handstitched (手工缝纫的) quilts. ______ stood out from the rest was a particularly beautiful one. Auntie explained that every piece of this quilt ______ (cut) from her favorite clothes and represented an important moment in her life. “This is from a blouse I wore to the very first picture show I ever saw,” she said. Her stories went on. When it was time ______ (leave), she presented me with her valued quilt.\n\nI began retelling this story to my 12-year-old granddaughter, ______ I had some worries. Maybe children ______ (raise) in the 21st century wouldn’t be interested in an old lady’s talking about an old quilt, but I wanted to pass along this piece of family history. To my surprise, my granddaughter loved it after I explained why old clothes were used to make quilts. This opened the door to ______ (describe) how mothers passed along their knowledge of cooking, gardening and sewing to ensure that their daughters were well-armed to face life’s demands. In turn, my granddaughter explained how modern mothers pass on knowledge of computers, college and financial planning to ensure their daughters’ success.\n\nSurprised by how much my granddaughter had to teach me, I thought of the days ______ multiple generations of families lived under one roof. Sharing knowledge and history ______ have been a daily occurrence at that time.\n\nMultigenerational homes may be rarer now, but we can use new ways to promote the love that grandparents and grandchildren have always shared. As long as we continue to teach and learn from each other, we can build closeness ______ we may be generations and thousands of miles apart. It can be anything—computers, cooking, gardening, maybe even a young lady’s story told in a quilt—that brings you far ______ (close) to those you love.',
+    blanks: [
+      {
+        answer: 'What', accepted: ['what'], given: '', isGiven: false,
+        catId: 'nominal', point: '主语从句 · 连接代词 what 作主语',
+        wrongType: 'CLAUSE_ERROR', difficulty: 2,
+        sense: '在那批手工缝制的被子里，最惹眼的是一床特别漂亮的。',
+        clue: '空在句首、后面没有名词可修饰，且 ___ stood out from the rest 缺主语；再往下看 was a particularly beautiful one，说明整个“什么东西”作主语。',
+        why: '先看结构：句子已有谓语 was，那么它前面的部分必须是一个主语从句，而主语从句本身缺主语（stood out 前什么都没有），所以只能用既能引导从句、又能在从句里当主语的 what。再看语义：指“那些被子里最出众的那一床（东西）”，不是“哪一个人才”，所以不用 who。',
+        others: '①That：that 引导主语从句时从句必须完整，stood out from the rest 缺主语，不成立；②Which：which 需要上文已经给出选择范围（of the three 之类）才用；③It：it 没有连接作用，两句会各自独立，语法不通。',
+        tip: '句首一空 + 后面从句缺主语 → What；从句完整才轮到 That。'
+      },
+      {
+        answer: 'was cut', accepted: ['was cut'], given: 'cut', isGiven: true,
+        catId: 'verb', point: '一般过去时的被动语态（主谓一致）',
+        wrongType: 'VOICE_ERROR', difficulty: 2,
+        sense: '姑妈解释说，这床被子上的每一块布都是从她最喜爱的衣服上剪下来的，都代表着她人生中的某个重要时刻。',
+        clue: '主语是 every piece（每一块），与 cut 是被动关系——布“被剪”；同句并列的 represented 是一般过去时，说明整句讲的是过去的事。',
+        why: '第一步看语态：布不会自己剪，every piece of this quilt 和 cut 之间是被动，所以必须用 be + done。第二步看时态：并列谓语 represented 是过去式，且姑妈解释的是她过去做的事，所以 be 用 was。第三步看主谓一致：every piece 是单数，be 用 was 而不是 were。',
+        others: '①cut / cuts：主动形式，布不能“剪”，语态错；②were cut：主语 every piece 是单数，主谓不一致；③had been cut：过去完成时要有“过去之前”的参照点，本句只叙述当时的做法，没有这个时间层次。',
+        tip: 'every + 单数名词作主语 → 谓语单数；物作主语 + 动词是“施加动作” → 被动。'
+      },
+      {
+        answer: 'to leave', accepted: ['to leave'], given: 'leave', isGiven: true,
+        catId: 'nonfinite', point: 'it is time to do sth 句式',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 1,
+        sense: '该告辞的时候，她把那床珍爱的被子送给了我。',
+        clue: 'When it was time ______ (leave) 是一个固定句式：it 是形式主语，真正的内容在后面的不定式。',
+        why: '先数谓语：When 从句里已有谓语 was，说明空处不能再放谓语动词，只能填非谓语。再看句式：It is/was time to do sth 表示“该做某事了”，此处用不定式 to leave 作真正的主语（it 只是占位）。',
+        others: '①leaving：It is time doing 不是英语句式；It is time for doing 才用动名词，且后面不直接接 leave；②left：过去分词不能作这个句式的主语；③leaving 前加 our 才成立（It is time for leaving），与括号给的词不符。',
+        tip: 'It is time to do sth（该做某事了）；It is time for sth/doing（……的时候了）。'
+      },
+      {
+        answer: 'though', accepted: ['though', 'although'], given: '', isGiven: false,
+        catId: 'adverbial', point: '让步状语从句连词',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 3,
+        sense: '我开始把这个故事讲给十二岁的孙女听，尽管我心里有些担心。',
+        clue: '主句是“我开始讲这个故事”，后面“我有些担心”与“讲”形成让步关系；再看下一句 Maybe children ... wouldn’t be interested，正是在说担心什么。',
+        why: '先判断逻辑：讲故事与“有担心”不是因果也不是转折并列（不是 but 那种对等），而是“虽然担心，还是讲了”的让步。再看位置：空在逗号之后、从句之前，需要能引导让步状语从句的连词，though / although 都可以。',
+        others: '①but：but 连接两个并列分句，前面 I began retelling this story to my 12-year-old granddaughter 是完整主句，but 后面再跟从句会缺主句结构；②because：逻辑反了，担心不是讲故事的原因；③unless / if：条件关系，与“虽然”的语义不符。',
+        tip: '“虽然担心，还是做了”→ though / although 引导让步从句，不能和 but 同现。'
+      },
+      {
+        answer: 'raised', accepted: ['raised'], given: 'raise', isGiven: true,
+        catId: 'nonfinite', point: '过去分词作后置定语',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '也许在二十一世纪长大的孩子，对老太太讲一床旧被子不会感兴趣。',
+        clue: 'children ______ (raise) in the 21st century：children 后面已经有谓语 wouldn’t be interested，空处只能是非谓语；孩子与 raise 是“被抚养”的被动关系。',
+        why: '第一步数谓语：从句谓语是 wouldn’t be interested，空处不能再是谓语。第二步定关系：children 是被抚养的，所以要用过去分词 raised 作后置定语，相当于 who were raised in the 21st century。第三步排除：raising 表主动，会把“孩子抚养别人”这个意思塞进来。',
+        others: '①raising：现在分词表主动，孩子不会去抚养别人；②to raise：不定式作定语多表将来的动作，此处是已经发生的事实；③were raised：再放一个谓语，与 wouldn’t be interested 冲突，句子会没有连词连接。',
+        tip: '名词 + 一个空 + 后面还有谓语 → 非谓语；被动的用 done，主动的用 doing。'
+      },
+      {
+        answer: 'describing', accepted: ['describing'], given: 'describe', isGiven: true,
+        catId: 'nonfinite', point: '介词 to 后面接动名词（the door to doing）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 4,
+        sense: '这打开了一扇门，让我能讲述母亲们如何把烹饪、园艺和缝纫的知识传给女儿。',
+        clue: 'This opened the door to ______ (describe)：to 前面是名词 door，to 在这里是介词（“通向……的门”），不是不定式符号。',
+        why: '先看 to 的性质：如果 to 后面接原形，to 必须是不定式符号，而不定式不能作介词的宾语；这里是 the door to...（通往……的门），to 是介词，介词后接名词或动名词，所以用 describing。这类“to 是介词”的搭配还有 look forward to doing、be used to doing。',
+        others: '①describe：把 to 当不定式符号，但 the door to describe 讲不通（门不能“去描述”）；②described：过去分词表被动，而“讲述”这个动作是作者主动做的；③to describe：多一个 to，结构与前面的 to 重复。',
+        tip: '名词 + to + doing 是固定搭配（the key to solving、the door to doing），这里的 to 是介词。'
+      },
+      {
+        answer: 'when', accepted: ['when'], given: '', isGiven: false,
+        catId: 'attrib', point: '定语从句 · 关系副词 when 作时间状语',
+        wrongType: 'CLAUSE_ERROR', difficulty: 3,
+        sense: '被孙女教了这么多，我想起了几代同堂的那些日子。',
+        clue: '先行词是 the days（表时间），从句 multiple generations of families lived under one roof 主谓宾齐全，缺的是时间状语。',
+        why: '先找先行词：the days 是表示时间的名词。再看从句：multiple generations of families 是主语，lived 是谓语，under one roof 是地点状语，句子成分已完整，说明关系词不能在从句里当主语或宾语，只能作时间状语，用关系副词 when（= in which）。',
+        others: '①which：which 在从句里要充当主语或宾语，而本从句已经不缺成分；②that：同样要求从句缺成分，且非正式用法中 that 也不能替代表时间的 when；③where：where 指地点，the days 是时间不是地点。',
+        tip: '先行词是时间名词 + 从句不缺主宾 → 用 when（= in/on which）。'
+      },
+      {
+        answer: 'must', accepted: ['must'], given: '', isGiven: false,
+        catId: 'extra', point: '情态动词 + have done 表对过去的肯定推测',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 4,
+        sense: '分享知识与历史，在那个时候一定是天天都在发生的事。',
+        clue: '空后是 have been（完成式），空后还有 at that time 指向过去；整句是对过去情况的肯定判断。',
+        why: '先看结构：______ have been a daily occurrence 说明空处必须是情态动词或助动词，和 have been 一起构成谓语。再看语义：作者在推测过去的事实（“一定天天如此”），肯定推测用 must have done；at that time 把时间锁定在过去，所以不是 must be。',
+        others: '①should：should have done 表示“本该做而没做”，是虚拟责备，与“一定如此”相反；②can：can have done 只用于疑问句和否定句，肯定句不用；③would：would have done 是虚拟条件句里的结果，本句没有虚拟条件。',
+        tip: 'must have done＝对过去的肯定推测；can’t have done＝对过去的否定推测。'
+      },
+      {
+        answer: 'even if', accepted: ['even if', 'even though', 'although', 'though'], given: '', isGiven: false,
+        catId: 'adverbial', point: '让步状语从句（even if / even though）',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 4,
+        sense: '只要我们继续互相教、互相学，即使相隔几代、相距千里，也能建立亲密感。',
+        clue: '主句 we can build closeness 是正面结果，从句 we may be generations and thousands of miles apart 是不利条件；“即使……也……”正是让步关系。',
+        why: '先判断逻辑：距离与代沟本来会阻碍亲密，但主句说仍能建立亲密，两者是让步。再看语气：这里含有“即使（可能）相距千里”的假设意味，even if 最贴切；如果把它当作已知事实，even though 也成立，故两个都接受。',
+        others: '①because：因果讲反了，相隔千里不是“建立亲密”的原因；②so that：表目的或结果，与让步语义不符；③unless：条件“除非”，会变成“除非相隔千里才能亲密”，语义荒谬。',
+        tip: '“即使……也……”→ even if / even though；让步从句后面主句不再加 but。'
+      },
+      {
+        answer: 'closer', accepted: ['closer'], given: 'close', isGiven: true,
+        catId: 'transform', point: '形容词比较级（far + 比较级）',
+        wrongType: 'WORD_FORM_ERROR', difficulty: 2,
+        sense: '它可以是任何东西——电脑、烹饪、园艺，甚至一床被子里讲出的年轻姑娘的故事——把你拉得离所爱的人更近。',
+        clue: '空前的 far 修饰比较级（far closer），空后的 to those you love 是比较对象；整句在说“比原来更近”。',
+        why: '第一步看修饰语：far 只能修饰比较级（far better / far closer），不能修饰原级。第二步看语义：brings you far ______ to those you love 表达“让你与所爱的人更亲近”，是两者相比更近，用比较级 closer。第三步看拼写：close 变比较级直接加 -r。',
+        others: '①close：原级不能与 far 连用（far close 不成立）；②closest：最高级要 the + 范围，本句没有“在……之中”的比较范围；③more close：close 是单音节词，比较级加 -er，不用 more。',
+        tip: 'far / much / even / a lot + 比较级；看到 far 就先想比较级。'
+      }
+    ]
+  });
+
+  P.push({
+    id: 'paper02',
+    no: '02',
+    title: 'Noise — A Mixed Blessing',
+    source: '2025 · 上海一模',
+    level: '高三',
+    genre: '议论文',
+    words: 306,
+    topic: '体育与观众噪声的双面作用',
+    readGuide: '这是一篇“先肯定、再转折、最后分情况”的议论文。第一段讲主场噪声的积极作用，第二段转折：噪声真正影响的是裁判，第三段再分项目讨论。注意 however、But 这些信号。',
+    passage: 'Convenient it might be, but attending a game virtually couldn’t possibly be as exciting as being at a real game, surely? And what about the effect on ______ well the players perform in the game? Don’t the fans have a responsibility to turn up and encourage their team? Sporting teams always prefer to play in their home stadium, where 70-80% of the crowd ______ (consist) of their own fans. There is plenty of evidence to show that the home team does have an advantage ______ the visiting team. On average, teams playing in their home stadium win about 53% of the time. There are certain football stadiums which seem ______ (design) to take advantage of the noise fans make, using the shape of the stadium to make the noise as loud as possible. This then makes it very difficult for the visiting team to do well.\n\nSome teams now train using recordings of the other team’s fans ______ they can learn to take no notice of whatever their opponents might be shouting. However, there is some evidence to suggest that those ______ (impact) are not the players, but the referees (裁判), or match officials, who have to take decisions about whether to allow goals. Shouting from the crowd can affect their decisions, and make them ______ (likely) to favour the visiting team.\n\nBut is the noise of their supporters always a positive thing for players or athletes? Not necessarily. In general, crowds seem to improve performance for team sports and sports ______ (involve) strength or the ability to keep going, such as running or cycling. However, sports which require a lot of concentration ______ (not benefit) from the excitement caused by the screaming crowd. These kinds of athletes need calm and quiet to do well, and noise from the crowd might cause ______ to take unnecessary risks and make a mistake.',
+    blanks: [
+      {
+        answer: 'how', accepted: ['how'], given: '', isGiven: false,
+        catId: 'nominal', point: '宾语从句 · 连接副词 how 修饰 well',
+        wrongType: 'CLAUSE_ERROR', difficulty: 2,
+        sense: '那它对球员在场上的表现到底有多好，会有什么影响呢？',
+        clue: '介词 on 后面是宾语从句 ______ well the players perform，well 是副词，需要一个能修饰副词的连接词。',
+        why: '先看结构：介词 on 后接宾语从句，从句 the players perform 主谓齐全，前面却有副词 well，说明缺的是修饰 well 的程度副词。表示“多么好、表现得多好”用 how well，how 引导宾语从句并在从句中作状语。',
+        others: '①that：that 引导的从句必须完整，不能在 well 前再插一个词；②what：what 要在从句里作主语或宾语，而这里主语 the players、谓语 perform 都在；③however：however 引导让步状语从句，语义是“无论多么”，与本句“有多大影响”不符。',
+        tip: 'how + adj./adv. + 主谓 = “多么……”，常放在介词后作宾语从句。'
+      },
+      {
+        answer: 'consists', accepted: ['consists'], given: 'consist', isGiven: true,
+        catId: 'verb', point: '主谓一致（百分数 + of + 名词）',
+        wrongType: 'SUBJECT_VERB_AGREEMENT', difficulty: 4,
+        sense: '运动队总是更喜欢在主场作战，那里 70% 到 80% 的观众都是自己的球迷。',
+        clue: 'where 从句的主语是 70-80% of the crowd；crowd 是集合名词、在这里作单数看，且 consist of 没有被动形式。',
+        why: '第一步找主语：70-80% of the crowd。百分数作主语时，谓语与 of 后面的名词一致；crowd 表示“人群”整体，作单数，所以谓语用 consists。第二步看搭配：consist of 是主动形式，不能用 be consisted of。第三步看时态：全段用一般现在时陈述普遍情况，用 consists。',
+        others: '①consist：主语是单数第三人称，动词必须加 -s；②are consisted：consist of 是不及物动词短语，没有被动语态；③consisting：这里需要谓语，现在分词不能单独作谓语。',
+        tip: '百分数/分数 + of + 名词，谓语跟着 of 后面的名词走；consist of 永远主动。'
+      },
+      {
+        answer: 'over', accepted: ['over'], given: '', isGiven: false,
+        catId: 'prep', point: '固定搭配 have an advantage over',
+        wrongType: 'PREPOSITION_ERROR', difficulty: 3,
+        sense: '有大量证据表明，主队确实比客队占优势。',
+        clue: '空前的 an advantage 与空后的 the visiting team 构成“对……的优势”这一固定搭配。',
+        why: '先看搭配：advantage 与不同介词组合意思不同——have an advantage over sb 表示“比某人占优势”，take advantage of 表示“利用”。本句是“主队对客队有优势”，比较双方用 over。再看语境：后面讲主场胜率约 53%，正是在说这种优势。',
+        others: '①of：an advantage of 后接的是“优点、好处”的具体内容，不是比较对象；②to：没有 have an advantage to sb 这个搭配；③than：than 用于比较级后面，advantage 本身不是比较级。',
+        tip: 'have an advantage over sb（比某人占优势）/ take advantage of sth（利用某事）。'
+      },
+      {
+        answer: 'designed', accepted: ['designed'], given: 'design', isGiven: true,
+        catId: 'nonfinite', point: 'seem + 过去分词（be designed to do 的省略）',
+        wrongType: 'VOICE_ERROR', difficulty: 3,
+        sense: '有些足球场似乎就是被专门设计来放大球迷制造的噪声的，它们利用球场的形状把声音弄得尽可能响。',
+        clue: 'which seem ______ (design) to take advantage of the noise：先行词 stadiums 与 design 是被动关系（球场“被设计”），to take advantage of 说明设计的目的。',
+        why: '先数谓语：定语从句已有谓语 seem，空处只能是非谓语。再看语态：球场是被设计的，所以用过去分词 designed，构成 seem designed to do（= seem to be designed to do）。后面 using the shape of the stadium 是现在分词作状语，进一步印证前面说的是设计特征。',
+        others: '①designing：现在分词表主动，球场不会去设计别人；②to design：seem to design 会变成“球场似乎设计了……”，主语与动作关系错；③design：原形不能作 seem 的表语。',
+        tip: 'seem / appear / look + done 表示“看起来是被……的”，被动含义靠过去分词。'
+      },
+      {
+        answer: 'so that', accepted: ['so that'], given: '', isGiven: false,
+        catId: 'adverbial', point: '目的状语从句 so that',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 3,
+        sense: '现在有些球队用对手球迷的录音来训练，好让球员学会对那些喊声置之不理。',
+        clue: '前半句是“用录音训练”，后半句 they can learn to take no notice 是训练想达到的目的；两个空连写说明这里是两个词组成的一个连词。',
+        why: '先判断逻辑：train using recordings 与 learn to take no notice 是“做法—目的”关系，不是因果（because）也不是结果（so...that 结构中间要有形容词）。再看结构：______ ______ they can learn 后面是完整的主谓，前面需要引导目的状语从句的连词，so that 正好两个词。',
+        others: '①such that：such that 前面要有 such + 名词，本句没有；②so as：so as 后面接不定式（so as to do），不能接从句；③in order：要写成 in order that 才引导从句，且只空一格时写不下。',
+        tip: 'so that + 从句（目的/结果）；so as to / in order to + 动词原形。'
+      },
+      {
+        answer: 'impacted', accepted: ['impacted'], given: 'impact', isGiven: true,
+        catId: 'nonfinite', point: '过去分词作后置定语（those impacted）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '然而有证据表明，受到影响的人不是球员，而是裁判，也就是那些必须判定进球是否有效的比赛官员。',
+        clue: 'those ______ (impact) 后面紧跟 are not the players，说明空处不能是谓语；those 与 impact 是被动关系（“被影响的人”）。',
+        why: '第一步看结构：从句谓语是 are，those 后面只能放修饰语，用过去分词 impacted 作后置定语（= those who are impacted）。第二步看语态：人是“被影响”的，所以用 -ed 形式。第三步看搭配：impact 作动词时及物，被动含义用过去分词最自然。',
+        others: '①impacting：现在分词表主动，“影响别人的人”与原意相反；②to impact：不定式作定语多指将来，且与 those 搭配不自然；③are impacted：再出现一个谓语，与后面的 are not the players 冲突。',
+        tip: 'those + done = those who are done（被……的人）；those + doing = 主动做……的人。'
+      },
+      {
+        answer: 'more likely', accepted: ['more likely'], given: 'likely', isGiven: true,
+        catId: 'transform', point: '形容词比较级（make sb more likely to do）',
+        wrongType: 'WORD_FORM_ERROR', difficulty: 2,
+        sense: '看台上的喊声会影响他们的判罚，使他们更可能做出对客队有利的决定。',
+        clue: '前文说噪声会影响裁判的决定，这里与“不受影响时”相比，是程度上的“更容易”，且 likely 是多音节词。',
+        why: '第一步看结构：make them ______ to favour 是 make + 宾语 + 宾补，宾补要用形容词。第二步看语义：噪声让裁判“更倾向于”帮客队，含比较意味，所以用比较级。第三步看形式：likely 是多音节形容词，比较级用 more likely，不加 -er。',
+        others: '①likely：原级只表示“可能的”，体现不出噪声带来的程度变化；②most likely：最高级需要 the 和比较范围，本句没有“在……中最”；③likelier：likely 虽有人用 likelier，但标准书面语用 more likely。',
+        tip: 'make + 宾语 + adj.（宾补）；多音节形容词比较级用 more，最高级用 the most。'
+      },
+      {
+        answer: 'involving', accepted: ['involving'], given: 'involve', isGiven: true,
+        catId: 'nonfinite', point: '现在分词作后置定语',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '总的来说，观众似乎能提升团队项目和需要力量或耐力的项目（比如跑步、骑行）的表现。',
+        clue: 'sports ______ (involve) strength or the ability to keep going：sports 后面是定语位置，且运动与 involve 是主动关系（运动“包含、需要”力量）。',
+        why: '先看结构：主句谓语是 seem to improve，空处只能是修饰 sports 的定语。再看关系：sports 主动 involve strength（需要力量），用现在分词 involving 作后置定语。后面 such as running or cycling 是对“需要力量或耐力”的举例，语义吻合。',
+        others: '①involved：过去分词表被动，“被包含的运动”讲不通；②to involve：不定式作定语通常表将来或目的，这里是一般性说明；③involves：再放一个谓语，与主句谓语冲突。',
+        tip: '主动关系用 doing 作定语，被动关系用 done；先判断名词与动词谁主动。'
+      },
+      {
+        answer: 'don’t benefit', accepted: ['don’t benefit', 'do not benefit'], given: 'not benefit', isGiven: true,
+        catId: 'verb', point: '一般现在时的否定（主谓一致）',
+        wrongType: 'SUBJECT_VERB_AGREEMENT', difficulty: 3,
+        sense: '然而，需要高度专注的运动并不能从观众尖叫带来的兴奋中获益。',
+        clue: '主语是 sports which require a lot of concentration，中心词 sports 是复数；括号给的是 not benefit，说明要自己补出助动词构成否定。',
+        why: '第一步定谓语：主句需要一个谓语，benefit 是实义动词，否定要借助 do/does/did。第二步看主语：sports 是复数，所以用 don’t（do not）。第三步看时态：全段是一般现在时讲普遍规律，因此 don’t benefit。',
+        others: '①doesn’t benefit：主语 sports 是复数，助动词用 does 会造成主谓不一致；②not benefit：英语里实义动词不能直接加 not，必须借助助动词；③aren’t benefit：benefit 是实义动词，不是形容词，不能与 be 连用。',
+        tip: '实义动词的否定 = do/does/did + not + 动词原形；先看主语单复数再选助动词。'
+      },
+      {
+        answer: 'them', accepted: ['them'], given: '', isGiven: false,
+        catId: 'pronoun', point: '人称代词宾格（指代前文的 athletes）',
+        wrongType: 'PRONOUN_ERROR', difficulty: 2,
+        sense: '这类运动员需要安静的环境才能发挥好，而观众的噪声可能让他们去冒不必要的风险、犯下错误。',
+        clue: 'cause ______ to take unnecessary risks：cause sb to do sth 里的 sb 指前一句的 These kinds of athletes。',
+        why: '先看结构：cause + 宾语 + to do，空处必须是宾语，用宾格。再找指代：上一句 These kinds of athletes need calm and quiet，说明这里指的是“这些运动员”，复数，用 them。',
+        others: '①they：主格不能作 cause 的宾语；②their：物主代词后面要接名词，而这里后面是 to take，不是名词；③themselves：反身代词表示“他们自己对自己”，本句是噪声让他们冒险，不是自己对自己。',
+        tip: 'cause sb to do sth；动词后的宾语用宾格，先找它指代的是哪个人/物。'
+      }
+    ]
+  });
 })();
 
 (function () {
@@ -1976,6 +2218,244 @@ details.explanation-panel .explain {
   };
 })();
 
+/* ============================================================
+ * data/bank-papers-02.js — 上海真题语篇 03-04（整篇 10 空 · 真卷口径）
+ * ============================================================ */
+(function () {
+  'use strict';
+  var P = window.__EGL_PAPERS__ = window.__EGL_PAPERS__ || [];
+
+  P.push({
+    id: 'paper03',
+    no: '03',
+    title: 'The Northern Lights',
+    source: '2022 · 上海高考',
+    level: '高三',
+    genre: '说明文',
+    words: 294,
+    topic: '极光：命名、颜色、观测与成因',
+    readGuide: '说明文，按“是什么—什么颜色—在哪看—什么时候看”推进。时态以现在完成时（have been...）和一般现在时为主，第三段有一个倒装句要注意。',
+    passage: 'How much do you know about the northern lights, or the aurora borealis? They offer a magical display that fascinates ______ sees it. The name “aurora borealis” came respectively ______ the Roman goddess of the dawn, Aurora, and the Greek name for wind of the north, Boreas. For thousands of years, the northern lights have been the source of awe (敬畏). ______ people really understood what causes them, the lights had been thought to be a sign of war or destruction.\n\nThe colors most often ______ (associate) with the northern lights are pink, green, yellow, blue, and occasionally orange and white. These lights, ______ (appear) as a static (静止的) band of light, or sometimes as a curtain of constantly flowing colors, are a big attraction.\n\nThe best sites ______ you can see the northern lights are Alaska and northern Canada. But visiting these vast, open areas ______ (not be) always easy. Norway, Sweden and Finland also offer excellent observation sites. During periods of particularly strong solar activities, the lights are often seen as far south as the top of Scotland and even northern England. Only on rare occasions ______ the lights be seen farther south.\n\nThe northern lights are always present, but it is recommended that visitors go there in winter, due to lower levels of light pollution and the clear air. September, October, March and April are some of the best months ______ (view) the northern lights. The lights ______ (know) to be brighter and more active for up to two days after sunspot activity is at its highest.',
+    blanks: [
+      {
+        answer: 'whoever', accepted: ['whoever'], given: '', isGiven: false,
+        catId: 'nominal', point: '宾语从句 · whoever 作从句主语',
+        wrongType: 'CLAUSE_ERROR', difficulty: 3,
+        sense: '它们呈现出一种迷人的景象，让每一个看到它的人都为之着迷。',
+        clue: 'fascinates ______ sees it：fascinate 后面需要一个宾语，而这个宾语同时又是 sees 的主语，是“人”。',
+        why: '先看结构：fascinates 缺宾语，空处要引导一个宾语从句，同时这个引导词还要在从句里作 sees 的主语。再看语义：句意是“让任何看到它的人着迷”，指人不确定，用 whoever（= anyone who）。',
+        others: '①who：who 只能引导定语从句，前面要有先行词（someone who...），本句 fascinates 后面没有先行词；②whom：whom 在从句里只能作宾语，而这里缺的是主语；③whatever：whatever 指物，不能作 sees 的主语（物不会“看”）。',
+        tip: '缺宾语 + 从句缺主语 + 指人 → whoever；指物 → whatever。'
+      },
+      {
+        answer: 'from', accepted: ['from'], given: '', isGiven: false,
+        catId: 'prep', point: '介词 come from（源自）',
+        wrongType: 'PREPOSITION_ERROR', difficulty: 2,
+        sense: '“aurora borealis”这个名字分别来自罗马神话中的黎明女神 Aurora，以及希腊语中表示北风的词 Boreas。',
+        clue: '空前的 came 与空后的 the Roman goddess ... and the Greek name ... 构成“来自（某来源）”的搭配；respectively 提示后面跟两个来源。',
+        why: '先看动词：come 在这里表示“来源”，固定搭配是 come from（来自）。再看句子：came respectively ______ the Roman goddess ... and the Greek name ...，后面是两个来源，正好是 from 的宾语。',
+        others: '①of：come of 表示“由……产生/出身于”，且不与 respectively 连用表示来源；②to：come to 是“到达”，语义不通；③out：come out 是“出版、出现”，后面不能直接接来源。',
+        tip: 'come from + 来源；be named after + 名字来源（命名）。'
+      },
+      {
+        answer: 'Before', accepted: ['before'], given: '', isGiven: false,
+        catId: 'adverbial', point: '时间状语从句 + 过去完成时的呼应',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 4,
+        sense: '在人们真正弄明白极光的成因之前，它一直被认为是战争或毁灭的征兆。',
+        clue: '主句用的是 had been thought（过去完成时），它需要一个“过去的过去”的参照点，也就是“人们弄明白”这件事发生的时刻。',
+        why: '先看时态：主句 had been thought 是过去完成时，表示“在某个过去时间点之前就已经如此”，那么从句就要提供这个过去时间点。再看语义：人们“理解成因”是后来的事，在那之前极光被当作凶兆，所以用 Before。句首首字母大写。',
+        others: '①After：逻辑反了，成了“理解之后才被当成凶兆”；②Since：since 引导的从句一般用一般过去时、主句用现在完成时，与 had been thought 不匹配；③While：while 表“当……时”或对比，不能表达“在……之前”。',
+        tip: '看到 had done，先找“过去的过去”的参照点；before + 从句最常见。'
+      },
+      {
+        answer: 'associated', accepted: ['associated'], given: 'associate', isGiven: true,
+        catId: 'nonfinite', point: '过去分词短语作后置定语（be associated with）',
+        wrongType: 'VOICE_ERROR', difficulty: 3,
+        sense: '最常与极光联系在一起的颜色是粉色、绿色、黄色、蓝色，偶尔还有橙色和白色。',
+        clue: 'The colors most often ______ (associate) with the northern lights are ...：主语是 The colors，谓语是 are，空处只能是修饰 colors 的定语；颜色与 associate 是被动关系（“被联系”）。',
+        why: '第一步数谓语：句子的谓语是 are，所以空处不是谓语。第二步看关系：colors 是“被人们与极光联系起来”的对象，用过去分词 associated，相当于 which are most often associated with。第三步看副词：most often 插在非谓语前，正好说明这一被动动作经常发生。',
+        others: '①associating：现在分词表主动，“颜色去联系极光”讲不通；②to associate：不定式作定语表将来或目的，这里是习惯性描述；③are associated：再放一个谓语，主句会变成两个谓语却无连词。',
+        tip: 'be associated with（与……相关）；名词 + most often + done + 介词 = 过去分词定语。'
+      },
+      {
+        answer: 'appearing', accepted: ['appearing'], given: 'appear', isGiven: true,
+        catId: 'nonfinite', point: '现在分词作后置定语（表主动/状态）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '这些光，看起来是一条静止的光带，有时又像一幅不断流动的彩色帷幕，极具吸引力。',
+        clue: 'These lights, ______ (appear) as a static band of light, ..., are a big attraction. 主语 These lights 与谓语 are 之间是两个逗号隔开的插入成分，空处只能是非谓语；光“呈现为”某种形态是主动的。',
+        why: '先看结构：句子的主谓是 These lights ... are a big attraction，中间用逗号隔开的部分是补充说明，属于非限制性定语或状语，只能用非谓语。再看关系：appear as（呈现为）是光自己呈现，主动，用现在分词 appearing。',
+        others: '①appeared：过去分词表被动，光不是“被呈现”；②to appear：不定式一般表将来或目的，这里是客观描述；③appearance：名词不能带 as 构成这个结构。',
+        tip: '逗号隔开、删掉后句子仍完整 → 非谓语；主动用 doing，被动用 done。'
+      },
+      {
+        answer: 'where', accepted: ['where'], given: '', isGiven: false,
+        catId: 'attrib', point: '定语从句 · 关系副词 where',
+        wrongType: 'CLAUSE_ERROR', difficulty: 3,
+        sense: '能看极光的最佳地点是阿拉斯加和加拿大北部。',
+        clue: '先行词 The best sites 表地点，从句 you can see the northern lights 主谓宾齐全，缺的是地点状语。',
+        why: '先找先行词：sites（地点）。再看从句：you 是主语，can see 是谓语，the northern lights 是宾语，成分完整，说明关系词只能作地点状语，用关系副词 where（= at which）。',
+        others: '①which：which 要在从句里作主语或宾语，本从句已有宾语 the northern lights；②that：同理，that 不能作状语，也不能跟在表地点的先行词后充当 where；③when：先行词不是时间，语义不符。',
+        tip: '先行词是地点 + 从句不缺主宾 → where（= in/at which）。'
+      },
+      {
+        answer: 'is not', accepted: ['is not', 'isn’t'], given: 'not be', isGiven: true,
+        catId: 'verb', point: '动名词作主语时的主谓一致',
+        wrongType: 'SUBJECT_VERB_AGREEMENT', difficulty: 4,
+        sense: '但去这些广阔空旷的地方并不总是那么容易。',
+        clue: '主语是动名词短语 visiting these vast, open areas（“去这些地方”这件事），谓语要用单数；括号给的是 not be，需要补出 be 的单数和否定形式。',
+        why: '第一步找主语：visiting these vast, open areas 是动名词短语作主语，表示一件事，谓语用单数 is。第二步加否定：be 动词的否定直接在后加 not，即 is not（isn’t）。第三步看时态：全段讲一般情况，用现在时。',
+        others: '①are not：动名词短语作主语看作单数，用 are 会主谓不一致；②do not be：be 动词的否定不需要助动词 do；③not be：缺少主语对应的 be 形式，句子没有谓语。',
+        tip: '动名词/不定式/从句作主语 → 谓语用单数；be 动词否定直接加 not。'
+      },
+      {
+        answer: 'can', accepted: ['can'], given: '', isGiven: false,
+        catId: 'extra', point: 'Only + 状语置于句首的部分倒装',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 5,
+        sense: '只有在极少数情况下，人们才能在更靠南的地方看到极光。',
+        clue: 'Only on rare occasions 位于句首，后面 ______ the lights be seen 是“情态动词 + 主语 + 动词原形”的倒装语序，说明空处必须是情态动词。',
+        why: '先看语序：正常语序是 The lights ______ be seen only on rare occasions，现在 Only 状语提前，句子部分倒装，变成“情态动词/助动词 + 主语 + 其余”。be seen 已经是“be + done”，前面只能再放一个情态动词。再看语义：“能够被看到”用 can。',
+        others: '①are：are the lights be seen 语序和形式都不对；②do：do the lights be seen 语法错误，do 后面接原形，不接 be seen；③will：will the lights be seen 也构成倒装，但语义是“将会被看到”，与“偶尔能看到”不符。',
+        tip: 'Only + 状语在句首 → 部分倒装：Only then did I realize... / Only on rare occasions can...'
+      },
+      {
+        answer: 'to view', accepted: ['to view'], given: 'view', isGiven: true,
+        catId: 'nonfinite', point: '不定式作后置定语（the best months to do）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 2,
+        sense: '九月、十月、三月和四月是观赏极光的最佳月份。',
+        clue: 'some of the best months ______ (view) the northern lights：months 后面接的不是谓语，而是说明“用来做什么”的定语。',
+        why: '先看结构：主句谓语是 are，空处只能是非谓语。再看语义：the best months to view the northern lights 表示“观赏极光的最佳月份”，不定式作定语，修饰被序数词/最高级限定的名词（the best months）时最常用。',
+        others: '①viewing：动名词作定语多表用途或正在进行，the best months viewing 不成立；②viewed：过去分词表被动，月份不会“被观赏”；③view：原形不能直接作定语。',
+        tip: 'the first / the best / the only + 名词 + to do（用不定式作定语）。'
+      },
+      {
+        answer: 'are known', accepted: ['are known'], given: 'know', isGiven: true,
+        catId: 'verb', point: '一般现在时的被动语态（be known to be）',
+        wrongType: 'VOICE_ERROR', difficulty: 3,
+        sense: '据知，在太阳黑子活动达到高峰后的两天里，极光会更明亮、更活跃。',
+        clue: '主语 The lights 与 know 是被动关系（“人们知道极光……”），后面的 to be brighter and more active 是 be known to be 结构。',
+        why: '第一步看语态：极光是“被人们所知”的对象，用被动。第二步看时态：全段陈述客观事实，用一般现在时，所以 are known。第三步看搭配：be known to be + adj. 表示“据知是……”，与后面的 to be brighter 正好吻合。主语 The lights 是复数，be 用 are。',
+        others: '①know：主动形式，“极光知道”讲不通；②is known：主语 The lights 是复数，主谓不一致；③have been known：现在完成时强调“到现在为止一直”，本句只是陈述一般规律，与后面的 are always present 重复。',
+        tip: 'be known to be / be known as / be known for 三个搭配要分清：to be 是“据知是”，as 是“作为”，for 是“因……而闻名”。'
+      }
+    ]
+  });
+
+  P.push({
+    id: 'paper04',
+    no: '04',
+    title: 'Young Enterprise',
+    source: '2023 · 上海高考',
+    level: '高三',
+    genre: '说明文',
+    words: 288,
+    topic: '青年创业组织：参与者、导师与赞助者',
+    readGuide: '说明文，介绍一个教年轻人做生意的组织。全文以一般现在时为主，第二段插叙早期历史时用过去时。注意 though 引导的让步、who 引导的非限制性定语从句。',
+    passage: 'Young Enterprise is an organization that makes serious efforts to teach all types of young people the general principles about running a business.\n\n______ (originate) in the United States of America, the idea of Young Enterprise was introduced into Britain by a successful banker. ______ developed very slowly in its early years, the organization grew rapidly later. Young Enterprise is now backed by industry and commerce, so that today the young throughout the United Kingdom can participate in.\n\nA participant in Young Enterprise is known as Achiever. Young Enterprise primarily meets the needs of young people, ______ are still at school, giving them an understanding of industry and the opportunities it offers them in the future. But it is usually possible ______ (include) young people in the same age group who have left school but have not yet started to work.\n\nAn advisor is a practicing business executive with an expert knowledge of his own field who volunteers to help a young enterprise company during its trading year. ______ counts for advisers is an ability to get along with young people and to put across the subject. As the name ______ (imply), Advisors are there to advise: they do not run the business.\n\nNormally three advisors — one on accountancy, one on production, and one on marketing — ______ (be) available to each company. Young Enterprise makes ______ a rule that the advisors must come from a variety of business occupations.\n\nA Sponsor, ______ (reward) by the success of the enterprise of its achievers, is an organization which participates in Young Enterprise, and ______ its own expense, provides facilities, accommodation, advice and encouragement.',
+    blanks: [
+      {
+        answer: 'Originating', accepted: ['originating'], given: 'originate', isGiven: true,
+        catId: 'nonfinite', point: '现在分词作状语（主动关系）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '这个源自美国的想法，由一位成功的银行家引入英国。',
+        clue: '空在句首、逗号之后，句子已有谓语 was introduced；主语 the idea of Young Enterprise 与 originate 是主动关系（想法“源自”某地）。',
+        why: '先数谓语：主句谓语是 was introduced，句首的逗号结构只能是非谓语状语。再看关系：the idea 自己 originate in the USA（源自美国），是主动关系，用现在分词 originating。句首首字母大写。',
+        others: '①Originated：过去分词表被动，“想法被起源”讲不通；②To originate：不定式作状语多表目的，“为了源自美国”语义不通；③origin 是名词/原形，不能作句首状语。',
+        tip: '句首逗号结构先看主语与动词是主动还是被动：主动用 doing，被动用 done。'
+      },
+      {
+        answer: 'Though', accepted: ['though', 'although', 'while'], given: '', isGiven: false,
+        catId: 'adverbial', point: '让步状语从句连词',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 3,
+        sense: '尽管这个组织早期发展得非常缓慢，但后来迅速壮大起来。',
+        clue: '前半句 developed very slowly 与后半句 grew rapidly later 意思相反；主句前没有 but，说明让步关系要在从句连词里体现。',
+        why: '先判断逻辑：发展慢与后来迅速壮大是让步（“虽然……但是……”）。再看结构：空后是完整的主谓 developed very slowly in its early years，需要引导让步状语从句的连词，though / although 都可以；while 在此也能表示“虽然”，故一并接受。句首首字母大写。',
+        others: '①But：but 是并列连词，不能引导位于句首的从句还保留后面主句（Though..., the organization grew 才是标准结构）；②Because：因果讲反了，发展慢不是迅速壮大的原因；③However：however 是副词，不能直接引导从句作连词。',
+        tip: '中文“虽然……但是……”在英语里只能留一个：Though + 从句，主句不再加 but。'
+      },
+      {
+        answer: 'who', accepted: ['who'], given: '', isGiven: false,
+        catId: 'attrib', point: '非限制性定语从句 · 关系代词 who 作主语',
+        wrongType: 'CLAUSE_ERROR', difficulty: 2,
+        sense: '青年创业主要面向年轻人，也就是还在上学的人，让他们了解产业以及产业将来能提供的就业机会。',
+        clue: '先行词 young people 指人，逗号后面 are still at school 缺主语。',
+        why: '先找先行词：young people（人）。再看从句：______ are still at school 缺主语，需要关系代词 who（指人、作主语）。逗号说明是非限制性定语从句，此时不能用 that。',
+        others: '①that：非限制性定语从句（逗号后）不能用 that；②which：which 指物，先行词是人；③whom：whom 只能在从句里作宾语，这里缺主语。',
+        tip: '逗号 + 指人 + 从句缺主语 → who；逗号后永远不用 that。'
+      },
+      {
+        answer: 'to include', accepted: ['to include'], given: 'include', isGiven: true,
+        catId: 'nonfinite', point: 'it is possible to do sth 句式',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 2,
+        sense: '但通常也可以把同一年龄段里已经离校、还没开始工作的年轻人纳入进来。',
+        clue: 'it is usually possible ______ (include)：it 是形式主语，真正的主语是后面的不定式。',
+        why: '先看句式：It is + adj. + to do sth 是英语里最常用的形式主语句式，it 占位，真正的主语用不定式。再看语义：“也有可能包括……”，用 to include。后面的 young people ... who have left school 是 include 的宾语。',
+        others: '①including：It is possible including 不是英语句式；②included：过去分词不能作这个句式的主语；③include：原形不能直接放在形容词后作主语。',
+        tip: 'It is + adj. + to do sth（形式主语句）；It is no use doing sth 才用动名词。'
+      },
+      {
+        answer: 'What', accepted: ['what'], given: '', isGiven: false,
+        catId: 'nominal', point: '主语从句 · what 作从句主语',
+        wrongType: 'CLAUSE_ERROR', difficulty: 3,
+        sense: '对导师来说，最重要的是能与年轻人相处并把主题讲清楚的能力。',
+        clue: '空在句首、后面 counts for advisers 缺主语，句子的谓语是 is，说明前面整个是一个主语从句。',
+        why: '先看结构：句子已有谓语 is（an ability to get along...），空处引导主语从句，且从句 counts for advisers 缺主语，只能用 what（= the thing that）。再看语义：“对导师而言重要的是……”，指事物，不用 who。',
+        others: '①That：that 引导主语从句时从句必须完整，counts for advisers 缺主语，不成立；②Which：which 要有选择范围才用；③It：it 没有连接作用，会变成两个独立句子。',
+        tip: '句首 + 后面谓语缺主语 → What；从句完整 → That。'
+      },
+      {
+        answer: 'implies', accepted: ['implies'], given: 'imply', isGiven: true,
+        catId: 'verb', point: '一般现在时第三人称单数',
+        wrongType: 'SUBJECT_VERB_AGREEMENT', difficulty: 2,
+        sense: '正如这个名字所暗示的，导师的职责是提供建议，他们并不经营这家企业。',
+        clue: '主语 the name 是第三人称单数；As the name ______ 是“正如……所表明的”这一固定说法，讲的是普遍事实。',
+        why: '第一步看主语：the name 是单数第三人称。第二步看时态：as 从句陈述一般事实（名字的含义是固定的），用一般现在时。第三步加 -s：imply 以辅音字母 + y 结尾，变三单要改 y 为 i 再加 -es，即 implies。',
+        others: '①imply：三单主语后动词必须加 -s；②implied：过去式表示过去发生，与“名字现在暗示”的事实不符；③implying：现在分词不能单独作谓语。',
+        tip: '辅音字母 + y 结尾的动词，三单变 y 为 i 加 es：imply → implies。'
+      },
+      {
+        answer: 'are', accepted: ['are'], given: 'be', isGiven: true,
+        catId: 'verb', point: '主谓一致（插入语后的真正主语）',
+        wrongType: 'SUBJECT_VERB_AGREEMENT', difficulty: 4,
+        sense: '通常每家公司会有三位导师——一位负责会计，一位负责生产，一位负责营销。',
+        clue: '两个破折号中间是补充说明，真正的句子主干是 Normally three advisors ______ available to each company，主语 three advisors 是复数。',
+        why: '第一步找主语：跳过破折号里的插入成分，主语是 three advisors（复数）。第二步看时态：陈述通常情况，用一般现在时。第三步定形式：复数主语配 are，构成 are available to each company。',
+        others: '①is：主语是 three advisors，复数，用 is 会主谓不一致；②were：过去时与全段一般现在时的说明语气不符；③being：非谓语不能作谓语。',
+        tip: '主谓一致先“去掉插入语”：破折号、逗号、括号里的成分都不影响主语的数。'
+      },
+      {
+        answer: 'it', accepted: ['it'], given: '', isGiven: false,
+        catId: 'pronoun', point: '形式宾语 it（make it a rule that...）',
+        wrongType: 'PRONOUN_ERROR', difficulty: 4,
+        sense: '青年创业组织规定，导师必须来自不同的商业领域。',
+        clue: 'makes ______ a rule that the advisors must come from a variety of business occupations：真正的宾语是后面的 that 从句，位置太长，所以先用一个形式宾语占位。',
+        why: '先看结构：make + 宾语 + 宾补（make sb/sth + n./adj.）。本句真正的宾语是 that the advisors must come from a variety of business occupations，太长，按英语习惯后置，前面用形式宾语 it 占位，构成 make it a rule that...。再看 it 不能换成其它代词：它只是结构占位，没有实际指代。',
+        others: '①that：that 不能作形式宾语，且后面已经有一个 that 从句；②this：this 作形式宾语不是英语习惯用法；③them：形式宾语固定用 it，与后面从句的单复数无关。',
+        tip: 'make / find / think / consider + it + 宾补 + that 从句（it 是形式宾语）。'
+      },
+      {
+        answer: 'rewarded', accepted: ['rewarded'], given: 'reward', isGiven: true,
+        catId: 'nonfinite', point: '过去分词短语作后置定语',
+        wrongType: 'VOICE_ERROR', difficulty: 3,
+        sense: '赞助方是这样一种组织：它从学员企业的成功中获得回报，参与青年创业项目，并自费提供场地、食宿、建议和鼓励。',
+        clue: 'A Sponsor, ______ (reward) by the success of the enterprise of its achievers, is an organization...：主语 A Sponsor 后的逗号结构只能是定语，赞助方与 reward 是被动关系（“获得回报”= be rewarded by）。',
+        why: '第一步数谓语：主句谓语是 is，空处不是谓语。第二步看关系：A Sponsor 是“被（学员的成功）回报”的一方，用过去分词 rewarded，相当于 who is rewarded by。第三步注意搭配：be rewarded by/with 是固定被动搭配。',
+        others: '①rewarding：现在分词表主动，“赞助方去回报别人”与原意相反；②to reward：不定式作定语表将来或目的，这里是解释性质；③rewards：再放一个谓语，与后面的 is 冲突。',
+        tip: 'sb be rewarded by/with sth（某人因……得到回报）；名词后的逗号结构用非谓语。'
+      },
+      {
+        answer: 'at', accepted: ['at'], given: '', isGiven: false,
+        catId: 'prep', point: '固定搭配 at one’s own expense',
+        wrongType: 'PREPOSITION_ERROR', difficulty: 3,
+        sense: '……并且自费提供场地、食宿、建议和鼓励。',
+        clue: 'and ______ its own expense, provides facilities...：expense 前需要一个介词，与 its own 构成“自费”的固定短语。',
+        why: '先看搭配：at one’s own expense 是固定短语，意为“自费、自己承担费用”，其中 at 表示“以……方式/代价”。再看结构：and 连接两个谓语（participates in 与 provides），中间插入 at its own expense 作状语，语义是“自掏腰包提供……”。',
+        others: '①in：in one’s expense 不是英语搭配；②on：on expense 也不成立（on expenses 指报销）；③with：with its own expense 表示“带着费用”，语义不清。',
+        tip: 'at one’s own expense（自费）；at the expense of（以……为代价）。'
+      }
+    ]
+  });
+})();
+
 /* data/bank-tense-02.js — 专题 02：一般过去时 Past Simple（上海高中语法填空） */
 (function () {
   'use strict';
@@ -2498,6 +2978,245 @@ details.explanation-panel .explain {
   };
 })();
 
+/* ============================================================
+ * data/bank-papers-03.js — 上海真题语篇 05-06（整篇 10 空 · 真卷口径）
+ * 05 = 2021 上海高考；06 = 浦东新区多校联考 25-26 学年高一期中（解析写法取该卷）
+ * ============================================================ */
+(function () {
+  'use strict';
+  var P = window.__EGL_PAPERS__ = window.__EGL_PAPERS__ || [];
+
+  P.push({
+    id: 'paper05',
+    no: '05',
+    title: 'Being in a Band Is Cool',
+    source: '2021 · 上海高考',
+    level: '高三',
+    genre: '说明文（指南）',
+    words: 296,
+    topic: '校园音乐社团：组乐队的实用指南',
+    readGuide: '指南类文章，分小标题给建议。语气是“你”对着读者说，注意祈使句和 you 的泛指用法；第一段有对过去的假设（would feel）。',
+    passage: 'When you were younger, you would feel it a waste of time taking piano lessons. Carrying a flute (长笛) from class to class just for a half-hour lesson ______ not have seemed meaningful. But as you grow up, you realize that being in a band is pretty cool. Yet, ______ talented you are, it’s still not easy to organize a band. Good news! Here’s a quick guide to help you.\n\n√ Find your members\nYou’ll need a drummer, a guitarist and a singer. Any other instrument is a bonus. This is where the flute finds its place. If you can make ______ (play) the flute cool, you deserve all the fame and fortune in the world!\n\n√ Organize a band practice\nIf you have a band member ______ a set of drums and parents who are hard of hearing, you can practice at home for free. Otherwise, you’ll need to find a local studio, for ______ you have to pay a handsome amount of money. ______ (divide) the cost equally, including the cost of hiring any equipment for the drummer. You rock together, and you roll together!\n\n√ Be productive\nIf you’re paying for a studio, the last thing you want is to spend it chatting with each other, so meet half an hour in advance to get all the chatting ______ (finish).\n\n√ Agree on songs, and learn them!\nEach band member should choose a song for the whole band ______ (learn). This will allow you to find out ______ music works for your group.\n\n√ Start writing\nOnce you know your type of music, start writing! You can do this individually or as a band but the most important thing is to respect other people’s songs. It’s very rare to find ______ that isn’t shy about sharing their first few pieces of writing, so be nice!',
+    blanks: [
+      {
+        answer: 'must', accepted: ['must'], given: '', isGiven: false,
+        catId: 'extra', point: '情态动词 + have done（对过去的推测）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 4,
+        sense: '为了半小时的课，把长笛从一间教室背到另一间教室，在当时看来肯定没什么意义。',
+        clue: '空后是 not have seemed（完成式），且整段在讲“你小时候”的事；语义是“（在当时看来）一定显得没意义”。',
+        why: '先看结构：______ not have seemed meaningful 需要一个情态动词与 have seemed 构成谓语。再看语义：作者在回看小时候的感受，做的是对过去情况的肯定推测，用 must have done；否定词 not 属于后面的谓语部分（must not have seemed = “一定显得不……”）。',
+        others: '①should：should not have done 表示“本不该做却做了”，是对行为的责备，与本句“显得没意义”不同；②can：can not have done 表示“不可能做过”，语气是否定推测，与句意相反；③would：would not have done 是虚拟条件句的结果，本句没有虚拟条件。',
+        tip: 'must have done（一定做过）/ can’t have done（不可能做过）——都用来推测过去。'
+      },
+      {
+        answer: 'however', accepted: ['however'], given: '', isGiven: false,
+        catId: 'adverbial', point: 'however + adj. + 主谓（让步状语从句）',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 4,
+        sense: '然而，不管你多有天赋，组建一支乐队仍然不容易。',
+        clue: '空后紧跟形容词 talented，然后是 you are；这是 however + adj./adv. + 主语 + 谓语的让步结构。',
+        why: '先看结构：______ talented you are 中 talented 是形容词，前面需要能修饰形容词并引导让步从句的词，however 正好构成“无论多么……”；同时主句 it’s still not easy 有 still 呼应让步。再看语义：“不管你多有天赋，组乐队都不容易”。',
+        others: '①whatever：whatever 后面接名词或从句，不能直接修饰形容词 talented；②no matter：要写成 no matter how talented you are 才成立，单空填不下；③but：but 是并列连词，不能引导这个从句。',
+        tip: 'however + adj./adv. + 主谓 = no matter how + adj./adv. + 主谓（无论多么……）。'
+      },
+      {
+        answer: 'playing', accepted: ['playing'], given: 'play', isGiven: true,
+        catId: 'nonfinite', point: '动名词作 make 的宾语',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '如果你能把吹长笛这件事弄得很酷，那全世界的名声和财富你都配得上！',
+        clue: 'make ______ (play) the flute cool：make 后面是“宾语 + 宾补 cool”，宾语是“吹长笛”这件事，需要用名词性成分。',
+        why: '先看结构：make + 宾语 + 形容词（宾补）。这里宾语不是 the flute（长笛本身不会“酷”），而是“吹长笛”这件事，所以用动名词 playing the flute 作宾语。再看语义：把“吹长笛”这件事变得酷，才通顺。',
+        others: '①play：动词原形不能作 make 的宾语（除非是 make sb do sth 的使役结构，但那样后面不能接形容词 cool）；②to play：不定式作宾语多表目的或将来，且 make to do 不是英语结构；③played：过去分词表被动，“被吹的长笛”与 cool 搭配语义不对。',
+        tip: 'make + 动名词 + adj.（把做某事变得……）；make sb do sth 是另一套结构，别混。'
+      },
+      {
+        answer: 'with', accepted: ['with'], given: '', isGiven: false,
+        catId: 'prep', point: '介词 with 表“拥有/带有”',
+        wrongType: 'PREPOSITION_ERROR', difficulty: 2,
+        sense: '如果你有个会打鼓的成员，而且他父母听力还不太好，那你就可以免费在家练习。',
+        clue: 'a band member ______ a set of drums and parents who are hard of hearing：空后是两样“拥有”的东西，用 with 短语作后置定语。',
+        why: '先看结构：a band member 后面接两个并列的名词短语（a set of drums、parents who...），需要一个介词把它们挂在 member 上。再看语义：“有个成员，他有套鼓，还有听力不好的父母”，with 表示“拥有、带有”，最贴切。',
+        others: '①of：a member of a set of drums 会变成“一套鼓的成员”，语义荒谬；②for：for 表示目的或对象，不能表示“拥有”；③has：has 是谓语动词，前面已有 If you have a band member，再出现谓语会造成结构混乱。',
+        tip: 'with + 名词 作后置定语，表示“带有、拥有”（a house with a garden）。'
+      },
+      {
+        answer: 'which', accepted: ['which'], given: '', isGiven: false,
+        catId: 'attrib', point: '“介词 + 关系代词 which”引导非限制性定语从句',
+        wrongType: 'CLAUSE_ERROR', difficulty: 4,
+        sense: '否则你就得找个本地录音棚，而租录音棚是要花一大笔钱的。',
+        clue: 'for ______ you have to pay a handsome amount of money：介词 for 提到了关系代词前面，先行词是 a local studio（物）。',
+        why: '先找先行词：a local studio（物）。再看结构：pay for sth 的介词 for 被提到了从句前面，形成“介词 + 关系代词”，指物只能用 which。逗号说明是非限制性定语从句，不能用 that。',
+        others: '①that：介词后面不能用 that，且非限制性定语从句也不用 that；②where：where 相当于 in/at which，不能与 for 搭配成 for where；③what：what 不能引导定语从句。',
+        tip: '介词 + which（指物）/ 介词 + whom（指人）；介词后绝不用 that。'
+      },
+      {
+        answer: 'Divide', accepted: ['divide'], given: 'divide', isGiven: true,
+        catId: 'verb', point: '祈使句（动词原形开头）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 2,
+        sense: '把费用平均分摊，包括为鼓手租用设备的费用。',
+        clue: '这是一个独立的句子，前面没有主语，后面是 the cost equally，属于给读者的建议。',
+        why: '先看句子成分：没有主语，句子以动词开头，是祈使句，用动词原形 Divide。再看上下文：这一段都在给建议（meet half an hour in advance、you rock together），语气是指示性的，用祈使句最自然。句首首字母大写。',
+        others: '①Dividing：动名词不能单独构成祈使句，句子会缺谓语；②To divide：不定式通常表目的，作祈使句不成立；③Divided：过去分词表被动，“被分摊”与建议语气不符。',
+        tip: '祈使句 = 动词原形开头（Please... / Don’t...），没有主语。'
+      },
+      {
+        answer: 'finished', accepted: ['finished'], given: 'finish', isGiven: true,
+        catId: 'nonfinite', point: 'get sth done（过去分词作宾补）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '所以提前半小时到，把该聊的天都聊完。',
+        clue: 'get all the chatting ______ (finish)：get + 宾语 + 宾补，chatting 与 finish 是被动关系（聊天“被聊完”）。',
+        why: '先看结构：get + 宾语 + 宾语补足语，宾补可以用形容词、过去分词或不定式。再看关系：all the chatting 是“被完成”的对象，所以用过去分词 finished，构成 get sth done（把某事做完）。',
+        others: '①finishing：现在分词表主动，聊天不会“去完成”别的东西；②to finish：get sth to do 表示“让某物去做”，语义不通；③finish：原形不能作宾补。',
+        tip: 'get sth done = have sth done（把某事做完/让别人做完），宾语与补足语是被动关系。'
+      },
+      {
+        answer: 'to learn', accepted: ['to learn'], given: 'learn', isGiven: true,
+        catId: 'nonfinite', point: '不定式作后置定语（for sb to do）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '每位成员都应该为整个乐队挑一首歌来学。',
+        clue: 'a song for the whole band ______ (learn)：for the whole band 是不定式的逻辑主语，说明“让整个乐队去学”。',
+        why: '先看结构：choose a song for the whole band ______，song 后面需要定语。再看语义：“一首供整个乐队去学的歌”，用不定式 to learn，其逻辑主语由 for the whole band 引出（for sb to do）。',
+        others: '①learning：现在分词作定语表主动进行，a song learning 不成立；②learned：过去分词表被动，“被学的歌”虽然能讲通，但 for the whole band 的逻辑主语关系就断了；③learn：原形不能直接作定语。',
+        tip: 'for sb to do sth 作定语/状语：a song for us to learn（一首供我们学的歌）。'
+      },
+      {
+        answer: 'what', accepted: ['what'], given: '', isGiven: false,
+        catId: 'nominal', point: '宾语从句 · what 作主语',
+        wrongType: 'CLAUSE_ERROR', difficulty: 3,
+        sense: '这能让你弄清楚什么样的音乐适合你们乐队。',
+        clue: 'find out ______ music works for your group：find out 后接宾语从句，从句 music works for your group 缺主语。',
+        why: '先看结构：find out 是及物动词，后面接宾语从句；从句 ______ music works for your group 中 music 是主语、works 是谓语，缺的是修饰 music 的“什么”，即 what music（什么样的音乐）。再看 which 与 what：which 要有明确的选择范围（which of these two），本句没有。',
+        others: '①that：that 引导宾语从句时从句必须完整，这里 music 前缺修饰语；②which：需要有给定的选择范围；③how：how music works 会变成“音乐如何运作”，与“适合你们乐队”的语义不符。',
+        tip: 'what + 名词 = “什么样的……”（what music / what kind of music）；which 要有范围。'
+      },
+      {
+        answer: 'someone', accepted: ['someone', 'somebody'], given: '', isGiven: false,
+        catId: 'pronoun', point: '不定代词 someone 作宾语',
+        wrongType: 'PRONOUN_ERROR', difficulty: 2,
+        sense: '很少能遇到一个不介意分享自己头几篇作品的人，所以对人客气点！',
+        clue: 'find ______ that isn’t shy about sharing their first few pieces of writing：that 从句修饰前面的名词，指“某个人”，且是否定语境里的“很难找到”。',
+        why: '先看结构：find 后面接宾语，宾语后面跟 that 定语从句（that isn’t shy about...），说明宾语必须是“人”。再看语义：“很难找到不害羞地分享作品的人”，泛指某个人，用 someone / somebody。',
+        others: '①anyone：在 rare to find 这种语境里 anyone 也可表示“任何人”，但本句强调“能找到某个人”这件事很少，some- 更贴切；②something：something 指物，与 that isn’t shy（人才能害羞）矛盾；③everyone：everyone 与 very rare to find 语义冲突。',
+        tip: '肯定句里“某个人”用 someone/somebody；否定和疑问句里多用 anyone/anybody。'
+      }
+    ]
+  });
+
+  P.push({
+    id: 'paper06',
+    no: '06',
+    title: 'My Unforgettable Semester in Florence',
+    source: '25-26 学年 · 浦东新区多校联考高一期中',
+    level: '高一',
+    genre: '记叙文',
+    words: 285,
+    topic: '在佛罗伦萨交换的一个学期',
+    readGuide: '回忆性记叙文，通篇过去时。第一段交代“去之前就知道会很特别”，中间写课程与城市，最后一段回到现在（will carry）。注意 which 引导的非限制性定语从句和动名词作主语。',
+    passage: 'Before I arrived in Florence, I knew that my time at the university ______ (be) special. The way of learning, which was very different from ______ I knew back home, gave students more freedom, and I soon learned that I would take oral exams for my literature classes ______ a written test. ______ these talks were challenging, they helped me improve my Italian more than I had expected.\n\nThe whole city became our classroom. Some of our classes ______ (hold) inside the famous Uffizi Gallery. ______ (walk) past the long lines of tourists every day felt like having a special key to the city. The beauty of the art ______ surrounded us in those old buildings was felt by every student in our program. It was one of ______ (valuable) experiences of my entire time abroad.\n\nAfter class, my friends and I loved to explore. We would find little cafes in narrow streets and taste amazing Italian food. In the evenings, we often ______ (climb) up to Piazzale Michelangelo. From there, we ______ see all the red roofs, the river flowing through the city, and the great dome of the cathedral. We spent many hours there talking and watching the breathtaking sunset.\n\nMy time in Florence, which taught me so much more than just books, was an adventure that I will carry in my heart forever.',
+    blanks: [
+      {
+        answer: 'would be', accepted: ['would be'], given: 'be', isGiven: true,
+        catId: 'verb', point: '过去将来时（过去的将来）',
+        wrongType: 'TENSE_CONFUSION', difficulty: 3,
+        sense: '在我到达佛罗伦萨之前，我就知道我在这所大学的时光会很特别。',
+        clue: '主句谓语 arrived 是一般过去时，宾语从句 I knew 也是过去；而“很特别”是相对于 knew 而言的将来。',
+        why: '第一步定时间基准：整件事发生在过去（Before I arrived）。第二步看从句：my time at the university ______ special 是 knew 的宾语从句，表示“从过去看将来”，要用过去将来时 would be。第三步看搭配：be special 的 be 不能丢，所以是 would be 两个词。',
+        others: '①was：一般过去时只说明“当时很特别”，体现不出“事先预知将来”的时间层次；②will be：现在时的将来，与全句过去的时间基准矛盾；③had been：过去完成时表示“到达之前就已经特别”，与 knew 的预知语义不符。',
+        tip: '过去时刻“看将来” → would do；主句过去时，宾语从句的将来要用过去将来时。'
+      },
+      {
+        answer: 'what', accepted: ['what'], given: '', isGiven: false,
+        catId: 'nominal', point: '宾语从句 · what 作 knew 的宾语',
+        wrongType: 'CLAUSE_ERROR', difficulty: 2,
+        sense: '这里的学法和我在国内所熟悉的大不相同，给了学生更多自由。',
+        clue: 'different from ______ I knew back home：介词 from 后面是宾语从句，从句 I knew 缺宾语。',
+        why: '先看结构：from 是介词，后面接宾语从句；从句 I knew back home 中 I 是主语、knew 是谓语，缺宾语，所以用既能引导从句又能作宾语的 what（= the thing that）。再看语义：“我在国内所知道的那种学法”，指事物。',
+        others: '①that：that 引导的从句必须完整，I knew 后面缺宾语；②which：which 要有选择范围；③it：it 不能引导从句，句子会缺连接。',
+        tip: '介词/动词后 + 从句缺宾语 → what；从句完整 → that。'
+      },
+      {
+        answer: 'instead of', accepted: ['instead of'], given: '', isGiven: false,
+        catId: 'prep', point: '介词短语 instead of（而不是）',
+        wrongType: 'PREPOSITION_ERROR', difficulty: 3,
+        sense: '我很快得知，我的文学课要参加口试，而不是笔试。',
+        clue: 'oral exams for my literature classes ______ a written test：空前后是两个对立的事物（口试 / 笔试）。',
+        why: '先看逻辑：口试与笔试是替代关系（“是口试而不是笔试”）。再看结构：空后是名词短语 a written test，需要介词短语；instead of 由两个词组成，正好填满这个空，表示“而不是”。',
+        others: '①instead：instead 是副词，后面不能直接接名词（要写成 instead of a written test 或用逗号隔开）；②rather：rather than 也可以，但空只有一个，只能写 instead of；③because of：因果关系，与“而是”的替代语义不符。',
+        tip: 'instead of + 名词/doing（而不是）；instead 单独用时是副词，前后要有逗号。'
+      },
+      {
+        answer: 'Although', accepted: ['although', 'though', 'while'], given: '', isGiven: false,
+        catId: 'adverbial', point: '让步状语从句连词',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 3,
+        sense: '虽然这些谈话很有挑战性，但它们帮助我把意大利语提高得比预想的更多。',
+        clue: '前半句 these talks were challenging（有挑战）与后半句 helped me improve（有帮助）形成让步；主句前没有 but。',
+        why: '先判断逻辑：谈话难，但仍有帮助，是“虽然……但是……”。再看结构：空后是完整的主谓 these talks were challenging，需要引导让步状语从句的连词，although / though 都可以；while 在书面语里也可表“虽然”，一并接受。句首首字母大写。',
+        others: '①But：but 是并列连词，前面缺少可并列的分句（句首就是空）；②Because：因果讲反了，有挑战不是“有帮助”的原因；③However：however 是副词，不能引导从句。',
+        tip: '句首一个空 + 两个相反的意思 → Although / Though + 从句，主句不再加 but。'
+      },
+      {
+        answer: 'were held', accepted: ['were held'], given: 'hold', isGiven: true,
+        catId: 'verb', point: '一般过去时的被动语态（主谓一致）',
+        wrongType: 'VOICE_ERROR', difficulty: 3,
+        sense: '我们的一些课就在著名的乌菲齐美术馆里上。',
+        clue: '主语 Some of our classes 与 hold 是被动关系（课程“被举办”）；全文叙述过去的事。',
+        why: '第一步看语态：课程是被安排、被举办的，所以用被动 be + done。第二步看时态：这一段回忆过去（became、gave），用一般过去时。第三步看主谓一致：Some of our classes 是复数，be 用 were，所以是 were held。',
+        others: '①held：主动形式，“课程举办”会缺宾语，语态错；②was held：主语 Some of our classes 是复数；③have been held：现在完成时与这一段的过去叙事不符。',
+        tip: 'Some of + 复数名词 → 谓语复数；物作主语 + 动作是“被施加” → 被动。'
+      },
+      {
+        answer: 'Walking', accepted: ['walking'], given: 'walk', isGiven: true,
+        catId: 'nonfinite', point: '动名词作主语',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '每天走过排着长队的游客，感觉就像拥有了一把打开这座城市的特殊钥匙。',
+        clue: '______ (walk) past the long lines of tourists every day felt like...：句子的谓语是 felt，空处需要一个能作主语的名词性成分。',
+        why: '先数谓语：主句谓语是 felt like，空处不能是谓语。再看结构：句首缺主语，用动名词 Walking 作主语，表示“每天走过游客长队这件事”。第三步看主谓一致：动名词短语作主语，谓语用单数 felt，正好吻合。',
+        others: '①Walk：祈使句会让后面变成两个谓语；②To walk：不定式作主语通常表示具体的一次或将来的动作，此处是日常反复的事；③Walked：过去分词不能作主语。',
+        tip: '句首缺主语、讲“一件事” → 动名词 doing（谓语用单数）。'
+      },
+      {
+        answer: 'that', accepted: ['that', 'which'], given: '', isGiven: false,
+        catId: 'attrib', point: '定语从句 · 关系代词作主语（指物）',
+        wrongType: 'CLAUSE_ERROR', difficulty: 3,
+        sense: '那些古老建筑里环绕着我们的艺术之美，我们项目里的每位学生都感受到了。',
+        clue: '先行词是 The beauty of the art（物），从句 ______ surrounded us in those old buildings 缺主语。',
+        why: '先找先行词：The beauty of the art，指物。再看从句：______ surrounded us 缺主语，用关系代词 that 或 which（指物、作主语）。注意这里没有逗号，是限制性定语从句，that 也可以用。',
+        others: '①what：what 不能引导定语从句（前面已有先行词）；②who：先行词是物不是人；③where：本句缺主语，而 where 只能作地点状语。',
+        tip: '先行词是物 + 从句缺主语 → that / which 都行；有逗号时只能用 which。'
+      },
+      {
+        answer: 'the most valuable', accepted: ['the most valuable'], given: 'valuable', isGiven: true,
+        catId: 'transform', point: '形容词最高级（one of the most + adj. + 复数）',
+        wrongType: 'WORD_FORM_ERROR', difficulty: 3,
+        sense: '那是我在国外期间最有价值的经历之一。',
+        clue: 'one of ______ (valuable) experiences of my entire time abroad：这是 one of the + 最高级 + 名词复数 的固定结构，of my entire time abroad 给出了比较范围。',
+        why: '第一步看结构：one of + 形容词最高级 + 名词复数，表示“最……的之一”。第二步看范围：of my entire time abroad 明确了比较范围，必须用最高级。第三步看形式：valuable 是多音节形容词，最高级是 the most valuable，不能丢 the。',
+        others: '①valuable：原级不能用于 one of the ... 结构；②more valuable：比较级用于两者比较，而这里范围是“整个留学期间”，是三者以上；③most valuable：最高级前要有 the，且 experiences 前需要限定。',
+        tip: 'one of the + 最高级 + 名词复数（……之一）；多音节形容词最高级 = the most + adj.。'
+      },
+      {
+        answer: 'climbed', accepted: ['climbed'], given: 'climb', isGiven: true,
+        catId: 'verb', point: '一般过去时（描述过去反复发生的动作）',
+        wrongType: 'TENSE_CONFUSION', difficulty: 2,
+        sense: '晚上我们常常爬到米开朗基罗广场上去。',
+        clue: '时间状语 In the evenings + often，且整段是回忆（We would find、We spent），叙述过去的习惯。',
+        why: '第一步定时间：全段在回忆过去（would find、spent many hours）。第二步看状语：In the evenings、often 说的是过去反复做的事，英语里用一般过去时即可（也可用 would climb，但括号给的是 climb，需要自己变过去式）。第三步变形式：climb 加 -ed。',
+        others: '①climb：原形不能作谓语，且与过去语境不符；②have climbed：现在完成时强调与现在的联系，本段只是回忆；③were climbing：过去进行时强调“某时正在爬”，与 often 的反复语义不符。',
+        tip: '过去反复的习惯：一般过去时 + often / every evening；此时不用现在时。'
+      },
+      {
+        answer: 'could', accepted: ['could', 'would'], given: '', isGiven: false,
+        catId: 'extra', point: '情态动词 could 表过去的能力',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 4,
+        sense: '从那里，我们能看到所有红色的屋顶、穿城而过的河流，还有大教堂巨大的圆顶。',
+        clue: '前后句都是一般过去时（climbed、spent），空后是动词原形 see，说明空处是情态动词。',
+        why: '先看结构：______ see all the red roofs 中 see 是原形，前面只能是情态动词或助动词。再看语义与时间：作者在回忆“当时从那里能看见什么”，表示过去的能力，用 could；从上下文看，这里也可理解为“（当时）会看到”，故 would 也接受（原卷答案给 could/would）。',
+        others: '①can：现在时的能力，与回忆的过去语境不符；②will：将来，时间错；③are able to：be able to 需要变成 were able to，与空前只有一个空、空后是 see 的结构不符。',
+        tip: '过去的能力用 could；但表示“经过努力终于做到”要用 was/were able to。'
+      }
+    ]
+  });
+})();
+
 (function () {
   // data/bank-tense-03.js — 专题：一般将来时（Future Simple, will）
   // 遵循 spec/DATA_SCHEMA.md：12 核心题（q01-q06 choice / q07-q12 input）+ 6 道 pool（p01-p06，全部 input）。
@@ -3016,6 +3735,245 @@ details.explanation-panel .explain {
       }
     ]
   };
+})();
+
+/* ============================================================
+ * data/bank-papers-04.js — 上海真题语篇 07-08（整篇 10 空 · 真卷口径）
+ * 07 = 2026 届崇明区高三二模；08 = 2026 届宝山区高三二模（个别空位按唯一答案调整）
+ * ============================================================ */
+(function () {
+  'use strict';
+  var P = window.__EGL_PAPERS__ = window.__EGL_PAPERS__ || [];
+
+  P.push({
+    id: 'paper07',
+    no: '07',
+    title: 'Dedicated to Dunhuang: A Life Inspired by Ancient Art',
+    source: '2026 届 · 崇明区高三二模',
+    level: '高三',
+    genre: '记叙文（人物特写）',
+    words: 300,
+    topic: '常书鸿、常沙娜父女与敦煌艺术',
+    readGuide: '人物特写，按时间线推进：1943 年父亲下决心 → 1944 年建研究所 → 女儿临摹壁画 → 赴美归来 → 今天合作推广。时态以过去时为主，最后一段转现在。',
+    passage: 'Famous Chinese artist Chang Shana, the designer behind the decorative mural (壁画) on the ceiling of the banquet (宴会) hall of Beijing’s Great Hall of the People, and her father Chang Shuhong, who was also a famous artist, have dedicated their lives to preserving and promoting the art of Dunhuang.\n\nHer passion for Dunhuang ______ (inspire) by her father Chang Shuhong, often referred to as the pioneer of introducing Dunhuang art.\n\nIn 1943, her father, then a promising artist who ______ (win) several medals in France, made up his mind to contribute to Dunhuang after reading about the cave art there. It wasn’t long ______ he moved to Dunhuang, a remote county in northwest China’s Gansu Province.\n\n______ (travel) along rough roads for an entire month, in the fall of 1943, the family arrived at the dusty, yet exciting Mogao Caves in Dunhuang. In 1944, Chang Shuhong founded Dunhuang Art Institute, ______ is now known as Dunhuang Academy. He gave up the prospect of furthering his art career, and devoted himself to the protection and study of Dunhuang’s treasures. But this was so hard a task that his wife couldn’t bear the harsh conditions and left him. What’s worse, during the war, the government stopped ______ (fund) the Dunhuang Art Research Institute. Nevertheless, Chang Shana and her father stayed to continue their mission.\n\nChang Shana made copies of the murals ______ the guidance of her father, researchers at the institute and visiting artists. She learned a lot about murals and ______ the styles for the murals had evolved. That experience has greatly influenced her career.\n\nChang Shana later went to the US for further study and when she came back, she turned to industrial art, teaching at Tsinghua University. Chang has completed many key designs ______ (base) on Dunhuang murals, including the ceiling of the Great Hall of the People.\n\nFor Chang, Dunhuang has become an inseparable part of her life. She’s now cooperating with an e-commerce platform to promote the sale of her work ______ (make) sure that the thousand-year-old art lives on.',
+    blanks: [
+      {
+        answer: 'was inspired', accepted: ['was inspired'], given: 'inspire', isGiven: true,
+        catId: 'verb', point: '一般过去时的被动语态',
+        wrongType: 'VOICE_ERROR', difficulty: 2,
+        sense: '她对敦煌的热爱是被父亲常书鸿激发出来的，父亲常被称为介绍敦煌艺术的先驱。',
+        clue: '主语 Her passion for Dunhuang 与 inspire 是被动关系（热爱“被激发”）；by her father 直接给出了动作发出者。',
+        why: '第一步看语态：Her passion 自己不会“激发”，是被激发，所以用 be + done。第二步看时态：父亲激发她热爱是过去的事（后文 In 1943 展开），用一般过去时。第三步看主谓一致：主语 Her passion 是单数，be 用 was，故填 was inspired。',
+        others: '①inspired：主动形式，“热爱激发了父亲”主宾颠倒；②were inspired：主语 Her passion 是单数；③has been inspired：现在完成时强调对现在的影响，与本段讲过去的来历不符。',
+        tip: '看到 by + 人，先想被动；主语单复数决定 was 还是 were。'
+      },
+      {
+        answer: 'had won', accepted: ['had won'], given: 'win', isGiven: true,
+        catId: 'verb', point: '过去完成时（过去的过去）',
+        wrongType: 'TENSE_CONFUSION', difficulty: 4,
+        sense: '1943 年，她的父亲当时是一位很有前途的艺术家，此前已在法国赢得过几枚奖章，他读到那里石窟艺术的介绍后，下定决心为敦煌做点事。',
+        clue: '主句动词是 made up his mind（1943 年），而“获奖”发生在那之前；then a promising artist who... 是对他当时身份的补充说明。',
+        why: '第一步定参照点：In 1943 ... made up his mind 是过去的时间点。第二步看动作先后：获奖在“下决心”之前，属于“过去的过去”，用过去完成时 had won。第三步看形式：win 的过去分词是 won。',
+        others: '①won：一般过去时与 made 处于同一时间层，体现不出“在那之前”；②has won：现在完成时以现在为参照，与 1943 年不符；③would win：过去将来时指向之后，时间方向反了。',
+        tip: '两个过去动作比先后：先发生的用 had done，后发生的用一般过去时。'
+      },
+      {
+        answer: 'before', accepted: ['before'], given: '', isGiven: false,
+        catId: 'adverbial', point: 'It was not long before...（固定句式）',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 3,
+        sense: '没过多久，他就搬到了敦煌——中国西北甘肃省一个偏远的县。',
+        clue: 'It wasn’t long ______ he moved to Dunhuang：It was not long before... 是固定句式“没过多久就……”。',
+        why: '先看句式：It is/was not long before + 从句，表示“没过多久就……”。再看时态呼应：主句 was 是过去时，从句 moved 也是过去时，before 表示“在……之前”，正好表达“下决心”之后不久就搬家。',
+        others: '①since：It wasn’t long since 后面要接过去完成时或表示“自从”，与本句结构不符；②until：not... until 表示“直到……才”，需要主句用否定动作，而这里主句是时间长短；③when：It wasn’t long when 不是英语句式。',
+        tip: 'It will not be long before... / It was not long before...（没过多久就……）。'
+      },
+      {
+        answer: 'Having travelled', accepted: ['having travelled', 'having traveled'], given: 'travel', isGiven: true,
+        catId: 'nonfinite', point: '现在分词完成式作状语（动作先于谓语）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 5,
+        sense: '沿着崎岖的道路走了一整个月，1943 年秋天，一家人终于抵达了尘土飞扬却令人兴奋的敦煌莫高窟。',
+        clue: '主句谓语是 arrived，空处在句首作状语；travel 发生在 arrived 之前（走了一个月才到），且 the family 与 travel 是主动关系。',
+        why: '第一步数谓语：主句已有谓语 arrived，句首空处只能是非谓语状语。第二步看关系：一家人“走”路，主动，用现在分词。第三步看先后：走了一个月发生在“到达”之前，所以用完成式 having travelled，强调先发生。',
+        others: '①Travelling：现在分词一般式与主句动作同时，体现不出“走完才到”；②Travelled：过去分词表被动，一家人不是“被走”；③To travel：不定式多表目的或将来，与已经完成的行程不符。',
+        tip: '非谓语先判断“主动还是被动”，再判断“先后”：先发生用 having done，被动且先发生用 having been done。'
+      },
+      {
+        answer: 'which', accepted: ['which'], given: '', isGiven: false,
+        catId: 'attrib', point: '非限制性定语从句 · which 指代前文机构',
+        wrongType: 'CLAUSE_ERROR', difficulty: 2,
+        sense: '1944 年，常书鸿创建了敦煌艺术研究所，也就是现在的敦煌研究院。',
+        clue: '逗号后 ______ is now known as Dunhuang Academy，先行词是 Dunhuang Art Institute（物、机构），从句缺主语。',
+        why: '先找先行词：Dunhuang Art Institute，指物（机构）。再看从句：______ is now known as... 缺主语，用关系代词 which。逗号说明是非限制性定语从句，此时不能用 that。',
+        others: '①that：非限制性定语从句（逗号后）不能用 that；②who：who 指人，先行词是机构；③what：what 不能引导定语从句。',
+        tip: '逗号 + 指物 + 从句缺主语 → which（绝不用 that）。'
+      },
+      {
+        answer: 'funding', accepted: ['funding'], given: 'fund', isGiven: true,
+        catId: 'nonfinite', point: 'stop doing sth（停止做某事）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 3,
+        sense: '更糟的是，战争期间政府停止了对敦煌艺术研究所的资助。',
+        clue: 'the government stopped ______ (fund) the Dunhuang Art Research Institute：“停止资助”这件事被中断了。',
+        why: '先看搭配：stop doing sth 表示“停止正在做的事”；stop to do sth 表示“停下来去做另一件事”。本句是政府不再资助研究所，资助这件事被停止，用 funding。再看结构：stopped 后需要宾语，动名词正好作宾语。',
+        others: '①to fund：stop to fund 会变成“停下来去资助”，语义反了；②fund：原形不能作 stop 的宾语；③funded：过去分词不能作 stop 的宾语（除非是 be funded 被动结构）。',
+        tip: 'stop doing（停止做）/ stop to do（停下来去做）/ stop sb from doing（阻止某人做）。'
+      },
+      {
+        answer: 'under', accepted: ['under'], given: '', isGiven: false,
+        catId: 'prep', point: '固定搭配 under the guidance of',
+        wrongType: 'PREPOSITION_ERROR', difficulty: 3,
+        sense: '在父亲、研究所的研究人员和来访艺术家的指导下，常沙娜临摹了许多壁画。',
+        clue: 'made copies of the murals ______ the guidance of her father...：guidance 前需要介词，构成“在……指导下”。',
+        why: '先看搭配：under the guidance of sb 是固定短语，表示“在某人指导下”，under 表示“在……之下/状态中”。再看结构：空后是 the guidance of her father, researchers... and visiting artists，一串指导者，正好接在 under 后。',
+        others: '①with：with the guidance of 不是标准搭配；②by：by the guidance of 也不成立（by 后一般接动作发出者）；③in：in the guidance of 语义变成“在指导之中”，不表示“在某人指导下”。',
+        tip: 'under the guidance / leadership / control / pressure of...（在……之下）用 under。'
+      },
+      {
+        answer: 'how', accepted: ['how'], given: '', isGiven: false,
+        catId: 'nominal', point: '宾语从句 · how 作方式状语',
+        wrongType: 'CLAUSE_ERROR', difficulty: 3,
+        sense: '她学到了很多关于壁画的知识，也了解了壁画的风格是如何演变的。',
+        clue: 'learned a lot about murals and ______ the styles for the murals had evolved：and 并列两个 learned 的宾语，后一个宾语从句缺“如何”这个方式状语。',
+        why: '先看结构：learned 后面接宾语，and 连接两个宾语；从句 the styles for the murals had evolved 主谓齐全，缺的是“怎么演变”的方式状语，用 how。再看语义：了解“风格是如何演变的”，正是 how 的典型用法。',
+        others: '①that：that 引导的从句必须完整，但这里需要一个“方式”含义，语义不足；②what：what 要在从句里作主语或宾语，本从句主谓齐全；③which：需有选择范围，语义不符。',
+        tip: '从句不缺主宾、只缺“方式/程度” → how；缺“事物” → what。'
+      },
+      {
+        answer: 'based', accepted: ['based'], given: 'base', isGiven: true,
+        catId: 'nonfinite', point: '过去分词短语作后置定语（be based on）',
+        wrongType: 'VOICE_ERROR', difficulty: 3,
+        sense: '常沙娜完成了许多以敦煌壁画为基础的重要设计，其中包括人民大会堂的天花板。',
+        clue: 'many key designs ______ (base) on Dunhuang murals, including...：designs 与 base 是被动关系（设计“以……为基础”）。',
+        why: '第一步数谓语：主句谓语是 has completed，空处只能是非谓语。第二步看关系：designs 是“以壁画为基础”的被动对象，用过去分词 based，构成 be based on 的定语形式。第三步看位置：based on... 放在名词后作后置定语，相当于 which are based on。',
+        others: '①basing：现在分词表主动，“设计去以……为基础”主宾颠倒；②to base：不定式作定语表将来或目的，这里是既成事实；③base：原形不能作定语。',
+        tip: 'be based on（以……为基础）；名词 + based on... = 过去分词作后置定语。'
+      },
+      {
+        answer: 'to make', accepted: ['to make'], given: 'make', isGiven: true,
+        catId: 'nonfinite', point: '不定式作目的状语',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 2,
+        sense: '她现在正与一个电商平台合作，推广自己作品的销售，以确保这门千年艺术延续下去。',
+        clue: 'to promote the sale of her work ______ (make) sure that...：推广销售是为了“确保这门艺术传承下去”，表目的。',
+        why: '先看结构：主句谓语是 is cooperating，空处只能是非谓语。再看逻辑：合作推广作品的目的，是“确保千年艺术延续”，目的用不定式 to make。第三步看搭配：make sure that 是固定搭配，此处 make 用原形。',
+        others: '①making：现在分词表伴随或结果，目的性不如不定式明确；②made：过去分词表被动，与主动的“确保”不符；③make：原形不能直接作目的状语。',
+        tip: '表目的优先用 to do；make sure that...（确保……）是固定搭配。'
+      }
+    ]
+  });
+
+  P.push({
+    id: 'paper08',
+    no: '08',
+    title: 'Notre-Dame de Paris',
+    source: '2026 届 · 宝山区高三二模',
+    level: '高三',
+    genre: '说明文',
+    words: 336,
+    topic: '巴黎圣母院：历史、火灾与修复',
+    readGuide: '说明文，按“火灾—建造—建筑特色—大革命—小说与修复—2019 大火—修复完成”推进。过去时与现在完成时交替，注意 had stood、has been closed 的时间层次。',
+    passage: 'After a disastrous fire, this ancient site is now fully restored.\n\nOn April 15, 2019, the people of Paris, France, were shocked to see the Notre-Dame de Paris Cathedral in flames. The cathedral ______ (stand) for hundreds of years, but the fire nearly destroyed it. Hundreds of firefighters fought to save the building, but the fire still did extensive damage. Since then, the building has been closed for repairs, but this Sunday, it ______ (schedule) to be open to the public once more.\n\nNotre-Dame took nearly two centuries to build, from 1163 to 1345, and even after its completion, new features continued ______ (add). Repairs to the representative cathedral were done with careful accuracy, using methods from ______ original construction in the Middle Ages.\n\nNotre-Dame is an amazing example of Gothic architecture. The builders of Gothic cathedrals thought of their buildings as places where people go to meet with God, so they tried to make the buildings look like heaven. This means the cathedrals all have tall ceilings ______ (support) by columns, with large windows that are made of colored glass. As a result, the buildings are filled with colored light, which is intended to call to mind descriptions of heaven that say it has streets full of gold. Images of cathedrals like Notre-Dame can convey part of their beauty and splendor, ______ they don’t compare with the experience of seeing them in person.\n\nIn the late 18th century, popular resentment (怨恨) against the French upper class exploded into a revolution. The revolutionaries associated the Christian establishment with the king they despised (鄙视), so they ransacked (洗劫) Notre-Dame along with many other churches. Shortly after the revolution, some repairs were made, but the cathedral was still ______ bad shape. The cathedral’s disrepair partly inspired Victor Hugo’s famous novel The Hunchback of Notre-Dame.\n\nThis novel, much of which takes place inside the cathedral, was so popular ______ it inspired a major repair of the cathedral. The architect who planned the repairs took some creative license, adding features rather than ______ (restore) the cathedral to its original appearance. But the result was a beautiful building, which for a time was the most popular tourist attraction in France.\n\nIn 2018 more repair work began, intended to change some deterioration (恶化) that had taken place over time. It was during the repairing project that the fire started. The April 2019 fire destroyed the entire roof and much of the structure’s original frame. But a few important pieces were amazingly spared. The fire forced the government to perform more extensive repairs ______ had been planned, but the work is now complete. Now people can once again visit this architectural wonder and marvel at its beauty, its history and (for some) its spiritual significance.',
+    blanks: [
+      {
+        answer: 'had stood', accepted: ['had stood'], given: 'stand', isGiven: true,
+        catId: 'verb', point: '过去完成时（火灾之前的状态）',
+        wrongType: 'TENSE_CONFUSION', difficulty: 4,
+        sense: '这座大教堂已经矗立了数百年，但这场大火几乎把它毁掉了。',
+        clue: '时间点是 2019 年 4 月 15 日的火灾；had stood for hundreds of years 表示“在失火之前已经矗立了数百年”。',
+        why: '第一步定参照点：On April 15, 2019 ... the fire nearly destroyed it，火灾是过去的时间点。第二步看时间关系：“矗立数百年”发生在火灾之前，是“过去的过去”，用过去完成时。第三步看形式：stand 的过去分词是 stood，故 had stood。',
+        others: '①stood：一般过去时与 destroyed 同层，无法体现“在那之前已经数百年”；②has stood：现在完成时以现在为参照，与 2019 年的火灾叙事不符；③was standing：过去进行时强调“当时正在”，与 for hundreds of years 的持续总量不搭。',
+        tip: '过去的某个时间点之前已经完成的动作/状态 → had done。'
+      },
+      {
+        answer: 'is scheduled', accepted: ['is scheduled'], given: 'schedule', isGiven: true,
+        catId: 'verb', point: '一般现在时的被动语态（be scheduled to）',
+        wrongType: 'VOICE_ERROR', difficulty: 3,
+        sense: '此后这座建筑一直关闭维修，但这个星期天，它被安排再次向公众开放。',
+        clue: 'this Sunday 指向即将到来的安排；it ______ (schedule) to be open 中 it 与 schedule 是被动关系（“被安排”）。',
+        why: '第一步看语态：it（大教堂）是被安排的对象，用被动 be + done。第二步看时态：this Sunday 是将来的安排，但英语里按日程、时刻表安排的将来常用一般现在时（is scheduled to），与前半句 has been closed 的现在完成时衔接自然。第三步看形式：schedule 的过去分词是 scheduled。',
+        others: '①schedules：主动形式，教堂不会自己安排；②was scheduled：过去时与 this Sunday 的将来安排矛盾；③has been scheduled：可以表示“已经安排好”，但与 this Sunday 的时间指向不如 is scheduled 直接。',
+        tip: 'be scheduled to do（被安排做）；按日程表安排的将来用一般现在时。'
+      },
+      {
+        answer: 'to be added', accepted: ['to be added'], given: 'add', isGiven: true,
+        catId: 'nonfinite', point: '不定式的被动式（continue to be done）',
+        wrongType: 'VOICE_ERROR', difficulty: 5,
+        sense: '巴黎圣母院花了近两个世纪才建成（1163—1345），即使完工之后，新的建筑特征仍在不断被添加。',
+        clue: 'new features continued ______ (add)：主语 new features 与 add 是被动关系（特征“被添加”），continue 后接不定式。',
+        why: '第一步数谓语：主句谓语是 continued，空处只能是非谓语。第二步看搭配：continue 后接 to do 或 doing，这里用不定式 to add。第三步看语态：new features 是被添加的对象，不定式要用被动式 to be added。',
+        others: '①to add：主动形式，“特征去添加别的东西”主宾颠倒；②adding：continue doing 也可以，但 adding 是主动，语态错；③added：过去分词不能作 continue 的宾语。',
+        tip: '不定式的被动式 to be done：既表“将来/目的”，又表“被……”。'
+      },
+      {
+        answer: 'its', accepted: ['its', 'the'], given: '', isGiven: false,
+        catId: 'pronoun', point: '形容词性物主代词（指代 the cathedral）',
+        wrongType: 'PRONOUN_ERROR', difficulty: 2,
+        sense: '对这座代表性大教堂的修复做得非常精确，用的是中世纪最初建造时的方法。',
+        clue: 'using methods from ______ original construction in the Middle Ages：空处修饰 original construction，construction 属于“这座大教堂”。',
+        why: '先看结构：空处作定语修饰名词 original construction，需要形容词性物主代词或冠词。再看指代：前文一直在讲 the representative cathedral，单数事物，它的建造用 its（= the cathedral’s）。',
+        others: '①it：it 是主格/宾格，不能作定语修饰名词；②their：前文是单数的大教堂；③itself：反身代词不能直接修饰名词。',
+        tip: '名词前的“它的/他们的”用形容词性物主代词 its/their，不能用 it。'
+      },
+      {
+        answer: 'supported', accepted: ['supported'], given: 'support', isGiven: true,
+        catId: 'nonfinite', point: '过去分词短语作后置定语',
+        wrongType: 'VOICE_ERROR', difficulty: 3,
+        sense: '这意味着所有大教堂都有由柱子支撑的高高天花板，以及用彩色玻璃做成的大窗户。',
+        clue: 'tall ceilings ______ (support) by columns：ceilings 与 support 是被动关系（天花板“被柱子支撑”），by columns 给出动作发出者。',
+        why: '第一步数谓语：主句谓语是 have，空处只能是非谓语。第二步看关系：ceilings 是被支撑的对象，用过去分词 supported 作后置定语（= which are supported by columns）。第三步看标志：by columns 是被动的典型提示。',
+        others: '①supporting：现在分词表主动，“天花板去支撑柱子”主宾颠倒；②to support：不定式作定语表将来或目的，这里是客观描述；③supports：再放一个谓语，与 have 冲突。',
+        tip: '名词后 + done + by... = 过去分词作定语（被……的）。'
+      },
+      {
+        answer: 'but', accepted: ['but'], given: '', isGiven: false,
+        catId: 'coord', point: '并列连词 but（转折）',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 2,
+        sense: '像巴黎圣母院这样的图片能传达它们一部分的美与壮丽，但比不上亲眼所见的体验。',
+        clue: '前半句 can convey part of their beauty（能传达一部分）与后半句 don’t compare with（比不上）是转折关系。',
+        why: '先判断逻辑：图片“能传达一部分美”，但“比不上亲眼所见”，前后是转折。再看结构：两个分句都用逗号隔开、各有谓语（can convey / don’t compare），是并列关系，用并列连词 but。',
+        others: '①and：and 表并列递进，与前后相反的意思冲突；②so：so 表结果，“图片能传达美，所以比不上亲眼所见”逻辑不通；③although：although 引导从句，但后面 don’t compare 是完整分句，且句首已有主句，结构不合。',
+        tip: '两个完整分句 + 意思相反 → but；从句 + 主句的让步用 although/though。'
+      },
+      {
+        answer: 'in', accepted: ['in'], given: '', isGiven: false,
+        catId: 'prep', point: '固定搭配 in bad shape',
+        wrongType: 'PREPOSITION_ERROR', difficulty: 3,
+        sense: '大革命后做过一些修缮，但大教堂的状况依然很差。',
+        clue: 'the cathedral was still ______ bad shape：“状况差”是固定短语 in bad shape，与后面的 disrepair（失修）呼应。',
+        why: '先看搭配：in bad shape 表示“状况不佳、破损严重”，in 表示处于某种状态。再看语境：下一句 The cathedral’s disrepair partly inspired... 正是“失修”的进一步说明，语义完全吻合。',
+        others: '①on：on bad shape 不是搭配；②at：at bad shape 也不成立；③with：with bad shape 表示“带着坏形状”，语义不通。',
+        tip: 'in good/bad shape（状况好/差）；in + 抽象名词常表状态（in danger / in trouble）。'
+      },
+      {
+        answer: 'that', accepted: ['that'], given: '', isGiven: false,
+        catId: 'adverbial', point: 'so...that 结果状语从句',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 2,
+        sense: '这部小说非常受欢迎，以至于促成了一次大规模的修缮。',
+        clue: '前半句是 was so popular，so + 形容词后面要接 that 引导的结果状语从句。',
+        why: '先看结构：so popular ______ it inspired a major repair 是 so...that 结构，表示“如此……以至于……”。再看语义：小说太受欢迎，结果是推动了修缮，正是结果关系。',
+        others: '①as：so...as 用于比较（as...as），与 so popular 不搭；②because：因果讲反，受欢迎不是“因为”修缮；③which：which 不能接在 so popular 后面引导从句。',
+        tip: 'so + adj./adv. + that...（如此……以至于）；such + 名词 + that...。'
+      },
+      {
+        answer: 'restoring', accepted: ['restoring'], given: 'restore', isGiven: true,
+        catId: 'nonfinite', point: 'rather than 后接动名词（与前面 doing 对应）',
+        wrongType: 'VERB_FORM_ERROR', difficulty: 4,
+        sense: '负责修缮的建筑师发挥了一些创作自由，添加新特征，而不是把大教堂恢复成它最初的样子。',
+        clue: 'adding features rather than ______ (restore) the cathedral：rather than 前后要对称，前面是 adding features（动名词），后面也用动名词。',
+        why: '先看结构：rather than 是并列连词性质，连接两个对等的成分。前面是 adding features，所以后面也用 restoring，保持形式一致。再看语义：“添加新特征，而不是恢复原貌”。',
+        others: '①to restore：rather than to do 虽然偶尔出现，但与前面的 adding 不对称；②restore：原形与 adding 不平衡；③restored：过去分词表被动，与主动的“恢复”不符。',
+        tip: 'rather than 前后形式要一致：doing rather than doing / to do rather than to do。'
+      },
+      {
+        answer: 'than', accepted: ['than'], given: '', isGiven: false,
+        catId: 'prep', point: '比较结构 more...than',
+        wrongType: 'CONJUNCTION_ERROR', difficulty: 3,
+        sense: '这场大火迫使政府进行了比原计划更广泛的修复，不过现在工程已经完工。',
+        clue: 'more extensive repairs ______ had been planned：前面有比较级 more extensive，后面需要一个引出比较对象的词，从句用过去完成时 had been planned。',
+        why: '先看结构：more extensive 是比较级，后面必须用 than 引出比较对象。再看从句：______ had been planned 是省略形式（than what had been planned / than those that had been planned），表示“比原计划的（修复）更多”。',
+        others: '①that：that 不能引出比较对象；②as：as 用于同级比较（as...as），与 more 不搭；③which：which 引导定语从句，不能承担比较功能。',
+        tip: '比较级 + than + 比较对象；than 后面常接省略的从句（than planned / than expected）。'
+      }
+    ]
+  });
 })();
 
 /*
@@ -8440,6 +9398,32 @@ details.explanation-panel .explain {
     return n;
   }
 
+  // 真题语篇（整篇 10 空）：正文与逐空解析同样打指纹
+  function markPapers(list) {
+    list = list || W.__EGL_PAPERS__;
+    if (!list || !list.length) return 0;
+    var n = 0;
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i];
+      if (!p || typeof p !== 'object') continue;
+      if (typeof p.passage === 'string') {
+        var m = mark(p.passage);
+        if (m !== p.passage) { p.passage = m; n++; }
+      }
+      var bl = p.blanks || [];
+      for (var j = 0; j < bl.length; j++) {
+        var b = bl[j];
+        if (!b) continue;
+        ['sense', 'why', 'tip'].forEach(function (f) {
+          if (typeof b[f] !== 'string') return;
+          var mm = mark(b[f]);
+          if (mm !== b[f]) { b[f] = mm; n++; }
+        });
+      }
+    }
+    return n;
+  }
+
   /* ================= 3) 可见水印 ================= */
   var SEAL = 'eglSeal', FOOT = 'eglFooter', STYLE = 'eglBrandStyle';
   // 产品署名（品牌名统一在 brand.js 维护：页面标题 / 页脚 / 授权弹窗共用）
@@ -8449,7 +9433,7 @@ details.explanation-panel .explain {
   var CSS = "\n/* ==================== 品牌署名 · 授权（Hison） ====================\n   注意：本区块会被 build.js 原样注入 brand.js，由运行时二次写入并自愈守护。\n   删除本区块不会移除署名（脚本会重建）；删除 brand.js 则应用拒绝启动。 */\n/* 右下角署名印章：平时是一枚小方签，悬停 / 点击后原地展开署名卡片（无弹窗） */\n.egl-seal {\n  position: fixed; right: 12px; bottom: 12px; z-index: 46;\n  display: block; text-align: left; overflow: hidden;\n  padding: 5px 10px; border-radius: var(--radius-sm); cursor: pointer;\n  font-family: var(--font-body); color: var(--ink-dim);\n  background: var(--panel);\n  border: 1px solid var(--stroke-strong);\n  box-shadow: var(--shadow);\n  opacity: 0.88; transform-origin: 100% 100%;\n  transition: padding 0.3s var(--ease), background 0.24s var(--ease),\n              box-shadow 0.3s var(--ease), opacity 0.2s var(--ease), transform 0.3s var(--ease);\n}\n.egl-seal-face {\n  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;\n  font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;\n}\n.egl-seal-panel {\n  display: block; width: 0; max-height: 0; opacity: 0; margin-top: 0;\n  overflow: hidden; white-space: nowrap; transform: translateY(6px);\n  transition: width 0.3s var(--ease), max-height 0.3s var(--ease), opacity 0.24s var(--ease),\n              transform 0.3s var(--ease), margin-top 0.3s var(--ease);\n}\n.egl-seal-name { display: block; font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); }\n.egl-seal-row { display: block; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }\n.egl-seal-row i { font-style: normal; color: var(--ink-faint); margin-right: 6px; }\n.egl-seal-row b { color: var(--hl); font-weight: 700; letter-spacing: 0.02em; }\n/* 展开态：键盘聚焦 / 点击（触摸） */\n.egl-seal:focus-visible,\n.egl-seal.on {\n  padding: 11px 14px 12px; border-radius: var(--radius);\n  background: var(--panel);\n  border-color: var(--ink-dim);\n  box-shadow: var(--shadow-sheet);\n  opacity: 1; transform: translateY(-2px);\n}\n.egl-seal:focus-visible .egl-seal-panel,\n.egl-seal.on .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n/* 有鼠标的设备：悬停即展开 */\n@media (hover: hover) {\n  .egl-seal:hover {\n    padding: 11px 14px 12px; border-radius: var(--radius);\n    background: var(--panel);\n    border-color: var(--ink-dim);\n    box-shadow: var(--shadow-sheet);\n    opacity: 1; transform: translateY(-2px);\n  }\n  .egl-seal:hover .egl-seal-panel { width: 156px; max-height: 130px; opacity: 1; transform: none; margin-top: 8px; }\n}\n/* 题卡底纹已撤掉：部分机型浏览器（如荣耀浏览器）会把低透明度的水印墨迹\n   （SVG 图片版、文本 rgba 版都试过）自动提亮成实心白，糊在题干与选项上。\n   署名改由各处角标承担：题卡左下角 + 其它卡片右下角各一行小字，浓淡是\n   固定色 + 固定 opacity，与页面其它文字一致，各机型都不会被提亮，\n   截图、打印都带署名。 */\n/* 卡片角标 */\n.learn-head, .score-hero, .sq-card, .qbox { position: relative; }\n.learn-head { padding-bottom: 22px; }\n.sq-card { padding-bottom: 22px; }\n.score-hero { padding-bottom: 30px; }\n.learn-head::after, .score-hero::after, .sq-card::after, .qbox::after {\n  content: \"by __EGL_NM__\";\n  position: absolute; right: 10px; bottom: 6px;\n  font-family: var(--font-body);\n  font-size: 10px; letter-spacing: 0.1em; font-weight: 700;\n  color: var(--ink-faint); opacity: 0.6;\n  pointer-events: none; user-select: none;\n}\n/* 题卡角标放左下：右下是固定印章的位置，靠太近会叠在一起 */\n.qbox::after { right: auto; left: 12px; }\n/* 页脚署名 */\n.egl-foot { text-align: center; padding: 30px 16px 24px; color: var(--ink-faint); font-size: 12px; }\n.egl-foot .egl-foot-main { color: var(--ink-faint); }\n.egl-foot .egl-foot-brand { margin-top: 5px; color: var(--ink-dim); letter-spacing: 0.01em; line-height: 1.8; }\n.egl-foot .egl-foot-links { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }\n.egl-foot .egl-link {\n  border: 0; background: transparent; color: var(--accent); cursor: pointer;\n  font-family: inherit; font-size: 12px; padding: 3px 4px; text-decoration: underline;\n}\n.egl-foot .egl-link:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }\n.egl-foot .egl-tip { color: var(--ink-faint); font-size: 11px; }\n/* 页脚版本号（构建时由 package.json 注入） */\n.egl-foot .egl-foot-ver {\n  margin-top: 4px; color: var(--ink-faint); font-size: 11px;\n  font-family: var(--font-mono); letter-spacing: 0.06em; opacity: 0.85;\n}\n/* 首页品牌小标签 */\n.egl-chip {\n  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;\n  font-size: 11.5px; letter-spacing: 0.02em; color: var(--ink-faint);\n  border: 1px dashed var(--stroke-strong); border-radius: 4px; padding: 3px 9px;\n}\n/* 授权说明弹窗 */\n.egl-lic p { margin: 6px 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.75; }\n.egl-lic p b { color: var(--ink); }\n@media print {\n  body::before { display: none; }\n  .egl-seal { display: none; }\n  .learn-head::after, .score-hero::after, .sq-card::after, .qbox::after { color: #222; opacity: 0.75; }\n  .egl-foot { color: #333; }\n}\n";
   // 版本号：构建时由 build.js 用 package.json 的 version 替换（单一来源，
   // 发新版只需改 package.json）；未构建直接打开源码时不显示这一行。
-  var VER = "v1.6.1";
+  var VER = "v1.7.0";
   if (VER.charAt(0) === '_') VER = '';
   var _guardTimer = null;
 
@@ -8820,6 +9804,7 @@ details.explanation-panel .explain {
     mark: mark,
     inspect: inspect,
     markBank: markBank,
+    markPapers: markPapers,
     identity: function () {
       var id = ident();
       return id ? { name: id.n, tag: id.tag, douyin: id.dy, xhs: id.xhs, lab: id.lab } : null;
@@ -9061,6 +10046,7 @@ details.explanation-panel .explain {
   function catOfTopicId(topicId) {
     if (!topicId) return 'verb';
     if (topicId.indexOf('ai:') === 0) return topicId.slice(3);
+    if (topicId.indexOf('paper:') === 0) return topicId.slice(6);
     if (topicId === 'challenge') return 'verb';
     var no = String(topicId).replace(/^tense/, '');
     var cur = window.__EGL_CURRICULUM__;
@@ -9308,6 +10294,116 @@ details.explanation-panel .explain {
     return qs.concat(extra).slice(0, count);
   }
 
+  /* ---------- 真题语篇（整篇 10 空，独立于 tenseNN 单句题库） ----------
+   * 数据由 data/bank-papers-*.js 注册到 window.__EGL_PAPERS__；
+   * 一篇 = 10 个空，每个空转换成一条 input 题（带整篇上下文 aiCtx），
+   * 复用「整篇卷面」做题流程与判分/错题/大专题统计。 */
+  function papers() { return window.__EGL_PAPERS__ || []; }
+  function availablePaperIds() {
+    var out = [];
+    papers().forEach(function (p) {
+      if (p && p.id && p.blanks && p.blanks.length) out.push(p.id);
+    });
+    return out;
+  }
+  function paperById(id) {
+    var list = papers();
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i];
+    return null;
+  }
+  // 语篇整体统计：data.topics['paper:paper01']
+  function paperStat(pid) { return topicStat('paper:' + pid); }
+  function catLabelOf(catId) {
+    var c = categoryName(catId);
+    return (c && c.name) ? c.name : (catId || '其他/拓展');
+  }
+  // 取第 n 个空所在的整句（逐空卡片/回顾用）：向前到上一个句末标点，向后到下一个
+  function sentenceAt(passage, n) {
+    var text = String(passage || '');
+    var re = /_{4,}/g, m, marks = [];
+    while ((m = re.exec(text))) marks.push({ i: m.index, len: m[0].length });
+    if (!marks.length) return '______';
+    var nth = marks[n - 1] || marks[marks.length - 1];
+    var start = 0;
+    for (var k = nth.i - 1; k >= 0; k--) {
+      var ch = text[k];
+      if (ch === '.' || ch === '!' || ch === '?' || ch === '\n') {
+        start = k + 1;
+        while (start < text.length && (text[start] === ' ' || text[start] === '\n')) start++;
+        break;
+      }
+    }
+    var end = nth.i + nth.len;
+    for (var j = nth.i + nth.len; j < text.length; j++) {
+      var c2 = text[j];
+      if (c2 === '.' || c2 === '!' || c2 === '?') { end = j + 1; break; }
+    }
+    var s = text.slice(start, end);
+    var rel = nth.i - start;
+    if (rel >= 0 && rel + nth.len <= s.length && /_{4,}/.test(s.slice(rel, rel + nth.len))) {
+      s = s.slice(0, rel) + '______' + s.slice(rel + nth.len);
+    }
+    return s.replace(/\s+/g, ' ').trim() || '______';
+  }
+  // 一篇语篇 → 每空一条题目（结构与 AI 语篇题一致，可直接进整篇卷面流程）
+  function paperToQuestions(paper) {
+    var out = [];
+    if (!paper || !paper.blanks) return out;
+    var total = paper.blanks.length;
+    paper.blanks.forEach(function (b, i) {
+      var n = b.n || (i + 1);
+      var catName = catLabelOf(b.catId);
+      var acc = [b.answer];
+      (b.accepted || []).forEach(function (a) {
+        if (String(a).toLowerCase() !== String(b.answer).toLowerCase() && acc.indexOf(a) < 0) acc.push(a);
+      });
+      var why = '';
+      if (b.sense) why += '句意：' + b.sense;
+      if (b.why) why += (why ? '\n' : '') + '判断：' + b.why;
+      out.push({
+        id: 'paper_' + paper.id + '_b' + n,
+        source: 'paper',
+        isPaper: true,
+        paperId: paper.id,
+        type: 'input',
+        difficulty: b.difficulty || 3,
+        question: sentenceAt(paper.passage, n),
+        hint: b.given || '',
+        accepted: acc,
+        answerText: b.answer,
+        tag: b.point || catName,
+        wrongType: b.wrongType || 'CONTEXT_ERROR',
+        aiMeta: { topicId: 'paper:' + (b.catId || 'extra'), catId: b.catId || 'extra', catName: catName, knowledgePoint: b.point || '', type: b.catId || '' },
+        aiCtx: { kind: 'passage', isSentence: false, paperIndex: 0, paperCount: 1, title: paper.title, passage: paper.passage, total: total, blankN: n, given: b.given || '' },
+        explanation: {
+          answer: b.answer,
+          keyPoint: '考查点：' + (b.point || catName),
+          clue: b.clue || '',
+          chain: (b.point || catName) + ' → ' + b.answer,
+          why: why || '（本篇暂无解析）',
+          whyOthers: b.others || '',
+          commonError: '',
+          memory: b.tip || '',
+          examMind: '',
+          cue: ''
+        }
+      });
+    });
+    return out;
+  }
+  // 一篇语篇的考点分布（页面上展示“10 空都考了什么”）
+  function paperBreakdown(paper) {
+    var map = {}, out = [];
+    (paper && paper.blanks || []).forEach(function (b) {
+      var cid = b.catId || 'extra';
+      if (!map[cid]) { map[cid] = { catId: cid, name: catLabelOf(cid), count: 0, points: [] }; out.push(map[cid]); }
+      map[cid].count++;
+      if (b.point) map[cid].points.push(b.point);
+    });
+    out.sort(function (a, b) { return b.count - a.count; });
+    return out;
+  }
+
   // 数据导入导出（防丢数据）
   function exportData() {
     var out = data;
@@ -9374,6 +10470,13 @@ details.explanation-panel .explain {
   EGL.pickRetrain = pickRetrain;
   EGL.pickChallenge = pickChallenge;
   EGL.pickWrongRetrain = pickWrongRetrain;
+  EGL.papers = papers;
+  EGL.availablePaperIds = availablePaperIds;
+  EGL.paperById = paperById;
+  EGL.paperStat = paperStat;
+  EGL.paperToQuestions = paperToQuestions;
+  EGL.paperBreakdown = paperBreakdown;
+  EGL.catLabelOf = catLabelOf;
   EGL.exportData = exportData;
   EGL.importData = importData;
   EGL.resetData = resetData;
@@ -9886,36 +10989,57 @@ details.explanation-panel .explain {
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  /* ---------- Prompt 规则文本（稳定部分，动态部分在 buildPrompt 拼接） ---------- */
+  /* ---------- Prompt 规则文本（稳定部分，动态部分在 buildPrompt 拼接） ----------
+   * 口径来源：上海春考/高考与各区一模二模「语法填空 Section A」真卷，以及
+   * 浦东新区多校联考高一期中的答案详解写法（考查点 → 句意 → 依据 → 故填 → 其它形式为何不行）。
+   * 真卷事实：一篇 10 空、250-330 词、有提示词 4-6 空 + 无提示词 4-6 空、首句不设空。 */
   function shanghaiRulesText() {
     return [
-      '一、命题总则（上海命题风格 · 初高中通用）',
-      '1. 语篇必须完整、连贯、有明确主题（说明文/科普/议论文/叙事均可），语言地道自然；禁止把互不相关的句子拼成“文章”。',
-      '2. 语篇题每篇约 10 空，按上海卷实际配比：有提示词约 4 空 + 无提示词约 6 空，整套练习保持这个比例（纯单句模式不受此条限制）。',
-      '3. 难度来自语法结构与上下文逻辑，词汇限定在初高中课标范围：禁止生僻词、超纲词和陌生文化背景；禁止“时间词直给答案”的送分题，时态语态必须由上下文推断。',
-      '二、考点规则（上海专属，务必严格遵守）',
-      '4. 有提示词只有两种任务：①括号给动词——谓语（时态/语态/主谓一致，上海高频：一般过去、现在完成、过去完成、被动 be done）或非谓语（to do 目的/将来、doing 主动/伴随、done 被动/完成）；②括号给形容词/副词——只考比较级（有 than 等比较信号）或最高级（the / in,of + 范围）。',
-      '5. 禁止出全国卷式词性转换题：不给 care 让学生写 careful/carefully，不给名词派生形容词，不给形容词变副词、加否定前缀或名词后缀，也不考名词单复数变形。有提示词的答案必须还是同一个词：动词只做语法变形，形副只变比较等级（原词性不变）。',
-      '6. 无提示词只考 5 类：连词（并列连词 and/but/or/so；定语从句 who/which/that/whose/where；名词性从句 what/that/whether；状语从句 when/if/because/though 等）、介词（固定搭配与语义）、冠词（a/an/the/零冠词）、代词（it/they/that/those，含 it 形式主语/形式宾语）、情态动词与助动词（can/may/must/should；do/does/did）。每个无提示词空只能填 1 个单词。',
-      '7. 答案唯一：每个空有且只有一个正确答案，禁止“填 A 填 B 都说得通”的两可题；what 的从句必须缺成分、that 的从句必须完整，if/whether、which/where 等同理。',
-      '8. 非谓语必须真实需要判断：先看分句有没有谓语，再判断主动/被动与动作先后，禁止为覆盖 having done、to have done 等形式强行塞入。',
-      '9. 考点贴合上海高频坑：抽象地点先行词 case/situation/point/scene/occasion 后从句不缺主宾时用 where；逗号隔开的非限制性定语从句与介词后面不用 that；固定搭配注意 look forward to + doing 这类“to 是介词”的搭配。另外，however 只以 however + adj/adv + 主语 + 谓语 的让步结构自然出现，禁止硬凑。',
-      '10. 同一篇内考点要分散：相邻两空不考同一知识点，同一知识点全篇最多出现 2 次。',
-      '三、解析规则',
-      '11. 每个空都要给出学生能看懂的中文解析，讲清三点：①为什么是这个答案（语法依据+语境线索）；②为什么不是其它形式（对比易错项）；③做题时如何一步步判断（数谓语定谓语/非谓语、看从句缺不缺成分、联系上下文）。解析要具体，禁止“固定搭配”“语感如此”之类空话。',
-      '四、输出格式规则（违反会导致程序无法读取）',
-      '12. 只输出一个 JSON 对象：不要 Markdown、不要 ```json 代码块、不要任何解释、注释或前后说明，响应必须以 { 开头、以 } 结尾。',
-      '13. 正文中的每个空都用 4 个下划线 ____ 标出，____ 的个数必须与 blanks 数组长度完全一致；正文里绝对不能出现答案词，答案只写在 blanks 里。',
-      '14. 字段名与取值严格按下方 JSON 模板，不新增、不删减字段；字符串内不要出现未转义的引号，不要写尾逗号。'
+      '一、语篇规格（照上海真卷的写法，不要写成全国卷的样子）',
+      '1. 每篇 10 空、250-330 词、4-6 段，必须给英文标题（真实标题风格，不要写“语篇一”）。',
+      '2. 首句（或首段第一句）不设空，先交代话题与基调；最后一空不要落在全篇最后一个词上；两个空之间至少隔 12 个词，同一段最多 3 空。',
+      '3. 体裁轮换：说明文（科普/文化/环保/科技）、记叙文（一段个人经历 + 感悟）、议论文（观点 + 例证 + 让步）。不要整篇空洞说教。',
+      '4. 话题贴近上海卷取材：传统文化与文博、人工智能与科技、环境与城市生活、青少年成长与心理、校园与社团、体育、饮食健康、艺术与审美、跨文化交流。',
+      '5. 语言要地道、有细节：具体数字、人名地名、直接引语、对比或转折；可以用中文括注解释生词（如 resilience（韧性）），但不要靠生词制造难度。',
+      '6. 有提示词的空在正文里紧邻写成 “______ (hold)”，无提示词的空只写 “______”，不要再加别的标记。',
+      '二、空位配比与考点（上海卷 = 有提示词 + 无提示词两部分）',
+      '7. 每篇 10 空 = 有提示词 4-6 空 + 无提示词 4-6 空（成套练习按 5+5 取平均）；不要整篇都有提示词，也不要整篇都没有。',
+      '8. 有提示词只有两类任务：①括号给动词——谓语（时态/语态/主谓一致；上海高频：一般过去、过去进行、现在完成、过去完成、过去将来、被动 be done、情态 + have done）或非谓语（to do / doing / done 作主语、宾语、定语、状语、补语，含 make/get + 宾语 + 补足、介词后 doing、be likely to be done）；②括号给形容词/副词——只考比较级或最高级（more likely、the most valuable、far closer、so + adj. + that 结构里的形容词）。',
+      '9. 有提示词的答案必须是“原词 + 语法变形”，允许带助动词/be 构成时态语态（was cut / would be / has been studied / are being made），但禁止词性转换：不给名词让学生写形容词、不给形容词让学生写副词、不加否定前缀、不改名词单复数。',
+      '10. 无提示词只考下面 6 类，每空 1 个单词；固定搭配可以 2 个词，但全篇最多 2 空（so that / as long as / even though / instead of / rather than / no matter how / so far as）。',
+      '   ①从句与连词：what / that / whether / who / whom / which / whose / where / when / why / although / though / while / before / after / since / unless / so that / even if / as long as',
+      '   ②介词（含固定搭配）：an advantage over / at one’s own expense / under the guidance of / for fear of / in bad shape / come from',
+      '   ③冠词：a / an / the / 零冠词（in bad shape、at that time、take charge of）',
+      '   ④代词：it（形式主语/形式宾语）、them、those、one、someone、this / that',
+      '   ⑤情态动词与助动词：must have done、can not have done、can / could / would / should、do / does / did 表强调或否定',
+      '   ⑥连接副词：however / instead / therefore / besides（作插入语或句首状语时）',
+      '11. 上海高频坑要照顾到（全篇至少出现 4 个，并在解析里点明）：①逗号后的非限制性定语从句不用 that；②介词 + which（for which / in which）；③to 是介词的搭配（the door to doing、look forward to doing、be used to doing）；④形式宾语 it（make it a rule that…）；⑤what 从句缺成分 vs that 从句完整；⑥one of the most + adj. + 名词复数；⑦must / can not + have done 表推测；⑧Only + 状语置于句首引起部分倒装；⑨a number of / the number of 的主谓一致；⑩分数或百分数 + of + 名词作主语时的主谓一致。',
+      '12. 答案唯一：每个空只有一个标准答案。英语里确实还有自然可接受说法的（could / would、定冠词的两种合理写法等），写进 accepted 数组，并在解析里说明“也接受……”，绝不允许两个完全等价的答案同时算对。',
+      '13. 干扰项必须是学生真会犯的错：时态误配、主谓不一致、该被动却用主动、非谓语形式选错、比较级最高级混用、连接词逻辑错、介词搭配错、冠词多漏、代词数格错。禁止荒谬选项，禁止两个都能说通的选项。',
+      '14. 同一篇里考点要分散：相邻两空不考同一知识点，同一知识点全篇最多 2 次；不要连续两空都考非谓语或都考时态。',
+      '三、解析规格（照上海区教研室答案详解写，学生要能自学）',
+      '15. 每个空必须写全 6 项，缺一不可：',
+      '   sense：整句中文翻译（通顺、贴近原文语气，不要逐字硬译）',
+      '   rule：考查点（一句话，如“非限制性定语从句·关系代词作主语”“现在完成时的被动语态”）',
+      '   clue：本题关键线索——引用原句里的词或结构，并说明它为什么能定答案',
+      '   why：判断过程 2-4 句，按“先看句子成分/主谓 → 再看时间或逻辑 → 最后定形式”的顺序讲，不要只给结论',
+      '   others：其它常见错误形式逐个说明为什么不行（用 ①②③ 分条，每条讲清错在哪）',
+      '   tip：一句话记忆或考场口诀（要能背、能迁移，不要写“注意语境”这类空话）',
+      '16. 解析里必须出现原文中的具体词句（引用 3-10 个词），禁止只写“根据上下文可知”“固定搭配”而不说清是哪个线索、哪个搭配。',
+      '17. 面向初高中学生的口吻：术语第一次出现要顺带解释（如“过去分词 done 表被动或完成”），不要用“显而易见”“众所周知”。',
+      '四、输出格式（违反会导致程序读不出来）',
+      '18. 只输出一个 JSON 对象：不要 Markdown、不要 json 代码块、不要任何解释文字或注释，响应必须以 { 开头、以 } 结尾。',
+      '19. 正文中每个空都用 6 个下划线 ______ 标出，个数必须与 blanks 数组长度完全一致；正文里绝对不能出现答案词，答案只写在 blanks 里。',
+      '20. 字段名与取值严格按下方 JSON 模板，不新增、不删减字段；字符串里不要出现未转义的双引号，不要写尾逗号。'
     ].join('\n');
   }
 
   /* ---------- 专题分布动态描述 ---------- */
   function topicDistRule(topicId, catName) {
     if (!topicId || topicId === 'all') {
-      return '训练范围：全部大专题。按上海卷实际重要程度分布：谓语动词（时态/语态/主谓一致）、非谓语动词、从句连接词（定语/名词性/状语从句）、介词、冠词、代词、并列逻辑、形副比较等级；语篇按“有提示词 4 空 + 无提示词 6 空”配比，不要机械均分，也不要出词性转换题。';
+      return '训练范围：全部大专题。按上海真卷的重要程度分布（以一篇 10 空为基准）：谓语动词（时态/语态/主谓一致）2 空、非谓语动词 2 空、从句连接词（定语/名词性/状语从句）2 空、形副比较等级 1 空、介词 1 空、冠词或代词 1 空、情态动词或助动词 1 空；语篇按“有提示词 5 空 + 无提示词 5 空”配比，不要机械均分，也不要出词性转换题。';
     }
-    return '训练范围：以「' + catName + '」为大专题重点——该大专题下的不同知识点要占全部空数的一半以上，其余空用其它大专题作自然铺垫，保持句子/语篇自然连贯；同一形式不可连续重复。';
+    return '训练范围：以「' + catName + '」为大专题重点——该大专题下的不同知识点要占全部空数的一半以上，其余空用其它大专题作自然铺垫，保持语篇/句子自然连贯；同一形式不可连续重复，同一知识点全篇最多 2 次。';
   }
 
   /* ---------- buildPrompt：动态组装（§四十三） ---------- */
@@ -9930,37 +11054,42 @@ details.explanation-panel .explain {
     var papersN = Math.max(1, Math.ceil(targetCount / 10));
     var structure = cfg.structure || 'mixed';
     var lines = [];
-    lines.push('你是一位熟悉上海地区英语考试（初高中通用）命题风格的英语教研员，请命制一套可直接给学生练习的语法填空题，并严格按 JSON 输出。');
+    lines.push('你是一位熟悉上海地区英语考试命题风格的资深教研员（上海春考/高考与各区一模二模「语法填空」的命题口径）。请命制一套可直接给学生练习的语法填空题，并严格按 JSON 输出。');
     lines.push('');
     lines.push('【本次命题配置】');
     lines.push('- 训练专题：' + catName);
     lines.push('- 题目结构：' + (structure === 'sentence' ? '纯单句题（无语篇）' : structure === 'passage' ? '纯语篇题（无单句）' : '单句题 + 语篇题'));
-    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇不超过 10 空；满 10 空的语篇按“4 空有提示词 + 6 空无提示词”）'));
+    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇 10 空，250-330 词；按“有提示词 5 空 + 无提示词 5 空”配比）'));
     lines.push('- 总空数：' + targetCount + '（整套练习的空数之和）');
+    lines.push('');
+    lines.push('【命题蓝图：先在心里排好，再动笔写】');
+    lines.push('1. 语篇：先定体裁与话题（多篇之间不重复），再定 10 个空的考点，最后成文；不要边写边凑考点。');
+    lines.push('2. 一篇 10 空的参考排布（可微调，但两类提示词都要有）：谓语动词 2 空（时态 1、语态或主谓一致 1）＋非谓语动词 2 空（doing/done 作定语或状语 1、to do 1）＋形副比较等级 1 空＋从句连接词 2 空（定语从句 1、名词性从句或状语从句 1）＋介词 1 空＋冠词或代词 1 空＋情态动词或助动词 1 空。');
+    lines.push('3. 单句：每句只考 1 个点；句子要有信息量（≥15 词），时间或逻辑线索藏在句内（these days / by then / since / than / of all / only when 等），不要靠一个时间词直接泄题。');
     lines.push('');
     lines.push(topicDistRule(cfg.topicId, catName));
     lines.push('');
     lines.push(shanghaiRulesText());
     lines.push('');
-    lines.push('五、单句题规则（structure 含“单句”时必出）：每个单句都是独立完整的句子，句中给出一个提示词并要求学生按语境改成正确形式——动词（如 take / learn / tell / get / come / go / make / spend / leave / fail / feel / have 等）改成时态/语态/主谓一致/非谓语（to do/doing/done）形式；形容词/副词（如 hard / careful / interesting 等）改成比较级或最高级。禁止词性转换题。每句 1 个空（个别可 2 个空）；必须有明确语境线索（如 these days / at that time / by then / since / than / of all 等）且答案唯一。单句正文只写 ____ 空标，不写括号原词；原词只放 givenWord 字段。');
+    lines.push('五、单句题规则（structure 含“单句”时必出）：每个单句都是独立完整的句子，句中给出一个提示词并要求学生按语境改成正确形式——动词（take / learn / tell / get / come / go / make / spend / leave / fail / feel / hold / base / inspire 等）改成时态、语态、主谓一致或非谓语（to do / doing / done）；形容词、副词（hard / careful / interesting / valuable / likely / close 等）改成比较级或最高级。禁止词性转换题。每句 1 个空；必须有明确语境线索且答案唯一。单句正文只写 ______ 空标，不写括号原词；原词只放 givenWord 字段。');
     if (structure === 'mixed') {
       lines.push('');
-      lines.push('六、结构分配：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1-2 空），语篇 1~2 篇（每篇 5~10 空）。');
+      lines.push('六、结构分配：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1 空），语篇 1-2 篇（每篇 5-10 空）。');
     }
     lines.push('');
-    lines.push('输出前自检（在心里过一遍，不要写出来）：空数是否为 ' + targetCount + '；____ 的个数是否与 blanks 数量一致；有提示词是否只有“动词/形副比较等级”两种情况、有没有混进词性转换；无提示词是否都落在连词/介词/冠词/代词/情态·助动词 5 类内、每空是否只有 1 个单词；答案是否唯一；有没有 what/that 两可；非谓语是否真的需要判断；时态是否靠上下文；文章是否连贯；考点是否过度重复；解析是否三点齐全。');
+    lines.push('输出前自检（在心里过一遍，不要写出来）：空数是否为 ' + targetCount + '；______ 的个数是否与 blanks 数量一致；每篇语篇是否 10 空且首句不设空；有提示词是否只有“动词/形副比较等级”两种情况、有没有混进词性转换；无提示词是否都落在 6 类内、每空是否 1 个词（固定搭配是否不超过 2 空）；答案是否唯一、有没有 what/that、could/would 这类两可；非谓语是否真的需要判断；时态是否靠上下文而不是靠时间词；语篇是否连贯、是不是拼凑；考点是否过度重复；解析 6 项（sense/rule/clue/why/others/tip）是否写全、有没有引用原文线索。');
     if (cfg.qtype === 'input') {
       lines.push('');
-      lines.push('七、输出题型：填空输入题（无选项）。每个空只给 answer 与 givenWord，不输出 options 字段。');
+      lines.push('七、输出题型：填空输入题（无选项）。每个空给 answer、accepted、givenWord 与 6 项解析，不输出 options 字段。accepted 要写全学生可能写出的正确变体（缩写、两种时态写法、定冠词的两种合理写法），不能把错误形式写进去。');
     } else {
       lines.push('');
       lines.push('七、输出题型：点选选择题（n 选 1，学生只点不打字），这是本组最关键的要求：');
-      lines.push('  1. 每个空除 answer 外必须输出 options：选项个数由该考点自然能给出的合理干扰项决定，4~6 个（最少 3 个）；');
+      lines.push('  1. 每个空除 answer 外必须输出 options：选项个数按该考点自然能给出的合理干扰项决定，4-6 个（最少 3 个）；');
       lines.push('  2. options 中恰好 1 个与 answer 完全一致（忽略首尾空格与大小写），即正确项；');
       lines.push('  3. 其余选项必须是针对该考点的典型错误：错误时态/语态/非谓语形式/主谓不一致、比较级最高级混用、错误连接词、错误介词、冠词多漏误、代词误用、易混逻辑词等；');
       lines.push('  4. 干扰项禁止与正确答案或彼此重复，禁止明显荒谬，禁止出现“两个都能说通”的选项；');
       lines.push('  5. 选项文本只写答案形式本身，不加任何解释。');
-      lines.push('  空对象示例（本例 5 选 1）：{"answer":"has been built","options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时被动语态","category":"谓语动词","explanation":"主语 building 与 build 是被动关系；by 2025 说明动作到说话时已完成，所以用现在完成时的被动 has been built。has built 是主动、was built 是过去、is building 是进行，都与语境不符。判断步骤：先看主语与语态，再看时间关系，最后确定时态语态的组合形式。","difficulty":2}');
+      lines.push('  空对象示例（本例 5 选 1）：{"answer":"has been built","accepted":["has been built"],"options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时的被动语态","category":"谓语动词","sense":"到 2025 年，这座城市已经建起了三座新图书馆。","rule":"现在完成时的被动语态","clue":"句中的 by 2025 说明动作到那时已经完成，主语 the city 与 build 是被动关系","why":"先看主语与动词的关系：图书馆是被建的，所以必须用被动；再看时间：by 2025 表示“到那时为止”，是现在完成时的典型标志；两者相加就是 has been built。","others":"①has built 是主动，图书馆不会自己建；②was built 只说明过去某时建成，与 by 2025 的“到那时已完成”不符；③is building 是主动进行，主语不对；④has been building 是主动的完成进行，语态错。","tip":"by + 将来时间 → 现在完成；主语是“被做”的对象 → 被动，两个条件同时出现就是 has been done。","difficulty":2}');
     }
     lines.push('');
     lines.push('八、输出 JSON 模板（严格按此结构，字段一个不少、一个不多）：');
@@ -9968,18 +11097,24 @@ details.explanation-panel .explain {
     if (structure !== 'sentence') {
       schema.papers = [
         {
-          title: '语篇标题',
-          passage: '完整语篇，需要填空处用 ____（下划线×4）标记',
+          title: '语篇英文标题',
+          passage: '完整语篇（250-330 词、4-6 段），需要填空处用 ______ 标记，有提示词写成 ______ (hold)',
           blanks: [
             {
-              answer: '答案',
-              options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3', '干扰项4', '干扰项5'],
+              answer: '标准答案',
+              accepted: (cfg.qtype === 'input') ? ['标准答案', '可接受的另一种正确写法（没有就只放标准答案）'] : undefined,
+              options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3', '干扰项4'],
               givenWord: '有提示词时给原词，无提示词时为 null',
               isGivenWord: true,
-              type: 'nonfinite|tense|clause|prep|article|pronoun|conjunction|degree|other',
-              knowledgePoint: '具体知识点，如 having done',
+              type: 'tense|passive|agreement|nonfinite|degree|attributive|nominal|adverbial|prep|article|pronoun|conjunction|modal|other',
               category: '谓语动词|非谓语动词|形容词/副词比较等级|定语从句|名词性从句|状语从句|介词|冠词|代词|并列与逻辑|其他/拓展',
-              explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从句子结构和上下文判断',
+              knowledgePoint: '具体知识点，如 现在完成时的被动语态 / 介词 + which / make it a rule that',
+              sense: '整句中文翻译',
+              rule: '考查点一句话',
+              clue: '关键线索（引用原文词句并说明为什么能定答案）',
+              why: '判断过程 2-4 句（先成分/主谓，再时间或逻辑，最后定形式）',
+              others: '其它错误形式为什么不行（①②③ 分条）',
+              tip: '一句话记忆/考场口诀',
               difficulty: 1
             }
           ]
@@ -9989,17 +11124,23 @@ details.explanation-panel .explain {
     if (structure !== 'passage') {
       schema.sentences = [
         {
-          sentence: '完整单句，需要填空处用 ____（下划线×4）标记',
+          sentence: '完整单句，需要填空处用 ______ 标记',
           blanks: [
             {
-              answer: '答案',
-              options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3', '干扰项4'],
-              givenWord: '高频动词原形，如 take / learn / tell / get',
+              answer: '标准答案',
+              accepted: (cfg.qtype === 'input') ? ['标准答案'] : undefined,
+              options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3'],
+              givenWord: '高频动词原形或形容词/副词，如 hold / base / likely / valuable',
               isGivenWord: true,
-              type: 'tense|passive|nonfinite|agreement|degree',
-              knowledgePoint: '具体知识点，如 一般过去时 / 现在进行时 / 现在完成时被动',
+              type: 'tense|passive|agreement|nonfinite|degree',
+              knowledgePoint: '具体知识点，如 一般过去时 / 现在进行时 / 现在完成时被动 / the most valuable',
               category: '谓语动词|非谓语动词|形容词/副词比较等级',
-              explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从时间状语或语境判断',
+              sense: '整句中文翻译',
+              rule: '考查点一句话',
+              clue: '关键线索（引用原句词句）',
+              why: '判断过程 2-4 句',
+              others: '其它错误形式为什么不行（①② 分条）',
+              tip: '一句话记忆',
               difficulty: 1
             }
           ]
@@ -10089,7 +11230,7 @@ details.explanation-panel .explain {
     var body = {
       model: modelId,
       messages: [
-        { role: 'system', content: '你是英语语法填空命题引擎（上海命题风格 · 初高中通用）。只输出严格合法的 json 对象：不要解释文字、不要 Markdown、不要代码围栏。' },
+        { role: 'system', content: '你是上海春考/高考语法填空 Section A 的命题引擎（初高中通用）：按真卷规格出一篇 10 空、250-330 词的语篇，有提示词与无提示词各半，解析照市教研室答案详解写（句意/考查点/线索/判断/其它形式/记忆六项）。只输出严格合法的 json 对象：不要解释文字、不要 Markdown、不要代码围栏。' },
         { role: 'user', content: promptText }
       ],
       response_format: { type: 'json_object' },
@@ -10203,17 +11344,35 @@ details.explanation-panel .explain {
         var isG = !!b.isGivenWord || (b.givenWord != null && String(b.givenWord) !== '' && b.givenWord !== 'null');
         var ansRaw = String(b.answer).trim();
         var ansLower = ansRaw.toLowerCase();
+        // accepted：AI 给的“也接受”变体（去重、去空、不含答案本身重复）
+        var acc = [];
+        if (Array.isArray(b.accepted)) {
+          b.accepted.forEach(function (a) {
+            var s = String(a == null ? '' : a).trim();
+            if (!s) return;
+            if (s.toLowerCase() === ansLower) return;
+            if (acc.indexOf(s) < 0) acc.push(s);
+          });
+        }
         out.push({
           n: bi + 1,
           answer: ansLower,
           answerRaw: ansRaw,
+          accepted: acc,
           options: normalizeOptions(b.options, ansRaw, ansLower),
           givenWord: isG ? String(b.givenWord != null ? b.givenWord : '') : '',
           isGivenWord: isG,
           type: b.type || 'other',
           knowledgePoint: b.knowledgePoint || '',
           category: b.category || catName,
-          explanation: b.explanation || '（本题缺解析）',
+          // 解析六要素（新版）：sense / rule / clue / why / others / tip
+          sense: b.sense || '',
+          rule: b.rule || '',
+          clue: b.clue || '',
+          why: b.why || '',
+          others: b.others || '',
+          tip: b.tip || '',
+          explanation: b.explanation || b.why || '',
           difficulty: (b.difficulty >= 1 && b.difficulty <= 5) ? b.difficulty : 1
         });
       });
@@ -10371,6 +11530,14 @@ details.explanation-panel .explain {
             stem = stem.replace('______', '______ ' + gwParen);
           }
         }
+        // 解析：优先用新版六要素（句意/考查点/线索/判断/其它形式/记忆）
+        var exWhy = '';
+        if (b.sense) exWhy += '句意：' + b.sense;
+        if (b.why) exWhy += (exWhy ? '\n' : '') + '判断：' + b.why;
+        if (!exWhy) exWhy = b.explanation || '（AI 未提供解析）';
+        var exOthers = b.others || (hasOpts
+          ? '其它选项是该考点的典型干扰项：要么时态/语态/词形不对，要么与句子成分或上下文逻辑不符。'
+          : '易错点是填成其它语法形式：把每个错形代回原句，看主谓、时态、成分哪一条先不成立。');
         var q = {
           id: 'ai_' + genId + '_' + kind.slice(0, 1) + pi + '_b' + (b.n || idx),
           source: 'ai',
@@ -10387,18 +11554,17 @@ details.explanation-panel .explain {
           wrongType: 'CONTEXT_ERROR',
           explanation: {
             answer: b.answerRaw || b.answer,
-            keyPoint: b.knowledgePoint ? '考点：' + b.knowledgePoint : '考点：' + (b.category || '语法'),
-            clue: (kind === 'sentence'
-              ? '本题为单句题《' + ctx.title + '》，注意句中的时间状语/语境线索。'
-              : '本题来自语篇《' + p.title + '》第' + (b.n || idx) + '空；判断请结合前后文与所在句结构。'),
-            chain: (kind === 'sentence' ? '读全句找线索 → 判断该动词时态/语态/形式 → ' : '读语篇 → 看所在句结构 → ')
-              + (b.knowledgePoint || '判断该空作用') + ' → ' + (b.answerRaw || b.answer),
-            why: b.explanation || '（AI 未提供解析）',
-            whyOthers: hasOpts
-              ? '其它选项是该考点常见易错干扰项：或时态/语态/词形不对，或不符合句子成分/上下文逻辑；用排除法逐条对照主干再定。'
-              : '（AI 生成题无固定选项；易错点是填入其它语法形式，详见上方解析。）',
-            commonError: '上海卷此考点常见错误：只背规则不看语境；做题时请先找时间状语/语境线索，再定时态语态。',
-            memory: '',
+            keyPoint: b.rule ? '考查点：' + b.rule
+              : (b.knowledgePoint ? '考查点：' + b.knowledgePoint : '考查点：' + (b.category || '语法')),
+            clue: b.clue || (kind === 'sentence'
+              ? '单句题《' + ctx.title + '》：线索在句内，先找时间状语或逻辑标志，再定形式。'
+              : '语篇《' + p.title + '》第 ' + (b.n || idx) + ' 空：先看所在句缺什么成分，再联系上句逻辑。'),
+            chain: (kind === 'sentence' ? '读全句找线索 → ' : '读语篇 → 看所在句结构 → ')
+              + (b.rule || b.knowledgePoint || '判断该空作用') + ' → ' + (b.answerRaw || b.answer),
+            why: exWhy,
+            whyOthers: exOthers,
+            commonError: '',
+            memory: b.tip || '',
             cue: '',
             examMind: ''
           }
@@ -10422,7 +11588,8 @@ details.explanation-panel .explain {
           if (wantChoice) fallbackCount++;
           q.type = 'input';
           q.hint = isG ? String(b.givenWord) : '';
-          q.accepted = [b.answerRaw || b.answer];
+          // accepted 带上 AI 声明的“也接受”变体，避免学生写出合法变体被判错
+          q.accepted = [b.answerRaw || b.answer].concat(b.accepted || []);
           q.answerText = b.answerRaw || b.answer;
           q._fallbackInput = wantChoice;
         }
@@ -10527,7 +11694,7 @@ details.explanation-panel .explain {
       + '<h1>初高中英语语法填空学习系统</h1>'
       + '<p>先懂方法 → 学专题 → 做句子级基础 → 练 10 空语篇 → 错题复盘 → AI 按薄弱点巩固</p>'
       + '<div class="hero-tags"><span class="hot">上海命题风格</span><span>初高中通用</span><span>全国其他地区也能用</span>'
-      + '<span>10 空 = 4 空给词 + 6 空纯空</span><span>有提示词不考词性转换</span></div>';
+      + '<span>10 空 = 5 空给词 + 5 空纯空</span><span>有提示词不考词性转换</span></div>';
     v.appendChild(hero);
 
     // 今日 / 进度 / 累计：一张账目表（左标签、右数字，进度画成一条细线）
@@ -10553,11 +11720,13 @@ details.explanation-panel .explain {
 
     // 快捷入口：目录式列表（一行一件事，右侧细箭头）
     var chalDone = E.isChallengeAvailable() && allCoreFinished();
+    var paperN = E.availablePaperIds().length;
     var idx = U.el('nav', 'index-list');
     idx.setAttribute('aria-label', '快捷入口');
     idx.innerHTML =
       '<button class="index-row" data-nav="go-learn"><span class="tt">继续学习</span><span class="ar">→</span></button>'
-      + '<button class="index-row" data-nav="topics"><span class="tt">专题学习</span><span class="meta">' + st.available + ' 个专题</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="papers"><span class="tt">上海真题语篇 · 整篇 10 空</span><span class="meta">' + paperN + ' 篇</span><span class="ar">→</span></button>'
+      + '<button class="index-row" data-nav="topics"><span class="tt">单句专题训练</span><span class="meta">' + st.available + ' 个专题</span><span class="ar">→</span></button>'
       + '<button class="index-row" data-nav="ai"><span class="tt">AI 出题</span><span class="ar">→</span></button>'
       + '<button class="index-row" data-nav="method"><span class="tt">解题方法课</span><span class="ar">→</span></button>'
       + '<button class="index-row" data-nav="wrong"><span class="tt">错题本</span><span class="meta">' + d.wrongBook.length + ' 题</span><span class="ar">→</span></button>'
@@ -10684,13 +11853,14 @@ details.explanation-panel .explain {
     v.innerHTML = '';
     var cur = window.__EGL_CURRICULUM__;
     v.appendChild(U.el('div', '', '<div class="page-title">专题学习 · 语法填空</div>'
-      + '<div class="page-sub">初高中通用：按大专题学习，内置题库直接开练；尚未内置的专题可用「AI 出题」生成练习。</div>'));
+      + '<div class="page-sub">初高中通用：按大专题学习，内置题库直接开练；整篇 10 空的真题语篇在「上海真题语篇」里练。</div>'));
 
-    // 顶部：解题方法课 + AI 出题 快捷入口
-    var topRow = U.el('div', 'grid cards2', '');
+    // 顶部：真题语篇 + 解题方法课 + AI 出题 快捷入口
+    var topRow = U.el('div', 'grid cards3', '');
     topRow.style.marginBottom = '14px';
-    topRow.innerHTML = '<button class="mode-card glass" data-nav="method"><h4>解题方法课</h4><p>先学上海语法填空的做题顺序（数谓语 → 连词优先 → 5 类排查）与高频坑，再开练。</p></button>'
-      + '<button class="mode-card glass" data-nav="ai"><h4>AI 出题</h4><p>按专题/题数生成完整语篇，做完自动判分与错题入库。</p></button>';
+    topRow.innerHTML = '<button class="mode-card glass" data-nav="papers"><h4>上海真题语篇</h4><p>' + E.availablePaperIds().length + ' 篇真卷 · 每篇整篇 10 空一起做，交卷后逐空看解析。</p></button>'
+      + '<button class="mode-card glass" data-nav="method"><h4>解题方法课</h4><p>先学上海语法填空的做题顺序（数谓语 → 连词优先 → 5 类排查）与高频坑，再开练。</p></button>'
+      + '<button class="mode-card glass" data-nav="ai"><h4>AI 出题</h4><p>按专题/题数生成同规格整篇，做完自动判分与错题入库。</p></button>';
     v.appendChild(topRow);
 
     // 大专题卡片
@@ -10774,6 +11944,129 @@ details.explanation-panel .explain {
     out.sort(function (a, b) { return a.no.localeCompare(b.no); });
     return out;
   }
+
+  /* ============ 上海真题语篇（整篇 10 空） ============ */
+  function papersPage() {
+    var v = app.view;
+    v.innerHTML = '';
+    var ids = E.availablePaperIds();
+    v.appendChild(U.el('div', '', '<div class="page-title">上海真题语篇 · 整篇 10 空</div>'
+      + '<div class="page-sub">历年上海春考/高考与各区一模二模的语法填空（个别空位为唯一答案做了微调）。'
+      + '按真卷规格整篇作答：10 个空一起填，交卷后逐空看解析；解析照区教研室答案详解写——考查点 → 句意 → 线索 → 判断 → 其它形式为何不行 → 一句话记忆。</div>'));
+
+    var top = U.el('div', 'grid cards2', '');
+    top.style.marginBottom = '14px';
+    top.innerHTML = '<button class="mode-card glass" data-nav="topics"><h4>单句专题训练</h4><p>按 12 大专题练句子级填空，先打基础再看语篇。</p></button>'
+      + '<button class="mode-card glass" data-nav="ai"><h4>AI 出新题</h4><p>按专题生成同规格的整篇练习，做完自动判分与入库。</p></button>';
+    v.appendChild(top);
+
+    if (!ids.length) {
+      v.appendChild(U.el('div', 'empty', '还没有载入真题语篇。'));
+      bindNav(v);
+      return;
+    }
+
+    var card = U.el('div', 'glass cat-card');
+    card.style.setProperty('--c', 'var(--accent)');
+    card.appendChild(U.el('div', '', '<h4>题源列表 <span class="faint small" style="font-weight:500">共 ' + ids.length + ' 篇 · 每篇 10 空</span></h4>'
+      + '<div class="desc">点开一篇即可整篇作答；做完会在“我的语法填空能力”里按大专题记分。</div>'));
+    var rows = U.el('div', '');
+    ids.forEach(function (pid) {
+      var p = E.paperById(pid);
+      if (!p) return;
+      var s = E.paperStat(pid);
+      var acc = s.attempts ? s.correct / s.attempts : null;
+      var wrongN = E.data.wrongBook.filter(function (w) { return String(w.qid || '').indexOf('paper_' + pid + '_') === 0; }).length;
+      var r = U.el('div', 'topic-row');
+      r.dataset.pid = pid;
+      r.style.alignItems = 'flex-start';
+      r.innerHTML = '<span class="no">' + esc(p.no) + '</span>'
+        + '<span class="tt" style="flex:1;min-width:0">' + esc(p.title)
+        + '<span class="faint small" style="display:block;font-weight:500;margin-top:2px">'
+        + esc(p.source || '') + (p.genre ? ' · ' + esc(p.genre) : '') + (p.words ? ' · ' + p.words + ' 词' : '')
+        + '</span></span>'
+        + '<span class="sub">' + (acc === null ? '未做' : pct(acc)) + '</span>'
+        + '<span class="st">' + (wrongN ? '<span class="badge red">错 ' + wrongN + '</span>' : '<i class="dot none"></i>') + '</span>';
+      rows.appendChild(r);
+    });
+    card.appendChild(rows);
+    v.appendChild(card);
+
+    v.appendChild(U.el('div', 'glass', '<div class="sec-title" style="margin-top:0">做完一篇怎么用</div>'
+      + '<p style="font-size:14px">① 先按“通读一遍 → 判断每个空缺什么 → 再动笔”的顺序做；② 交卷后逐个空看解析，重点看“为什么其他形式不行”；'
+      + '③ 做错的空已自动进错题本，可以在错题本里按大专题回炉；④ 想再练同规格的新语篇，用「AI 出题」把专题选到那一类。</p>'));
+
+    $$('.topic-row[data-pid]', v).forEach(function (row) {
+      row.addEventListener('click', function () { E.ui.go('paper/' + row.dataset.pid); });
+    });
+    bindNav(v);
+  }
+
+  function paperPage(pid) {
+    var v = app.view;
+    var p = E.paperById(pid);
+    if (!p) { v.innerHTML = '<div class="empty">语篇未找到</div>'; return; }
+    var s = E.paperStat(pid);
+    var acc = s.attempts ? s.correct / s.attempts : null;
+    var wrongN = E.data.wrongBook.filter(function (w) { return String(w.qid || '').indexOf('paper_' + pid + '_') === 0; }).length;
+    var parts = E.paperBreakdown(p);
+
+    v.innerHTML = '';
+    v.appendChild(U.el('div', '', '<button class="btn ghost sm" data-nav="papers">← 返回真题语篇</button>'));
+
+    var head = U.el('div', 'glass', '');
+    head.style.marginTop = '10px';
+    head.style.padding = '16px 18px';
+    head.innerHTML = '<div class="page-title" style="font-size:20px">' + esc(p.title) + '</div>'
+      + '<div class="page-sub">' + esc(p.source || '') + ' · ' + esc(p.level || '') + ' · ' + esc(p.genre || '')
+      + (p.words ? ' · ' + p.words + ' 词' : '') + (p.topic ? ' · ' + esc(p.topic) : '') + '</div>'
+      + '<div class="grid cards4" style="margin-top:14px">'
+      + '<div class="stat-card" style="padding:8px"><div class="k">空数</div><div class="v" style="font-size:19px">' + (p.blanks || []).length + '</div></div>'
+      + '<div class="stat-card" style="padding:8px"><div class="k">正确率</div><div class="v" style="font-size:19px">' + (acc === null ? '未做' : pct(acc)) + '</div></div>'
+      + '<div class="stat-card" style="padding:8px"><div class="k">累计作答</div><div class="v" style="font-size:19px">' + s.attempts + '</div></div>'
+      + '<div class="stat-card" style="padding:8px"><div class="k">错题</div><div class="v" style="font-size:19px">' + wrongN + '</div></div>'
+      + '</div>';
+    v.appendChild(head);
+
+    if (p.readGuide) {
+      v.appendChild(U.el('div', 'glass', '<div class="sec-title" style="margin-top:0">通读提示</div>'
+        + '<p style="font-size:14px">' + esc(p.readGuide) + '</p>'
+        + '<p class="faint small">先按整篇读一遍再动笔：上海卷的空多数要靠上下文，不看全篇很容易只凭一个词猜。</p>'));
+    }
+
+    var mode = U.el('div', 'glass', '');
+    mode.style.marginTop = '14px';
+    mode.style.padding = '18px';
+    mode.innerHTML = '<div class="sec-title" style="margin-top:0">开始整篇作答</div>'
+      + '<div class="mode-grid"><div class="mode-card glass" data-start="1">'
+      + '<h4>整篇卷面 · 10 空一起填</h4><p>与真卷一致：先通读，再逐空填写，全部答完统一交卷，交卷后逐空看解析。</p></div></div>';
+    v.appendChild(mode);
+
+    var kp = U.el('div', 'glass', '');
+    kp.style.marginTop = '14px';
+    kp.style.padding = '14px 16px';
+    var rows = '<table class="mini-table"><tr><th>空</th><th>考点</th><th>大类</th><th>提示词</th></tr>';
+    (p.blanks || []).forEach(function (b, i) {
+      rows += '<tr><td>' + (i + 1) + '</td><td>' + esc(b.point || '') + '</td><td>' + esc(E.catLabelOf(b.catId))
+        + '</td><td>' + (b.isGiven && b.given ? esc(b.given) : '<span class="faint">无</span>') + '</td></tr>';
+    });
+    rows += '</table>';
+    var chips = parts.map(function (c) {
+      return '<span class="problem-chip"><b>' + c.count + '</b> 空 · ' + esc(c.name) + '</span>';
+    }).join('');
+    kp.innerHTML = '<div class="sec-title" style="margin-top:0">考点分布（' + (p.blanks || []).length + ' 空）</div>'
+      + '<div style="margin-bottom:10px">' + chips + '</div>' + rows
+      + '<p class="faint small" style="margin-top:8px">提示词“无”的空是纯逻辑填空，只填 1 个词（个别固定搭配 2 个词，如 instead of / so that）。</p>';
+    v.appendChild(kp);
+
+    $$('[data-start]', mode).forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (E.quiz && E.quiz.startPaper) E.quiz.startPaper(pid);
+      });
+    });
+    bindNav(v);
+  }
+
 
   /* ============ 专题页（含模式选择） ============ */
   function topicPage(tid) {
@@ -10866,13 +12159,16 @@ details.explanation-panel .explain {
     var box = U.el('div', '');
     wb.forEach(function (w) {
       var isAI = w.source === 'ai';
-      var q = isAI ? null : E.findQuestion(w.topicId, w.qid); // AI 题已存快照，不入库
+      // AI 题与真题语篇都存了解析快照，不进题库反查
+      var isRich = isAI || w.source === 'paper';
+      var q = isRich ? null : E.findQuestion(w.topicId, w.qid);
       var card = U.el('div', 'glass wb-item');
-      var meta = isAI ? null : metaById(w.topicId);
-      var icon = isAI ? '' : (meta && meta.icon ? meta.icon : '');
+      var meta = isRich ? null : metaById(w.topicId);
+      var icon = isRich ? '' : (meta && meta.icon ? meta.icon : '');
       card.innerHTML = '<div class="head">'
         + (isAI ? '<span class="badge gray">AI 训练</span> ' : '')
-        + '<span class="badge gray">' + (icon ? icon + ' ' : '') + esc(w.topicTitle || (isAI ? 'AI出题' : topicName(w.topicId))) + '</span>'
+        + (w.source === 'paper' ? '<span class="badge gray">真题语篇</span> ' : '')
+        + '<span class="badge gray">' + (icon ? icon + ' ' : '') + esc(w.topicTitle || (isRich ? 'AI出题' : topicName(w.topicId))) + '</span>'
         + (w.kp ? '<span class="badge blue">' + esc(w.kp) + '</span>' : (w.tag ? '<span class="badge blue">' + esc(w.tag) + '</span>' : ''))
         + '<span class="badge red">' + wtZh(w.wrongType) + '</span>'
         + '<span class="badge amber">错 ' + w.times + ' 次</span>'
@@ -10882,7 +12178,7 @@ details.explanation-panel .explain {
         + '<div class="q">' + esc(w.question) + '</div>'
         + '<div class="wb-meta"><span>我的答案：<span class="mya">' + esc(w.myAnswer === undefined || w.myAnswer === null || w.myAnswer === '' ? '（未作答）' : w.myAnswer) + '</span></span>'
         + '<span>正确答案：<span class="cora">' + esc(w.correctAnswer) + '</span></span></div>';
-      if (isAI && w.explText) {
+      if (isRich && w.explText) {
         var dAI = U.el('details', 'qa explanation-panel');
         dAI.style.marginTop = '10px';
         var pseudo = {
@@ -10896,7 +12192,9 @@ details.explanation-panel .explain {
             chain: '',
             why: w.explText,
             whyOthers: '',
-            commonError: 'AI 生成题，重做可到「AI 出题」按薄弱点再生成。',
+            commonError: w.source === 'paper'
+              ? '真题语篇的错题：回「上海真题语篇」把整篇再做一遍，比单看这一空更有效。'
+              : 'AI 生成题，重做可到「AI 出题」按薄弱点再生成。',
             memory: '',
             cue: '',
             examMind: ''
@@ -11472,6 +12770,8 @@ details.explanation-panel .explain {
   E.ui.home = home;
   E.ui.topics = topics;
   E.ui.topicPage = topicPage;
+  E.ui.papersPage = papersPage;
+  E.ui.paperPage = paperPage;
   E.ui.wrongBook = wrongBook;
   E.ui.weak = weak;
   E.ui.records = records;
@@ -11588,12 +12888,29 @@ details.explanation-panel .explain {
     renderPractice();
   }
 
+  /* ---------- 真题语篇进入整篇卷面（一篇 10 空，全部答完统一交卷） ---------- */
+  function startPaper(pid) {
+    var paper = E.paperById(pid);
+    if (!paper) { U.toast('没有找到这篇语篇', 'bad'); return; }
+    var qs = E.paperToQuestions(paper);
+    if (!qs.length) { U.toast('这篇语篇暂时没有题目', 'bad'); return; }
+    S = {
+      kind: 'paper', mode: 'normal', topicId: 'paper', title: paper.title, icon: '',
+      subtitle: paper.source || '', paperId: pid,
+      questions: qs, idx: 0, answers: [], startTs: E.util.nowTs(),
+      modeLabel: '上海真题语篇 · 整篇作答',
+      _paperId: pid, _aiQuestions: qs, _aiMeta: { mode: 'normal', title: paper.title }
+    };
+    E.ui.quizActive = true;
+    renderPractice();
+  }
+
   /* ---------- 练习主屏 ---------- */
   function renderPractice() {
     var v = appView();
     if (!v || !S) return;
-    // AI 语篇题：整篇一次展示、全部空一起作答（用户明确要求，不要一空一空翻）
-    if (S.kind === 'ai') { renderSheetAI(); return; }
+    // AI 语篇题 / 真题语篇：整篇一次展示、全部空一起作答（不要一空一空翻）
+    if (S.kind === 'ai' || S.kind === 'paper') { renderSheetAI(); return; }
     v.innerHTML = '';
     var topic = E.bank()[S.topicId];
 
@@ -11685,7 +13002,10 @@ details.explanation-panel .explain {
     var head = el('div', 'learn-head glass');
     head.innerHTML = '<button class="btn ghost sm" data-exit="1">✕</button>'
       + '<div class="tt">' + esc(S.title) + '</div>'
-      + '<div class="mode">整篇卷面 · 全部空一起作答，答完统一交卷看解析</div>'
+      + '<div class="mode">' + (S.kind === 'paper'
+        ? '上海真题语篇 · 整篇 ' + S.questions.length + ' 空一起作答，答完统一交卷看解析'
+        : '整篇卷面 · 全部空一起作答，答完统一交卷看解析')
+      + '</div>'
       + '<span class="pn" id="sheetCount">0 / ' + S.questions.length + '</span>';
     v.appendChild(head);
     var exitBtn = $('[data-exit]', v);
@@ -11716,11 +13036,12 @@ details.explanation-panel .explain {
         var h = el('div', 'sq-head');
         h.innerHTML = '<span class="badge ' + (isS ? 'green' : 'gray') + '">'
           + (isS ? '单句' : '语篇') + ' · 第 ' + n + ' 空</span>'
+          + (q.aiMeta && q.aiMeta.catName ? ' <span class="badge blue">' + esc(q.aiMeta.catName) + '</span>' : '')
           + (q.type === 'choice' ? '' : ' <span class="badge amber">填空输入</span>');
         card.appendChild(h);
         var stem = el('div', 'sq-stem');
         stem.style.cssText = 'font-size:15px;line-height:1.9;margin-top:8px;color:var(--ink-dim)';
-        stem.innerHTML = U.renderSentence(q, { hideInlineHint: true });
+        stem.innerHTML = U.renderSentence(q, { hideInlineHint: !q.isPaper });
         card.appendChild(stem);
         if (q.type === 'choice') {
           var row = el('div', 'sq-opts');
@@ -11865,7 +13186,12 @@ details.explanation-panel .explain {
   }
   function updateSheetMeta() {
     if (!S) return;
-    var answered = S.answers.filter(function (a) { return !!a; }).length;
+    // 选择题选中即算已答；输入题要看是否已经打字（S._typed），否则计数永远是 0
+    var answered = 0;
+    S.questions.forEach(function (q, i) {
+      if (S.answers[i]) { answered++; return; }
+      if (q.type !== 'choice' && S._typed && String(S._typed[i] || '').trim()) answered++;
+    });
     var elC = $('#sheetCount', appView());
     if (elC) elC.textContent = answered + ' / ' + S.questions.length;
     var sub = $('#sheetSubmit', appView());
@@ -12058,19 +13384,24 @@ details.explanation-panel .explain {
 
   function lastQ() { return S.idx >= S.questions.length - 1; }
 
-  /* ---------- 单题统计落库（AI 题含来源/大专题标记） ---------- */
+  /* ---------- 单题统计落库（AI 题 / 真题语篇含来源与大专题标记） ---------- */
   function commitStats(q, entry) {
     var isAI = !!(q.isAI || q.source === 'ai');
+    var isPaper = !!(q.isPaper || q.source === 'paper');
     var meta = q.aiMeta || {};
-    // AI 题按所属大专题计入 tag（topicId 形如 ai:verb），用于能力总览
-    var tid = isAI ? ('ai:' + (meta.catId || 'verb')) : S.topicId;
+    // AI 题记 ai:大专题；真题语篇记 paper:大专题；都用于「我的语法填空能力」聚合
+    var tid = isAI ? ('ai:' + (meta.catId || 'verb'))
+      : isPaper ? ('paper:' + (meta.catId || 'extra'))
+      : S.topicId;
     var tag = q.tag || '未分类';
     E.addDaily(entry.ok ? 1 : 0, 1);
     E.addGlobal(entry.ok ? 1 : 0, 1);
     E.recordTag(tid, tag, entry.ok);
     if (!entry.ok) {
       var corText = q.type === 'choice' ? q.options[q.answerIndex] : (q.answerText || (q.accepted && q.accepted[0]));
-      var topicTitle = isAI ? ('AI · ' + (meta.catName || '语法填空')) : (E.bank()[S.topicId] ? E.bank()[S.topicId].title : S.title);
+      var topicTitle = isAI ? ('AI · ' + (meta.catName || '语法填空'))
+        : isPaper ? ('真题语篇 · ' + (S.title || ''))
+        : (E.bank()[S.topicId] ? E.bank()[S.topicId].title : S.title);
       E.addWrong({
         topicId: tid,
         topicTitle: topicTitle,
@@ -12080,9 +13411,9 @@ details.explanation-panel .explain {
         myAnswer: entry.userText,
         correctAnswer: corText,
         wrongType: q.wrongType || 'CONTEXT_ERROR',
-        source: isAI ? 'ai' : 'bank',
+        source: isAI ? 'ai' : isPaper ? 'paper' : 'bank',
         catId: meta.catId || '',
-        explText: isAI ? (q.explanation ? q.explanation.why : '') : '',
+        explText: (isAI || isPaper) ? (q.explanation ? q.explanation.why : '') : '',
         kp: meta.knowledgePoint || tag
       });
     }
@@ -12098,7 +13429,12 @@ details.explanation-panel .explain {
     if (S.kind === 'core' && (S.mode === 'normal' || S.mode === 'blind')) {
       E.updateTopicStat(tid, correct, total, S.mode);
     }
-    var sessLabel = S.kind === 'ai' ? (S.title || 'AI 出题训练') : '';
+    // 真题语篇：整篇成绩记到 paper:<id>，供语篇列表查看
+    if (S.kind === 'paper' && S._paperId) {
+      E.updateTopicStat('paper:' + S._paperId, correct, total, 'normal');
+    }
+    var sessLabel = S.kind === 'ai' ? (S.title || 'AI 出题训练')
+      : S.kind === 'paper' ? ('真题语篇 · ' + (S.title || '')) : '';
     E.addSession(tid, kindModeName(), correct, total, seconds, sessLabel);
     E.save();
 
@@ -12128,6 +13464,7 @@ details.explanation-panel .explain {
     if (S.kind === 'wrongretrain') return 'wrongretrain';
     if (S.kind === 'mixed') return 'mixed';
     if (S.kind === 'ai') return 'ai';
+    if (S.kind === 'paper') return 'paper';
     return S.mode;
   }
 
@@ -12154,8 +13491,8 @@ details.explanation-panel .explain {
     ov.style.marginTop = '12px';
     ov.innerHTML =
       '<div class="glass metric"><div class="v">' + m.correct + '/' + m.total + '</div><div class="k">总正确</div></div>'
-      + '<div class="glass metric"><div class="v">' + m.choiceC + '/' + m.choiceT + '</div><div class="k">选择题</div></div>'
-      + '<div class="glass metric"><div class="v">' + m.inputC + '/' + m.inputT + '</div><div class="k">输入题</div></div>';
+      + '<div class="glass metric"><div class="v">' + (m.choiceT ? m.choiceC + '/' + m.choiceT : '—') + '</div><div class="k">选择题</div></div>'
+      + '<div class="glass metric"><div class="v">' + (m.inputT ? m.inputC + '/' + m.inputT : '—') + '</div><div class="k">输入题</div></div>';
     v.appendChild(ov);
 
     var wrongTotal = m.total - m.correct;
@@ -12200,7 +13537,8 @@ details.explanation-panel .explain {
       if (!a) return;
       var card = el('div', 'glass wb-item');
       card.style.borderLeftColor = a.ok ? 'var(--ok)' : 'var(--bad)';
-      var head = '<div class="head"><span class="badge ' + (a.ok ? 'green' : 'red') + '">第' + (i + 1) + '题 ' + (a.ok ? '对' : '错') + '</span>'
+      var unit = (S.kind === 'paper' || S.kind === 'ai') ? '空' : '题';
+      var head = '<div class="head"><span class="badge ' + (a.ok ? 'green' : 'red') + '">第' + (i + 1) + unit + ' ' + (a.ok ? '对' : '错') + '</span>'
         + (a.q.tag ? '<span class="badge blue">' + esc(a.q.tag) + '</span>' : '')
         + (a.q.type === 'choice' ? '<span class="badge gray">选择</span>' : '<span class="badge gray">输入</span>') + '</div>';
       var corText = a.q.type === 'choice' ? a.q.options[a.q.answerIndex] : (a.q.answerText || (a.q.accepted && a.q.accepted[0]));
@@ -12281,6 +13619,25 @@ details.explanation-panel .explain {
       v.appendChild(ab);
     }
 
+    // 真题语篇：本篇考点分布（让每篇做完都能回顾“这 10 空考了什么”）
+    if (S.kind === 'paper' && S._paperId) {
+      var paperObj = E.paperById(S._paperId);
+      var pb = E.paperBreakdown(paperObj);
+      var pbCard = el('div', 'glass', '');
+      pbCard.style.marginTop = '12px';
+      pbCard.style.padding = '14px 16px';
+      var pbRows = '<table class="mini-table"><tr><th>大类</th><th>空数</th><th>本篇考到的细点</th></tr>';
+      pb.forEach(function (c) {
+        pbRows += '<tr><td>' + esc(c.name) + '</td><td>' + c.count + '</td><td>' + esc(c.points.join('；')) + '</td></tr>';
+      });
+      pbRows += '</table>';
+      pbCard.innerHTML = '<div class="sec-title" style="margin-top:0">本篇考点分布（' + (paperObj ? paperObj.blanks.length : 0) + ' 空）</div>'
+        + pbRows
+        + '<p class="faint small" style="margin-top:6px">同一篇里同一大类出现多次是正常的（真卷也是这么配的）；'
+        + '真正要记住的是每空的“判断依据”，不是把答案背下来。</p>';
+      v.appendChild(pbCard);
+    }
+
     // 底部
     var foot = el('div', 'btn-row');
     foot.style.marginTop = '14px';
@@ -12291,6 +13648,9 @@ details.explanation-panel .explain {
       else if (kindNow === 'challenge') startChallenge(tidNow);
       else if (kindNow === 'retrain') startRetrain(tidNow, Object.keys(m.errByTag)[0] || null);
       else if (kindNow === 'wrongretrain') startWrongRetrain(tidNow);
+      else if (kindNow === 'paper') {
+        if (S._paperId) startPaper(S._paperId); else E.ui.go('papers', true);
+      }
       else if (kindNow === 'ai') {
         // 用同一组 AI 题重做；无缓存则回到 AI 页
         if (S._aiQuestions && S._aiQuestions.length) {
@@ -12301,8 +13661,8 @@ details.explanation-panel .explain {
       }
       else startMixed(modeNow);
     });
-    var back = el('button', 'btn ghost', '返回列表');
-    back.addEventListener('click', function () { E.ui.go('topics', true); });
+    var back = el('button', 'btn ghost', kindNow === 'paper' ? '返回真题语篇' : '返回列表');
+    back.addEventListener('click', function () { E.ui.go(kindNow === 'paper' ? 'papers' : 'topics', true); });
     var home = el('button', 'btn ghost', '首页');
     home.addEventListener('click', function () { E.ui.go('home', true); });
     foot.appendChild(again);
@@ -12338,8 +13698,8 @@ details.explanation-panel .explain {
     var kind = S.kind;
     U.confirmBox('退出本轮练习', '已答题目会计入统计，但整轮成绩不计入专题。确定退出？', '退出', true).then(function (ok) {
       if (!ok) return;
-      // 整篇卷面模式：退出前把已作答的空落库（与交卷同一逻辑）
-      if (kind === 'ai' && S._sheetMode && S.questions) {
+      // 整篇卷面模式（AI 题 / 真题语篇）：退出前把已作答的空落库（与交卷同一逻辑）
+      if ((kind === 'ai' || kind === 'paper') && S._sheetMode && S.questions) {
         S.questions.forEach(function (q, i) {
           if (!S.answers[i] && q.type !== 'choice' && S._typed && S._typed[i] && String(S._typed[i]).trim()) {
             var t = String(S._typed[i]).trim();
@@ -12352,7 +13712,9 @@ details.explanation-panel .explain {
       }
       S = null;
       E.ui.quizActive = false;
-      if (kind === 'ai') E.ui.go('ai', true); else E.ui.go('topics', true);
+      if (kind === 'ai') E.ui.go('ai', true);
+      else if (kind === 'paper') E.ui.go('papers', true);
+      else E.ui.go('topics', true);
     });
   }
 
@@ -12383,7 +13745,7 @@ details.explanation-panel .explain {
   E.quiz = {
     startCore: startCore, startChallenge: startChallenge, startRetrain: startRetrain,
     startWrongRetrain: startWrongRetrain, startMixed: startMixed, mixedGate: mixedGate,
-    startAI: startAI, askExit: askExit, isActive: function () { return !!S; }
+    startAI: startAI, startPaper: startPaper, askExit: askExit, isActive: function () { return !!S; }
   };
 })();
 
@@ -13050,6 +14412,8 @@ details.explanation-panel .explain {
     switch (route) {
       case 'topics': E.ui.topics(); break;
       case 'topic': E.ui.topicPage(parts[1] || ''); break;
+      case 'papers': E.ui.papersPage(); break;
+      case 'paper': E.ui.paperPage(parts[1] || ''); break;
       case 'wrong': E.ui.wrongBook(); break;
       case 'weak': E.ui.weak(); break;
       case 'records': E.ui.records(); break;
@@ -13173,6 +14537,7 @@ details.explanation-panel .explain {
     }
     // 题库文本打隐形指纹：被复制、被搬运的题干会带着作者信息走
     if (E.brand.markBank) E.brand.markBank(window.__GRAMMAR_LAB__);
+    if (E.brand.markPapers) E.brand.markPapers(window.__EGL_PAPERS__);
     var app = document.getElementById('app');
     viewEl = document.createElement('div');
     viewEl.className = 'wrap';

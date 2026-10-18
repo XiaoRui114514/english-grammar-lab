@@ -232,36 +232,57 @@
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  /* ---------- Prompt 规则文本（稳定部分，动态部分在 buildPrompt 拼接） ---------- */
+  /* ---------- Prompt 规则文本（稳定部分，动态部分在 buildPrompt 拼接） ----------
+   * 口径来源：上海春考/高考与各区一模二模「语法填空 Section A」真卷，以及
+   * 浦东新区多校联考高一期中的答案详解写法（考查点 → 句意 → 依据 → 故填 → 其它形式为何不行）。
+   * 真卷事实：一篇 10 空、250-330 词、有提示词 4-6 空 + 无提示词 4-6 空、首句不设空。 */
   function shanghaiRulesText() {
     return [
-      '一、命题总则（上海命题风格 · 初高中通用）',
-      '1. 语篇必须完整、连贯、有明确主题（说明文/科普/议论文/叙事均可），语言地道自然；禁止把互不相关的句子拼成“文章”。',
-      '2. 语篇题每篇约 10 空，按上海卷实际配比：有提示词约 4 空 + 无提示词约 6 空，整套练习保持这个比例（纯单句模式不受此条限制）。',
-      '3. 难度来自语法结构与上下文逻辑，词汇限定在初高中课标范围：禁止生僻词、超纲词和陌生文化背景；禁止“时间词直给答案”的送分题，时态语态必须由上下文推断。',
-      '二、考点规则（上海专属，务必严格遵守）',
-      '4. 有提示词只有两种任务：①括号给动词——谓语（时态/语态/主谓一致，上海高频：一般过去、现在完成、过去完成、被动 be done）或非谓语（to do 目的/将来、doing 主动/伴随、done 被动/完成）；②括号给形容词/副词——只考比较级（有 than 等比较信号）或最高级（the / in,of + 范围）。',
-      '5. 禁止出全国卷式词性转换题：不给 care 让学生写 careful/carefully，不给名词派生形容词，不给形容词变副词、加否定前缀或名词后缀，也不考名词单复数变形。有提示词的答案必须还是同一个词：动词只做语法变形，形副只变比较等级（原词性不变）。',
-      '6. 无提示词只考 5 类：连词（并列连词 and/but/or/so；定语从句 who/which/that/whose/where；名词性从句 what/that/whether；状语从句 when/if/because/though 等）、介词（固定搭配与语义）、冠词（a/an/the/零冠词）、代词（it/they/that/those，含 it 形式主语/形式宾语）、情态动词与助动词（can/may/must/should；do/does/did）。每个无提示词空只能填 1 个单词。',
-      '7. 答案唯一：每个空有且只有一个正确答案，禁止“填 A 填 B 都说得通”的两可题；what 的从句必须缺成分、that 的从句必须完整，if/whether、which/where 等同理。',
-      '8. 非谓语必须真实需要判断：先看分句有没有谓语，再判断主动/被动与动作先后，禁止为覆盖 having done、to have done 等形式强行塞入。',
-      '9. 考点贴合上海高频坑：抽象地点先行词 case/situation/point/scene/occasion 后从句不缺主宾时用 where；逗号隔开的非限制性定语从句与介词后面不用 that；固定搭配注意 look forward to + doing 这类“to 是介词”的搭配。另外，however 只以 however + adj/adv + 主语 + 谓语 的让步结构自然出现，禁止硬凑。',
-      '10. 同一篇内考点要分散：相邻两空不考同一知识点，同一知识点全篇最多出现 2 次。',
-      '三、解析规则',
-      '11. 每个空都要给出学生能看懂的中文解析，讲清三点：①为什么是这个答案（语法依据+语境线索）；②为什么不是其它形式（对比易错项）；③做题时如何一步步判断（数谓语定谓语/非谓语、看从句缺不缺成分、联系上下文）。解析要具体，禁止“固定搭配”“语感如此”之类空话。',
-      '四、输出格式规则（违反会导致程序无法读取）',
-      '12. 只输出一个 JSON 对象：不要 Markdown、不要 ```json 代码块、不要任何解释、注释或前后说明，响应必须以 { 开头、以 } 结尾。',
-      '13. 正文中的每个空都用 4 个下划线 ____ 标出，____ 的个数必须与 blanks 数组长度完全一致；正文里绝对不能出现答案词，答案只写在 blanks 里。',
-      '14. 字段名与取值严格按下方 JSON 模板，不新增、不删减字段；字符串内不要出现未转义的引号，不要写尾逗号。'
+      '一、语篇规格（照上海真卷的写法，不要写成全国卷的样子）',
+      '1. 每篇 10 空、250-330 词、4-6 段，必须给英文标题（真实标题风格，不要写“语篇一”）。',
+      '2. 首句（或首段第一句）不设空，先交代话题与基调；最后一空不要落在全篇最后一个词上；两个空之间至少隔 12 个词，同一段最多 3 空。',
+      '3. 体裁轮换：说明文（科普/文化/环保/科技）、记叙文（一段个人经历 + 感悟）、议论文（观点 + 例证 + 让步）。不要整篇空洞说教。',
+      '4. 话题贴近上海卷取材：传统文化与文博、人工智能与科技、环境与城市生活、青少年成长与心理、校园与社团、体育、饮食健康、艺术与审美、跨文化交流。',
+      '5. 语言要地道、有细节：具体数字、人名地名、直接引语、对比或转折；可以用中文括注解释生词（如 resilience（韧性）），但不要靠生词制造难度。',
+      '6. 有提示词的空在正文里紧邻写成 “______ (hold)”，无提示词的空只写 “______”，不要再加别的标记。',
+      '二、空位配比与考点（上海卷 = 有提示词 + 无提示词两部分）',
+      '7. 每篇 10 空 = 有提示词 4-6 空 + 无提示词 4-6 空（成套练习按 5+5 取平均）；不要整篇都有提示词，也不要整篇都没有。',
+      '8. 有提示词只有两类任务：①括号给动词——谓语（时态/语态/主谓一致；上海高频：一般过去、过去进行、现在完成、过去完成、过去将来、被动 be done、情态 + have done）或非谓语（to do / doing / done 作主语、宾语、定语、状语、补语，含 make/get + 宾语 + 补足、介词后 doing、be likely to be done）；②括号给形容词/副词——只考比较级或最高级（more likely、the most valuable、far closer、so + adj. + that 结构里的形容词）。',
+      '9. 有提示词的答案必须是“原词 + 语法变形”，允许带助动词/be 构成时态语态（was cut / would be / has been studied / are being made），但禁止词性转换：不给名词让学生写形容词、不给形容词让学生写副词、不加否定前缀、不改名词单复数。',
+      '10. 无提示词只考下面 6 类，每空 1 个单词；固定搭配可以 2 个词，但全篇最多 2 空（so that / as long as / even though / instead of / rather than / no matter how / so far as）。',
+      '   ①从句与连词：what / that / whether / who / whom / which / whose / where / when / why / although / though / while / before / after / since / unless / so that / even if / as long as',
+      '   ②介词（含固定搭配）：an advantage over / at one’s own expense / under the guidance of / for fear of / in bad shape / come from',
+      '   ③冠词：a / an / the / 零冠词（in bad shape、at that time、take charge of）',
+      '   ④代词：it（形式主语/形式宾语）、them、those、one、someone、this / that',
+      '   ⑤情态动词与助动词：must have done、can not have done、can / could / would / should、do / does / did 表强调或否定',
+      '   ⑥连接副词：however / instead / therefore / besides（作插入语或句首状语时）',
+      '11. 上海高频坑要照顾到（全篇至少出现 4 个，并在解析里点明）：①逗号后的非限制性定语从句不用 that；②介词 + which（for which / in which）；③to 是介词的搭配（the door to doing、look forward to doing、be used to doing）；④形式宾语 it（make it a rule that…）；⑤what 从句缺成分 vs that 从句完整；⑥one of the most + adj. + 名词复数；⑦must / can not + have done 表推测；⑧Only + 状语置于句首引起部分倒装；⑨a number of / the number of 的主谓一致；⑩分数或百分数 + of + 名词作主语时的主谓一致。',
+      '12. 答案唯一：每个空只有一个标准答案。英语里确实还有自然可接受说法的（could / would、定冠词的两种合理写法等），写进 accepted 数组，并在解析里说明“也接受……”，绝不允许两个完全等价的答案同时算对。',
+      '13. 干扰项必须是学生真会犯的错：时态误配、主谓不一致、该被动却用主动、非谓语形式选错、比较级最高级混用、连接词逻辑错、介词搭配错、冠词多漏、代词数格错。禁止荒谬选项，禁止两个都能说通的选项。',
+      '14. 同一篇里考点要分散：相邻两空不考同一知识点，同一知识点全篇最多 2 次；不要连续两空都考非谓语或都考时态。',
+      '三、解析规格（照上海区教研室答案详解写，学生要能自学）',
+      '15. 每个空必须写全 6 项，缺一不可：',
+      '   sense：整句中文翻译（通顺、贴近原文语气，不要逐字硬译）',
+      '   rule：考查点（一句话，如“非限制性定语从句·关系代词作主语”“现在完成时的被动语态”）',
+      '   clue：本题关键线索——引用原句里的词或结构，并说明它为什么能定答案',
+      '   why：判断过程 2-4 句，按“先看句子成分/主谓 → 再看时间或逻辑 → 最后定形式”的顺序讲，不要只给结论',
+      '   others：其它常见错误形式逐个说明为什么不行（用 ①②③ 分条，每条讲清错在哪）',
+      '   tip：一句话记忆或考场口诀（要能背、能迁移，不要写“注意语境”这类空话）',
+      '16. 解析里必须出现原文中的具体词句（引用 3-10 个词），禁止只写“根据上下文可知”“固定搭配”而不说清是哪个线索、哪个搭配。',
+      '17. 面向初高中学生的口吻：术语第一次出现要顺带解释（如“过去分词 done 表被动或完成”），不要用“显而易见”“众所周知”。',
+      '四、输出格式（违反会导致程序读不出来）',
+      '18. 只输出一个 JSON 对象：不要 Markdown、不要 json 代码块、不要任何解释文字或注释，响应必须以 { 开头、以 } 结尾。',
+      '19. 正文中每个空都用 6 个下划线 ______ 标出，个数必须与 blanks 数组长度完全一致；正文里绝对不能出现答案词，答案只写在 blanks 里。',
+      '20. 字段名与取值严格按下方 JSON 模板，不新增、不删减字段；字符串里不要出现未转义的双引号，不要写尾逗号。'
     ].join('\n');
   }
 
   /* ---------- 专题分布动态描述 ---------- */
   function topicDistRule(topicId, catName) {
     if (!topicId || topicId === 'all') {
-      return '训练范围：全部大专题。按上海卷实际重要程度分布：谓语动词（时态/语态/主谓一致）、非谓语动词、从句连接词（定语/名词性/状语从句）、介词、冠词、代词、并列逻辑、形副比较等级；语篇按“有提示词 4 空 + 无提示词 6 空”配比，不要机械均分，也不要出词性转换题。';
+      return '训练范围：全部大专题。按上海真卷的重要程度分布（以一篇 10 空为基准）：谓语动词（时态/语态/主谓一致）2 空、非谓语动词 2 空、从句连接词（定语/名词性/状语从句）2 空、形副比较等级 1 空、介词 1 空、冠词或代词 1 空、情态动词或助动词 1 空；语篇按“有提示词 5 空 + 无提示词 5 空”配比，不要机械均分，也不要出词性转换题。';
     }
-    return '训练范围：以「' + catName + '」为大专题重点——该大专题下的不同知识点要占全部空数的一半以上，其余空用其它大专题作自然铺垫，保持句子/语篇自然连贯；同一形式不可连续重复。';
+    return '训练范围：以「' + catName + '」为大专题重点——该大专题下的不同知识点要占全部空数的一半以上，其余空用其它大专题作自然铺垫，保持语篇/句子自然连贯；同一形式不可连续重复，同一知识点全篇最多 2 次。';
   }
 
   /* ---------- buildPrompt：动态组装（§四十三） ---------- */
@@ -276,37 +297,42 @@
     var papersN = Math.max(1, Math.ceil(targetCount / 10));
     var structure = cfg.structure || 'mixed';
     var lines = [];
-    lines.push('你是一位熟悉上海地区英语考试（初高中通用）命题风格的英语教研员，请命制一套可直接给学生练习的语法填空题，并严格按 JSON 输出。');
+    lines.push('你是一位熟悉上海地区英语考试命题风格的资深教研员（上海春考/高考与各区一模二模「语法填空」的命题口径）。请命制一套可直接给学生练习的语法填空题，并严格按 JSON 输出。');
     lines.push('');
     lines.push('【本次命题配置】');
     lines.push('- 训练专题：' + catName);
     lines.push('- 题目结构：' + (structure === 'sentence' ? '纯单句题（无语篇）' : structure === 'passage' ? '纯语篇题（无单句）' : '单句题 + 语篇题'));
-    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇不超过 10 空；满 10 空的语篇按“4 空有提示词 + 6 空无提示词”）'));
+    lines.push('- 语篇数量：' + (structure === 'sentence' ? '0 篇' : papersN + ' 篇（每篇 10 空，250-330 词；按“有提示词 5 空 + 无提示词 5 空”配比）'));
     lines.push('- 总空数：' + targetCount + '（整套练习的空数之和）');
+    lines.push('');
+    lines.push('【命题蓝图：先在心里排好，再动笔写】');
+    lines.push('1. 语篇：先定体裁与话题（多篇之间不重复），再定 10 个空的考点，最后成文；不要边写边凑考点。');
+    lines.push('2. 一篇 10 空的参考排布（可微调，但两类提示词都要有）：谓语动词 2 空（时态 1、语态或主谓一致 1）＋非谓语动词 2 空（doing/done 作定语或状语 1、to do 1）＋形副比较等级 1 空＋从句连接词 2 空（定语从句 1、名词性从句或状语从句 1）＋介词 1 空＋冠词或代词 1 空＋情态动词或助动词 1 空。');
+    lines.push('3. 单句：每句只考 1 个点；句子要有信息量（≥15 词），时间或逻辑线索藏在句内（these days / by then / since / than / of all / only when 等），不要靠一个时间词直接泄题。');
     lines.push('');
     lines.push(topicDistRule(cfg.topicId, catName));
     lines.push('');
     lines.push(shanghaiRulesText());
     lines.push('');
-    lines.push('五、单句题规则（structure 含“单句”时必出）：每个单句都是独立完整的句子，句中给出一个提示词并要求学生按语境改成正确形式——动词（如 take / learn / tell / get / come / go / make / spend / leave / fail / feel / have 等）改成时态/语态/主谓一致/非谓语（to do/doing/done）形式；形容词/副词（如 hard / careful / interesting 等）改成比较级或最高级。禁止词性转换题。每句 1 个空（个别可 2 个空）；必须有明确语境线索（如 these days / at that time / by then / since / than / of all 等）且答案唯一。单句正文只写 ____ 空标，不写括号原词；原词只放 givenWord 字段。');
+    lines.push('五、单句题规则（structure 含“单句”时必出）：每个单句都是独立完整的句子，句中给出一个提示词并要求学生按语境改成正确形式——动词（take / learn / tell / get / come / go / make / spend / leave / fail / feel / hold / base / inspire 等）改成时态、语态、主谓一致或非谓语（to do / doing / done）；形容词、副词（hard / careful / interesting / valuable / likely / close 等）改成比较级或最高级。禁止词性转换题。每句 1 个空；必须有明确语境线索且答案唯一。单句正文只写 ______ 空标，不写括号原词；原词只放 givenWord 字段。');
     if (structure === 'mixed') {
       lines.push('');
-      lines.push('六、结构分配：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1-2 空），语篇 1~2 篇（每篇 5~10 空）。');
+      lines.push('六、结构分配：单句部分与语篇部分都要有；单句空数约占总空数一半（每句 1 空），语篇 1-2 篇（每篇 5-10 空）。');
     }
     lines.push('');
-    lines.push('输出前自检（在心里过一遍，不要写出来）：空数是否为 ' + targetCount + '；____ 的个数是否与 blanks 数量一致；有提示词是否只有“动词/形副比较等级”两种情况、有没有混进词性转换；无提示词是否都落在连词/介词/冠词/代词/情态·助动词 5 类内、每空是否只有 1 个单词；答案是否唯一；有没有 what/that 两可；非谓语是否真的需要判断；时态是否靠上下文；文章是否连贯；考点是否过度重复；解析是否三点齐全。');
+    lines.push('输出前自检（在心里过一遍，不要写出来）：空数是否为 ' + targetCount + '；______ 的个数是否与 blanks 数量一致；每篇语篇是否 10 空且首句不设空；有提示词是否只有“动词/形副比较等级”两种情况、有没有混进词性转换；无提示词是否都落在 6 类内、每空是否 1 个词（固定搭配是否不超过 2 空）；答案是否唯一、有没有 what/that、could/would 这类两可；非谓语是否真的需要判断；时态是否靠上下文而不是靠时间词；语篇是否连贯、是不是拼凑；考点是否过度重复；解析 6 项（sense/rule/clue/why/others/tip）是否写全、有没有引用原文线索。');
     if (cfg.qtype === 'input') {
       lines.push('');
-      lines.push('七、输出题型：填空输入题（无选项）。每个空只给 answer 与 givenWord，不输出 options 字段。');
+      lines.push('七、输出题型：填空输入题（无选项）。每个空给 answer、accepted、givenWord 与 6 项解析，不输出 options 字段。accepted 要写全学生可能写出的正确变体（缩写、两种时态写法、定冠词的两种合理写法），不能把错误形式写进去。');
     } else {
       lines.push('');
       lines.push('七、输出题型：点选选择题（n 选 1，学生只点不打字），这是本组最关键的要求：');
-      lines.push('  1. 每个空除 answer 外必须输出 options：选项个数由该考点自然能给出的合理干扰项决定，4~6 个（最少 3 个）；');
+      lines.push('  1. 每个空除 answer 外必须输出 options：选项个数按该考点自然能给出的合理干扰项决定，4-6 个（最少 3 个）；');
       lines.push('  2. options 中恰好 1 个与 answer 完全一致（忽略首尾空格与大小写），即正确项；');
       lines.push('  3. 其余选项必须是针对该考点的典型错误：错误时态/语态/非谓语形式/主谓不一致、比较级最高级混用、错误连接词、错误介词、冠词多漏误、代词误用、易混逻辑词等；');
       lines.push('  4. 干扰项禁止与正确答案或彼此重复，禁止明显荒谬，禁止出现“两个都能说通”的选项；');
       lines.push('  5. 选项文本只写答案形式本身，不加任何解释。');
-      lines.push('  空对象示例（本例 5 选 1）：{"answer":"has been built","options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时被动语态","category":"谓语动词","explanation":"主语 building 与 build 是被动关系；by 2025 说明动作到说话时已完成，所以用现在完成时的被动 has been built。has built 是主动、was built 是过去、is building 是进行，都与语境不符。判断步骤：先看主语与语态，再看时间关系，最后确定时态语态的组合形式。","difficulty":2}');
+      lines.push('  空对象示例（本例 5 选 1）：{"answer":"has been built","accepted":["has been built"],"options":["has been built","has built","was built","is building","has been building"],"givenWord":"build","isGivenWord":true,"type":"tense","knowledgePoint":"现在完成时的被动语态","category":"谓语动词","sense":"到 2025 年，这座城市已经建起了三座新图书馆。","rule":"现在完成时的被动语态","clue":"句中的 by 2025 说明动作到那时已经完成，主语 the city 与 build 是被动关系","why":"先看主语与动词的关系：图书馆是被建的，所以必须用被动；再看时间：by 2025 表示“到那时为止”，是现在完成时的典型标志；两者相加就是 has been built。","others":"①has built 是主动，图书馆不会自己建；②was built 只说明过去某时建成，与 by 2025 的“到那时已完成”不符；③is building 是主动进行，主语不对；④has been building 是主动的完成进行，语态错。","tip":"by + 将来时间 → 现在完成；主语是“被做”的对象 → 被动，两个条件同时出现就是 has been done。","difficulty":2}');
     }
     lines.push('');
     lines.push('八、输出 JSON 模板（严格按此结构，字段一个不少、一个不多）：');
@@ -314,18 +340,24 @@
     if (structure !== 'sentence') {
       schema.papers = [
         {
-          title: '语篇标题',
-          passage: '完整语篇，需要填空处用 ____（下划线×4）标记',
+          title: '语篇英文标题',
+          passage: '完整语篇（250-330 词、4-6 段），需要填空处用 ______ 标记，有提示词写成 ______ (hold)',
           blanks: [
             {
-              answer: '答案',
-              options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3', '干扰项4', '干扰项5'],
+              answer: '标准答案',
+              accepted: (cfg.qtype === 'input') ? ['标准答案', '可接受的另一种正确写法（没有就只放标准答案）'] : undefined,
+              options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3', '干扰项4'],
               givenWord: '有提示词时给原词，无提示词时为 null',
               isGivenWord: true,
-              type: 'nonfinite|tense|clause|prep|article|pronoun|conjunction|degree|other',
-              knowledgePoint: '具体知识点，如 having done',
+              type: 'tense|passive|agreement|nonfinite|degree|attributive|nominal|adverbial|prep|article|pronoun|conjunction|modal|other',
               category: '谓语动词|非谓语动词|形容词/副词比较等级|定语从句|名词性从句|状语从句|介词|冠词|代词|并列与逻辑|其他/拓展',
-              explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从句子结构和上下文判断',
+              knowledgePoint: '具体知识点，如 现在完成时的被动语态 / 介词 + which / make it a rule that',
+              sense: '整句中文翻译',
+              rule: '考查点一句话',
+              clue: '关键线索（引用原文词句并说明为什么能定答案）',
+              why: '判断过程 2-4 句（先成分/主谓，再时间或逻辑，最后定形式）',
+              others: '其它错误形式为什么不行（①②③ 分条）',
+              tip: '一句话记忆/考场口诀',
               difficulty: 1
             }
           ]
@@ -335,17 +367,23 @@
     if (structure !== 'passage') {
       schema.sentences = [
         {
-          sentence: '完整单句，需要填空处用 ____（下划线×4）标记',
+          sentence: '完整单句，需要填空处用 ______ 标记',
           blanks: [
             {
-              answer: '答案',
-              options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3', '干扰项4'],
-              givenWord: '高频动词原形，如 take / learn / tell / get',
+              answer: '标准答案',
+              accepted: (cfg.qtype === 'input') ? ['标准答案'] : undefined,
+              options: (cfg.qtype === 'input') ? undefined : ['正确答案', '干扰项1', '干扰项2', '干扰项3'],
+              givenWord: '高频动词原形或形容词/副词，如 hold / base / likely / valuable',
               isGivenWord: true,
-              type: 'tense|passive|nonfinite|agreement|degree',
-              knowledgePoint: '具体知识点，如 一般过去时 / 现在进行时 / 现在完成时被动',
+              type: 'tense|passive|agreement|nonfinite|degree',
+              knowledgePoint: '具体知识点，如 一般过去时 / 现在进行时 / 现在完成时被动 / the most valuable',
               category: '谓语动词|非谓语动词|形容词/副词比较等级',
-              explanation: '面向初高中学生的中文解析：为什么是这个答案/为什么不是别的形式/怎么从时间状语或语境判断',
+              sense: '整句中文翻译',
+              rule: '考查点一句话',
+              clue: '关键线索（引用原句词句）',
+              why: '判断过程 2-4 句',
+              others: '其它错误形式为什么不行（①② 分条）',
+              tip: '一句话记忆',
               difficulty: 1
             }
           ]
@@ -435,7 +473,7 @@
     var body = {
       model: modelId,
       messages: [
-        { role: 'system', content: '你是英语语法填空命题引擎（上海命题风格 · 初高中通用）。只输出严格合法的 json 对象：不要解释文字、不要 Markdown、不要代码围栏。' },
+        { role: 'system', content: '你是上海春考/高考语法填空 Section A 的命题引擎（初高中通用）：按真卷规格出一篇 10 空、250-330 词的语篇，有提示词与无提示词各半，解析照市教研室答案详解写（句意/考查点/线索/判断/其它形式/记忆六项）。只输出严格合法的 json 对象：不要解释文字、不要 Markdown、不要代码围栏。' },
         { role: 'user', content: promptText }
       ],
       response_format: { type: 'json_object' },
@@ -549,17 +587,35 @@
         var isG = !!b.isGivenWord || (b.givenWord != null && String(b.givenWord) !== '' && b.givenWord !== 'null');
         var ansRaw = String(b.answer).trim();
         var ansLower = ansRaw.toLowerCase();
+        // accepted：AI 给的“也接受”变体（去重、去空、不含答案本身重复）
+        var acc = [];
+        if (Array.isArray(b.accepted)) {
+          b.accepted.forEach(function (a) {
+            var s = String(a == null ? '' : a).trim();
+            if (!s) return;
+            if (s.toLowerCase() === ansLower) return;
+            if (acc.indexOf(s) < 0) acc.push(s);
+          });
+        }
         out.push({
           n: bi + 1,
           answer: ansLower,
           answerRaw: ansRaw,
+          accepted: acc,
           options: normalizeOptions(b.options, ansRaw, ansLower),
           givenWord: isG ? String(b.givenWord != null ? b.givenWord : '') : '',
           isGivenWord: isG,
           type: b.type || 'other',
           knowledgePoint: b.knowledgePoint || '',
           category: b.category || catName,
-          explanation: b.explanation || '（本题缺解析）',
+          // 解析六要素（新版）：sense / rule / clue / why / others / tip
+          sense: b.sense || '',
+          rule: b.rule || '',
+          clue: b.clue || '',
+          why: b.why || '',
+          others: b.others || '',
+          tip: b.tip || '',
+          explanation: b.explanation || b.why || '',
           difficulty: (b.difficulty >= 1 && b.difficulty <= 5) ? b.difficulty : 1
         });
       });
@@ -717,6 +773,14 @@
             stem = stem.replace('______', '______ ' + gwParen);
           }
         }
+        // 解析：优先用新版六要素（句意/考查点/线索/判断/其它形式/记忆）
+        var exWhy = '';
+        if (b.sense) exWhy += '句意：' + b.sense;
+        if (b.why) exWhy += (exWhy ? '\n' : '') + '判断：' + b.why;
+        if (!exWhy) exWhy = b.explanation || '（AI 未提供解析）';
+        var exOthers = b.others || (hasOpts
+          ? '其它选项是该考点的典型干扰项：要么时态/语态/词形不对，要么与句子成分或上下文逻辑不符。'
+          : '易错点是填成其它语法形式：把每个错形代回原句，看主谓、时态、成分哪一条先不成立。');
         var q = {
           id: 'ai_' + genId + '_' + kind.slice(0, 1) + pi + '_b' + (b.n || idx),
           source: 'ai',
@@ -733,18 +797,17 @@
           wrongType: 'CONTEXT_ERROR',
           explanation: {
             answer: b.answerRaw || b.answer,
-            keyPoint: b.knowledgePoint ? '考点：' + b.knowledgePoint : '考点：' + (b.category || '语法'),
-            clue: (kind === 'sentence'
-              ? '本题为单句题《' + ctx.title + '》，注意句中的时间状语/语境线索。'
-              : '本题来自语篇《' + p.title + '》第' + (b.n || idx) + '空；判断请结合前后文与所在句结构。'),
-            chain: (kind === 'sentence' ? '读全句找线索 → 判断该动词时态/语态/形式 → ' : '读语篇 → 看所在句结构 → ')
-              + (b.knowledgePoint || '判断该空作用') + ' → ' + (b.answerRaw || b.answer),
-            why: b.explanation || '（AI 未提供解析）',
-            whyOthers: hasOpts
-              ? '其它选项是该考点常见易错干扰项：或时态/语态/词形不对，或不符合句子成分/上下文逻辑；用排除法逐条对照主干再定。'
-              : '（AI 生成题无固定选项；易错点是填入其它语法形式，详见上方解析。）',
-            commonError: '上海卷此考点常见错误：只背规则不看语境；做题时请先找时间状语/语境线索，再定时态语态。',
-            memory: '',
+            keyPoint: b.rule ? '考查点：' + b.rule
+              : (b.knowledgePoint ? '考查点：' + b.knowledgePoint : '考查点：' + (b.category || '语法')),
+            clue: b.clue || (kind === 'sentence'
+              ? '单句题《' + ctx.title + '》：线索在句内，先找时间状语或逻辑标志，再定形式。'
+              : '语篇《' + p.title + '》第 ' + (b.n || idx) + ' 空：先看所在句缺什么成分，再联系上句逻辑。'),
+            chain: (kind === 'sentence' ? '读全句找线索 → ' : '读语篇 → 看所在句结构 → ')
+              + (b.rule || b.knowledgePoint || '判断该空作用') + ' → ' + (b.answerRaw || b.answer),
+            why: exWhy,
+            whyOthers: exOthers,
+            commonError: '',
+            memory: b.tip || '',
             cue: '',
             examMind: ''
           }
@@ -768,7 +831,8 @@
           if (wantChoice) fallbackCount++;
           q.type = 'input';
           q.hint = isG ? String(b.givenWord) : '';
-          q.accepted = [b.answerRaw || b.answer];
+          // accepted 带上 AI 声明的“也接受”变体，避免学生写出合法变体被判错
+          q.accepted = [b.answerRaw || b.answer].concat(b.accepted || []);
           q.answerText = b.answerRaw || b.answer;
           q._fallbackInput = wantChoice;
         }

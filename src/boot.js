@@ -20,6 +20,8 @@
     switch (route) {
       case 'topics': E.ui.topics(); break;
       case 'topic': E.ui.topicPage(parts[1] || ''); break;
+      case 'papers': E.ui.papersPage(); break;
+      case 'paper': E.ui.paperPage(parts[1] || ''); break;
       case 'wrong': E.ui.wrongBook(); break;
       case 'weak': E.ui.weak(); break;
       case 'records': E.ui.records(); break;
@@ -143,6 +145,7 @@
     }
     // 题库文本打隐形指纹：被复制、被搬运的题干会带着作者信息走
     if (E.brand.markBank) E.brand.markBank(window.__GRAMMAR_LAB__);
+    if (E.brand.markPapers) E.brand.markPapers(window.__EGL_PAPERS__);
     var app = document.getElementById('app');
     viewEl = document.createElement('div');
     viewEl.className = 'wrap';

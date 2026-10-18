@@ -37,7 +37,74 @@ function loadRegistry() {
       errors.push(`[执行失败] ${f}: ${e.message}`);
     }
   }
-  return { reg: (window.__GRAMMAR_LAB__ || {}), errors, loaded };
+  return { reg: (window.__GRAMMAR_LAB__ || {}), papers: (window.__EGL_PAPERS__ || []), errors, loaded };
+}
+
+/* ---------- 上海真题语篇（整篇 10 空）校验 ---------- */
+const CAT_IDS = ['verb', 'nonfinite', 'transform', 'attrib', 'nominal', 'adverbial', 'prep', 'article', 'pronoun', 'coord', 'extra'];
+function wordsOfText(s) {
+  const m = String(s).match(/[A-Za-z][A-Za-z'’-]*/g);
+  return m ? m.length : 0;
+}
+function checkPapers(papers) {
+  const issues = [];
+  if (!papers || !papers.length) { issues.push('没有载入真题语篇（window.__EGL_PAPERS__ 为空）'); return issues; }
+  const seen = new Set();
+  papers.forEach((p, idx) => {
+    const label = `语篇${p.no || idx + 1}《${p.title || ''}》`;
+    if (!p.id) issues.push(label + ': 缺 id');
+    else if (seen.has(p.id)) issues.push(label + ': id 重复 ' + p.id);
+    else seen.add(p.id);
+    if (!p.title) issues.push(label + ': 缺 title');
+    if (!p.source) issues.push(label + ': 缺 source（卷别出处）');
+    if (!p.level) issues.push(label + ': 缺 level（年级）');
+    if (!p.genre) issues.push(label + ': 缺 genre（体裁）');
+    if (!p.passage) issues.push(label + ': 缺 passage');
+    const blanks = p.blanks || [];
+    if (blanks.length !== 10) issues.push(label + `: blanks 应恰 10 个，实际 ${blanks.length}`);
+    const marks = (String(p.passage || '').match(/______/g) || []).length;
+    if (marks !== blanks.length) issues.push(label + `: 正文空位 ${marks} 个，与 blanks ${blanks.length} 个不一致`);
+    if (wordsOfText(p.passage) < 180) issues.push(label + ': 语篇词数偏少（' + wordsOfText(p.passage) + '），真卷一般 250-330 词');
+    const parts = String(p.passage || '').split(/_{4,}/);
+    for (let i = 1; i < parts.length - 1; i++) {
+      const w = wordsOfText(parts[i]);
+      if (w < 3) issues.push(label + `: 第 ${i} 与第 ${i + 1} 空只隔 ${w} 个词，太密`);
+    }
+    let givenN = 0;
+    blanks.forEach((b, i) => {
+      const q = label + ' 第' + (i + 1) + '空';
+      if (b.n != null && b.n !== i + 1) issues.push(q + ': n 应与顺序一致');
+      if (!b.answer) issues.push(q + ': 缺 answer');
+      if (!Array.isArray(b.accepted) || !b.accepted.length) issues.push(q + ': 缺 accepted');
+      else {
+        const low = b.accepted.map(x => String(x).toLowerCase());
+        if (new Set(low).size !== low.length) issues.push(q + ': accepted 含重复变体');
+        if (low.indexOf(String(b.answer).toLowerCase()) < 0) issues.push(q + ': accepted 未包含 answer');
+      }
+      if (b.isGiven) { givenN++; if (!b.given) issues.push(q + ': isGiven 为真但缺 given'); }
+      else if (b.given) issues.push(q + ': 未标 isGiven 却给了 given');
+      if (!CAT_IDS.includes(b.catId)) issues.push(q + ': catId「' + b.catId + '」不在大专题列表');
+      if (!b.wrongType) issues.push(q + ': 缺 wrongType');
+      ['point', 'sense', 'clue', 'why', 'others', 'tip'].forEach(f => {
+        if (!b[f] || !String(b[f]).trim()) issues.push(q + ': 解析缺 ' + f);
+      });
+      if (b.isGiven && b.given) {
+        const g = String(b.given).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (!new RegExp('_{4,}\\s*\\(\\s*' + g + '\\s*\\)', 'i').test(String(p.passage))) {
+          issues.push(q + ': 正文里找不到紧跟空位的提示词（' + b.given + '）');
+        }
+      }
+      const ans = String(b.answer || '').trim();
+      if (ans.length >= 6 || ans.indexOf(' ') >= 0) {
+        const re = new RegExp('\\b' + ans.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+        if (re.test(String(p.passage).replace(/\([^)]*\)/g, ' '))) {
+          issues.push(q + ': 答案「' + ans + '」出现在了正文里（答案只能写在 blanks）');
+        }
+      }
+    });
+    if (givenN < 4 || givenN > 6) issues.push(label + ': 有提示词应 4-6 空，实际 ' + givenN);
+  });
+  return issues;
 }
 
 function wordsOf(text) {
@@ -170,11 +237,11 @@ function checkChallenge(reg) {
   return issues;
 }
 
-const { reg, errors, loaded } = loadRegistry();
+const { reg, papers, errors, loaded } = loadRegistry();
 console.log('已加载数据文件:', loaded.join(', ') || '(无)');
-const allIssues = [...errors, ...checkTopic(reg), ...checkChallenge(reg)];
+const allIssues = [...errors, ...checkTopic(reg), ...checkChallenge(reg), ...checkPapers(papers)];
 if (allIssues.length === 0) {
-  console.log('\n✅ 全部校验通过（12 专题 × 12 核心题 + 6 pool + 20 挑战题）。');
+  console.log('\n✅ 全部校验通过（12 专题 × 12 核心题 + 6 pool + 20 挑战题 + ' + papers.length + ' 篇真题语篇 × 10 空）。');
 } else {
   console.log(`\n❌ 发现 ${allIssues.length} 个问题：`);
   allIssues.slice(0, 120).forEach(x => console.log(' - ' + x));

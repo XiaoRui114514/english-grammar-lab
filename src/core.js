@@ -223,6 +223,7 @@
   function catOfTopicId(topicId) {
     if (!topicId) return 'verb';
     if (topicId.indexOf('ai:') === 0) return topicId.slice(3);
+    if (topicId.indexOf('paper:') === 0) return topicId.slice(6);
     if (topicId === 'challenge') return 'verb';
     var no = String(topicId).replace(/^tense/, '');
     var cur = window.__EGL_CURRICULUM__;
@@ -470,6 +471,116 @@
     return qs.concat(extra).slice(0, count);
   }
 
+  /* ---------- 真题语篇（整篇 10 空，独立于 tenseNN 单句题库） ----------
+   * 数据由 data/bank-papers-*.js 注册到 window.__EGL_PAPERS__；
+   * 一篇 = 10 个空，每个空转换成一条 input 题（带整篇上下文 aiCtx），
+   * 复用「整篇卷面」做题流程与判分/错题/大专题统计。 */
+  function papers() { return window.__EGL_PAPERS__ || []; }
+  function availablePaperIds() {
+    var out = [];
+    papers().forEach(function (p) {
+      if (p && p.id && p.blanks && p.blanks.length) out.push(p.id);
+    });
+    return out;
+  }
+  function paperById(id) {
+    var list = papers();
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i];
+    return null;
+  }
+  // 语篇整体统计：data.topics['paper:paper01']
+  function paperStat(pid) { return topicStat('paper:' + pid); }
+  function catLabelOf(catId) {
+    var c = categoryName(catId);
+    return (c && c.name) ? c.name : (catId || '其他/拓展');
+  }
+  // 取第 n 个空所在的整句（逐空卡片/回顾用）：向前到上一个句末标点，向后到下一个
+  function sentenceAt(passage, n) {
+    var text = String(passage || '');
+    var re = /_{4,}/g, m, marks = [];
+    while ((m = re.exec(text))) marks.push({ i: m.index, len: m[0].length });
+    if (!marks.length) return '______';
+    var nth = marks[n - 1] || marks[marks.length - 1];
+    var start = 0;
+    for (var k = nth.i - 1; k >= 0; k--) {
+      var ch = text[k];
+      if (ch === '.' || ch === '!' || ch === '?' || ch === '\n') {
+        start = k + 1;
+        while (start < text.length && (text[start] === ' ' || text[start] === '\n')) start++;
+        break;
+      }
+    }
+    var end = nth.i + nth.len;
+    for (var j = nth.i + nth.len; j < text.length; j++) {
+      var c2 = text[j];
+      if (c2 === '.' || c2 === '!' || c2 === '?') { end = j + 1; break; }
+    }
+    var s = text.slice(start, end);
+    var rel = nth.i - start;
+    if (rel >= 0 && rel + nth.len <= s.length && /_{4,}/.test(s.slice(rel, rel + nth.len))) {
+      s = s.slice(0, rel) + '______' + s.slice(rel + nth.len);
+    }
+    return s.replace(/\s+/g, ' ').trim() || '______';
+  }
+  // 一篇语篇 → 每空一条题目（结构与 AI 语篇题一致，可直接进整篇卷面流程）
+  function paperToQuestions(paper) {
+    var out = [];
+    if (!paper || !paper.blanks) return out;
+    var total = paper.blanks.length;
+    paper.blanks.forEach(function (b, i) {
+      var n = b.n || (i + 1);
+      var catName = catLabelOf(b.catId);
+      var acc = [b.answer];
+      (b.accepted || []).forEach(function (a) {
+        if (String(a).toLowerCase() !== String(b.answer).toLowerCase() && acc.indexOf(a) < 0) acc.push(a);
+      });
+      var why = '';
+      if (b.sense) why += '句意：' + b.sense;
+      if (b.why) why += (why ? '\n' : '') + '判断：' + b.why;
+      out.push({
+        id: 'paper_' + paper.id + '_b' + n,
+        source: 'paper',
+        isPaper: true,
+        paperId: paper.id,
+        type: 'input',
+        difficulty: b.difficulty || 3,
+        question: sentenceAt(paper.passage, n),
+        hint: b.given || '',
+        accepted: acc,
+        answerText: b.answer,
+        tag: b.point || catName,
+        wrongType: b.wrongType || 'CONTEXT_ERROR',
+        aiMeta: { topicId: 'paper:' + (b.catId || 'extra'), catId: b.catId || 'extra', catName: catName, knowledgePoint: b.point || '', type: b.catId || '' },
+        aiCtx: { kind: 'passage', isSentence: false, paperIndex: 0, paperCount: 1, title: paper.title, passage: paper.passage, total: total, blankN: n, given: b.given || '' },
+        explanation: {
+          answer: b.answer,
+          keyPoint: '考查点：' + (b.point || catName),
+          clue: b.clue || '',
+          chain: (b.point || catName) + ' → ' + b.answer,
+          why: why || '（本篇暂无解析）',
+          whyOthers: b.others || '',
+          commonError: '',
+          memory: b.tip || '',
+          examMind: '',
+          cue: ''
+        }
+      });
+    });
+    return out;
+  }
+  // 一篇语篇的考点分布（页面上展示“10 空都考了什么”）
+  function paperBreakdown(paper) {
+    var map = {}, out = [];
+    (paper && paper.blanks || []).forEach(function (b) {
+      var cid = b.catId || 'extra';
+      if (!map[cid]) { map[cid] = { catId: cid, name: catLabelOf(cid), count: 0, points: [] }; out.push(map[cid]); }
+      map[cid].count++;
+      if (b.point) map[cid].points.push(b.point);
+    });
+    out.sort(function (a, b) { return b.count - a.count; });
+    return out;
+  }
+
   // 数据导入导出（防丢数据）
   function exportData() {
     var out = data;
@@ -536,6 +647,13 @@
   EGL.pickRetrain = pickRetrain;
   EGL.pickChallenge = pickChallenge;
   EGL.pickWrongRetrain = pickWrongRetrain;
+  EGL.papers = papers;
+  EGL.availablePaperIds = availablePaperIds;
+  EGL.paperById = paperById;
+  EGL.paperStat = paperStat;
+  EGL.paperToQuestions = paperToQuestions;
+  EGL.paperBreakdown = paperBreakdown;
+  EGL.catLabelOf = catLabelOf;
   EGL.exportData = exportData;
   EGL.importData = importData;
   EGL.resetData = resetData;

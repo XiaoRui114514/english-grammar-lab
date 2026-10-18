@@ -184,5 +184,35 @@ ok(qs[0].isAI === true && qs[0].source === 'ai' && qs[0].aiCtx && qs[0].aiCtx.pa
 ok(Array.isArray(qs[0].accepted) && qs[0].accepted.length === 1, 'accepted 就位');
 ok(qs[0].explanation && qs[0].explanation.why, '解析字段就位');
 
+// ---- 真题语篇（整篇 10 空，真卷口径） ----
+console.log('[8] 真题语篇（真卷口径）');
+const papers = sb.window.__EGL_PAPERS__ || [];
+ok(papers.length >= 6, '已载入真题语篇 ' + papers.length + ' 篇（期望 ≥6）');
+ok(EGL.availablePaperIds().length === papers.length, 'availablePaperIds 与数据一致');
+ok(!!EGL.paperById('paper01'), 'paperById 可按 id 取语篇');
+ok(EGL.catOfTopicId('paper:verb') === 'verb', 'catOfTopicId 识别 paper: 前缀（计入大专题）');
+papers.forEach(p => {
+  ok(Array.isArray(p.blanks) && p.blanks.length === 10, `${p.id}: 10 空`);
+  const givenN = p.blanks.filter(b => b.isGiven).length;
+  ok(givenN >= 4 && givenN <= 6, `${p.id}: 有提示词 ${givenN} 空（4-6）`);
+  const pqs = EGL.paperToQuestions(p);
+  ok(pqs.length === 10, `${p.id}: 转换出 10 条题`);
+  ok(pqs[0].isPaper && pqs[0].aiCtx && pqs[0].aiCtx.passage, `${p.id}: 题带语篇上下文`);
+  ok(pqs.every(q => q.type === 'input'), `${p.id}: 全部为填空输入`);
+  ok(pqs.every(q => q.explanation && q.explanation.why && q.explanation.keyPoint), `${p.id}: 解析字段齐全`);
+  ok(pqs.every(q => EGL.util.checkInputAnswer(q.accepted[0], q.accepted)), `${p.id}: 标准答案能判对`);
+  const bd = EGL.paperBreakdown(p);
+  ok(bd.length >= 3 && bd.reduce((s, c) => s + c.count, 0) === 10, `${p.id}: 考点分布合计 10 空`);
+});
+
+// ---- AI 提示词已按真卷口径 ----
+console.log('[9] AI 提示词口径');
+const promptPassage = EGL.ai.buildPrompt({ topicId: 'all', count: 10, structure: 'passage', qtype: 'input' });
+ok(promptPassage.indexOf('有提示词 5 空') >= 0, '提示词按 5+5 真卷配比');
+ok(promptPassage.indexOf('250-330 词') >= 0, '提示词含语篇词数规格');
+ok(promptPassage.indexOf('sense') >= 0 && promptPassage.indexOf('tip') >= 0, '提示词要求解析六要素');
+ok(promptPassage.indexOf('首句') >= 0 && promptPassage.indexOf('不设空') >= 0, '提示词要求首句不设空');
+ok(promptPassage.indexOf('instead of') >= 0 && promptPassage.indexOf('so that') >= 0, '提示词允许两词固定搭配');
+
 console.log(`\n结果：${pass} 通过 / ${fail} 失败`);
 process.exit(fail ? 1 : 0);

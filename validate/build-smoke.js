@@ -141,11 +141,21 @@ check('weak', () => EGL.ui.weak());
 check('records', () => EGL.ui.records());
 check('mixedGate', () => EGL.quiz.mixedGate());
 check('methodPage', () => EGL.ui.methodPage());
+check('papersPage（真题语篇列表）', () => {
+  if (!EGL.availablePaperIds().length) throw new Error('产物里没有真题语篇数据');
+  EGL.ui.papersPage();
+});
+check('paperPage（考点分布）', () => EGL.ui.paperPage(EGL.availablePaperIds()[0]));
 
 console.log('[build] 练习流程（产物级）');
 check('startCore normal', () => EGL.quiz.startCore('tense01', 'normal'));
 check('startCore blind', () => EGL.quiz.startCore('tense06', 'blind'));
 check('startChallenge', () => EGL.quiz.startChallenge('tense01'));
+check('startPaper（整篇 10 空进入卷面）', () => {
+  const pid = EGL.availablePaperIds()[0];
+  EGL.quiz.startPaper(pid);
+  if (!EGL.quiz.isActive()) throw new Error('startPaper 未激活 quiz');
+});
 
 console.log('[build] AI 界面（产物级）');
 check('aiPage 渲染', () => {

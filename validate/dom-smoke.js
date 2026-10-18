@@ -278,6 +278,50 @@ check('AI 整篇卷面：点选全部空并交卷', () => {
   if (!hasScore) throw new Error('交卷后未出现成绩页');
 });
 
+console.log('[dom] 真题语篇');
+check('papersPage 渲染', () => {
+  EGL.ui.papersPage();
+  const view = EGL.ui.app.view;
+  if (!view || !view.children.length) throw new Error('papersPage 未注入内容');
+  let hasRow = false;
+  (function walk(n) {
+    if (!n || !n.children) return;
+    if (n.dataset && n.dataset.pid) hasRow = true;
+    n.children.forEach(walk);
+  })(view);
+  if (!hasRow) throw new Error('papersPage 没有列出语篇');
+});
+check('paperPage 渲染（考点分布）', () => {
+  EGL.ui.paperPage('paper01');
+  let hasTable = false;
+  (function walk(n) {
+    if (!n || !n.children) return;
+    if (String(n._innerHTML || '').indexOf('mini-table') >= 0) hasTable = true;
+    n.children.forEach(walk);
+  })(EGL.ui.app.view);
+  if (!hasTable) throw new Error('paperPage 缺考点分布表');
+});
+check('startPaper 进入整篇卷面并渲染 10 空卡片', () => {
+  function countCards() {
+    let n = 0;
+    (function walk(node) {
+      if (!node || !node.children) return;
+      if (String(node.className || '').indexOf('sq-card') >= 0) n++;
+      node.children.forEach(walk);
+    })(EGL.ui.app.view);
+    return n;
+  }
+  // 假 DOM 的 innerHTML='' 不清空 children，所以用“新增卡片数”来断言
+  const before = countCards();
+  EGL.quiz.startPaper('paper01');
+  if (!EGL.quiz.isActive()) throw new Error('startPaper 后 quiz 未激活');
+  const added = countCards() - before;
+  if (added !== 10) throw new Error('整篇卷面应新增 10 张空卡，实际 ' + added);
+});
+check('startPaper 未知 id 不崩', () => {
+  EGL.quiz.startPaper('paper_not_exist');
+});
+
 console.log('[dom] localStorage 持久化');
 check('save/load roundtrip', () => {
   const d = EGL.data;
