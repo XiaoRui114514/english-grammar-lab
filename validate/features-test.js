@@ -143,6 +143,18 @@ ok(cqs.every(q => q.accepted && q.accepted.length && q.question.indexOf('______'
 ok(E.getCustomPaper() && E.getCustomPaper().id === cust.id, '专卷可保存/读取');
 E.clearCustomPaper();
 ok(E.getCustomPaper() === null, '专卷可删除');
+// 专卷里也可能抽到选择题：选项必须完整保留
+const choiceQ = E.bank().tense01.questions[0];
+E.addWrong({
+  topicId: 'tense01', topicTitle: '一般现在时', qid: choiceQ.id, question: choiceQ.question,
+  tag: choiceQ.tag, myAnswer: 'x', correctAnswer: choiceQ.answerText,
+  wrongType: choiceQ.wrongType, source: 'bank', snapshot: E.snapshotQuestion(choiceQ)
+});
+const cust2 = E.buildCustomPaper();
+const qs2 = E.customToQuestions(cust2);
+ok(qs2.some(q => q.type === 'choice' && q.options && q.options.length === 6), '专卷可含选择题且选项完整');
+ok(qs2.every(q => !(q.type === 'choice' && (!q.options || q.options.length < 2))), '专卷不会出现“选择题却没选项”');
+E.clearCustomPaper();
 
 console.log('[8] 每日目标 / 导出导入');
 ok(E.setGoal(20) === 20 && E.dailyGoal() === 20, '每日目标可设置');

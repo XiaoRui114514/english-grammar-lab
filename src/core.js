@@ -945,16 +945,17 @@
     if (!cust || !cust.items || !cust.items.length) return [];
     var n = cust.items.length;
     return cust.items.map(function (it, i) {
+      var isChoice = it.type === 'choice' && it.options && it.options.length >= 2;
       return {
         id: it.id,
         source: 'custom',
         isCustom: true,
-        type: it.type === 'choice' ? 'choice' : 'input',
+        type: isChoice ? 'choice' : 'input',
         question: it.question,
         hint: it.hint || '',
         accepted: (it.accepted && it.accepted.length) ? it.accepted : [it.answerText],
-        options: it.options || null,
-        answerIndex: (typeof it.answerIndex === 'number') ? it.answerIndex : 0,
+        options: isChoice ? it.options : null,
+        answerIndex: isChoice ? ((typeof it.answerIndex === 'number') ? it.answerIndex : 0) : 0,
         answerText: it.answerText,
         tag: it.tag || it.knowledgePoint || '',
         wrongType: it.wrongType || 'CONTEXT_ERROR',

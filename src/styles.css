@@ -1006,6 +1006,7 @@ details.explanation-panel .explain {
 
 /* ============ 字号档位（设置页：标准 / 大 / 特大） ============ */
 html[data-font="lg"] .qtext { font-size: 19.5px; }
+html[data-font="lg"] .sq-stem { font-size: 16.5px !important; }
 html[data-font="lg"] .passage-body { font-size: 17px; }
 html[data-font="lg"] .kblock p, html[data-font="lg"] .kblock li { font-size: 15px; }
 html[data-font="lg"] .ex-mod, html[data-font="lg"] .ex-mod .chain { font-size: 15px; }
@@ -1014,6 +1015,7 @@ html[data-font="lg"] .mini-table { font-size: 14.5px; }
 html[data-font="lg"] .ledger-row .v { font-size: 20.5px; }
 html[data-font="lg"] .answer-input input { font-size: 19px; }
 html[data-font="xl"] .qtext { font-size: 21px; }
+html[data-font="xl"] .sq-stem { font-size: 18px !important; }
 html[data-font="xl"] .passage-body { font-size: 18.5px; }
 html[data-font="xl"] .kblock p, html[data-font="xl"] .kblock li { font-size: 16px; }
 html[data-font="xl"] .ex-mod, html[data-font="xl"] .ex-mod .chain { font-size: 16px; }
