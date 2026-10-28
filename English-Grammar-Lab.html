@@ -14931,7 +14931,7 @@ html[data-font="xl"] .answer-input input { font-size: 20px; }
     // 选择题选中即算已答；输入题要看是否已经打字（S._typed），否则计数永远是 0
     var answered = 0;
     S.questions.forEach(function (q, i) {
-      if (S.answers[i]) { answered++; return; }
+      if (q.type === 'choice' && S.answers[i]) { answered++; return; }
       if (q.type !== 'choice' && S._typed && String(S._typed[i] || '').trim()) answered++;
     });
     var elC = $('#sheetCount', appView());
@@ -14941,15 +14941,18 @@ html[data-font="xl"] .answer-input input { font-size: 20px; }
       ? '已全部作答（' + answered + '/' + S.questions.length + '），交卷看成绩'
       : '已作答 ' + answered + '/' + S.questions.length + '，交卷';
   }
-  function submitSheet(force) {
-    if (!S) return;
-    // 兜底填空输入：把已输入的文本补成条目
+  function syncSheetAnswers() {
+    // 未答完交卷后用户仍可修改或清空输入，每次都以当前文本重新判定。
     S.questions.forEach(function (q, i) {
-      if (!S.answers[i] && q.type !== 'choice' && S._typed && S._typed[i] && String(S._typed[i]).trim()) {
-        var t = String(S._typed[i]).trim();
-        S.answers[i] = { qid: q.id, q: q, userText: t, ok: E.util.checkInputAnswer(t, q.accepted), answerIndex: undefined };
-      }
+      if (q.type === 'choice') return;
+      var t = String((S._typed && S._typed[i]) || '').trim();
+      if (t) S.answers[i] = { qid: q.id, q: q, userText: t, ok: E.util.checkInputAnswer(t, q.accepted), answerIndex: undefined };
+      else delete S.answers[i];
     });
+  }
+  function submitSheet(force) {
+    if (!S || S._finished) return;
+    syncSheetAnswers();
     var missingIdx = -1;
     S.questions.forEach(function (q, i) {
       if (!S.answers[i] && missingIdx < 0) missingIdx = i;
@@ -15318,6 +15321,7 @@ html[data-font="xl"] .answer-input input { font-size: 20px; }
 
   /* ---------- 完成一轮 ---------- */
   function finish() {
+    if (!S || S._finished) return;
     clearTimer();
     S._finished = true;
     var seconds = Math.round((E.util.nowTs() - S.startTs) / 1000);
@@ -15694,21 +15698,18 @@ html[data-font="xl"] .answer-input input { font-size: 20px; }
 
   /* ---------- 退出 ---------- */
   function askExit() {
-    if (!S) return;
+    if (!S || S._finished) return;
+    var session = S;
     var kind = S.kind;
     var wasTimed = !!S.limitSec;
     // 先停表再弹确认框：避免用户还在犹豫时倒计时到点自动交卷（会重复落库）
     clearTimer();
     U.confirmBox('退出本轮练习', '已答题目会计入统计，但整轮成绩不计入专题。确定退出？', '退出', true).then(function (ok) {
+      if (S !== session || session._finished) return;
       if (!ok) { if (wasTimed && S && !S._finished) startTimer(); return; }
       // 整篇卷面模式（AI 题 / 真题语篇 / 专卷）：退出前把已作答的空落库（与交卷同一逻辑）
       if (isSheetKind(kind) && S._sheetMode && S.questions) {
-        S.questions.forEach(function (q, i) {
-          if (!S.answers[i] && q.type !== 'choice' && S._typed && S._typed[i] && String(S._typed[i]).trim()) {
-            var t = String(S._typed[i]).trim();
-            S.answers[i] = { qid: q.id, q: q, userText: t, ok: E.util.checkInputAnswer(t, q.accepted), answerIndex: undefined };
-          }
-        });
+        syncSheetAnswers();
         S.questions.forEach(function (q, i) {
           if (S.answers[i]) commitStats(q, S.answers[i], S.answers[i].sec || 0);
         });

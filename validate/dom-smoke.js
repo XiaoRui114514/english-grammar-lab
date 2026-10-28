@@ -31,6 +31,7 @@ class FakeEl {
     this.dataset = {};
     this.attributes = {};
     this.listeners = {};
+    this.queriedNodes = [];
     this.value = '';
     this.disabled = false;
     this.open = false;
@@ -53,7 +54,9 @@ class FakeEl {
   click() { const ls = this.listeners.click || []; ls.forEach(f => f.call(this, {})); }
   querySelector(sel) {
     // 桩不解析 innerHTML，因此查询时返回一个"合成匹配"以维持事件绑定流程
-    return synth(sel);
+    const n = synth(sel);
+    this.queriedNodes.push(n);
+    return n;
   }
   querySelectorAll(sel) {
     const n = synth(sel);
@@ -415,6 +418,95 @@ check('startReview / startCustom 不崩', () => {
 check('限时模拟考：startPaper(timed)', () => {
   EGL.quiz.startPaper('paper01', { timed: true });
   if (!EGL.quiz.isActive()) throw new Error('限时卷面未激活');
+});
+
+console.log('[dom] 整篇交卷回归');
+function sheetFixture() {
+  EGL.resetData();
+  const qs = EGL.paperToQuestions(EGL.paperById('paper01')).slice(0, 2);
+  const start = document._els.length;
+  EGL.quiz.startAI(qs, { title: '交卷回归' });
+  const created = document._els.slice(start);
+  const inputs = created.filter(n => n.className === 'answer-input')
+    .map(n => n.queriedNodes.find(x => x.tagName === 'INPUT'));
+  const submit = created.find(n => n.id === 'sheetSubmit');
+  if (inputs.length !== 2 || inputs.some(n => !n) || !submit) throw new Error('未找到卷面控件');
+  function type(i, value) {
+    inputs[i].value = value;
+    (inputs[i].listeners.input || []).forEach(fn => fn({}));
+  }
+  return { qs, submit, type };
+}
+check('未答完交卷后修改答案，按最终输入判分', () => {
+  const f = sheetFixture();
+  f.type(0, 'wrong answer');
+  f.submit.click();
+  if (EGL.data.global.answered !== 0) throw new Error('未答完时不应落库');
+  f.type(0, f.qs[0].accepted[0]);
+  f.type(1, f.qs[1].accepted[0]);
+  f.submit.click();
+  if (EGL.data.global.correct !== 2) throw new Error('仍使用第一次交卷时缓存的旧答案');
+});
+check('未答完交卷后清空答案，仍须补答', () => {
+  const f = sheetFixture();
+  f.type(0, f.qs[0].accepted[0]);
+  f.submit.click();
+  f.type(0, '');
+  const metaNodes = EGL.ui.app.view.queriedNodes;
+  if (metaNodes[metaNodes.length - 2].textContent !== '0 / 2') throw new Error('计数仍把已清空的旧答案当成已答');
+  f.type(1, f.qs[1].accepted[0]);
+  f.submit.click();
+  if (EGL.data.global.answered !== 0 || EGL.data.sessions.length) throw new Error('清空的空位被旧答案当成已作答');
+});
+check('重复交卷事件不会重复累计成绩和错题', () => {
+  const f = sheetFixture();
+  f.type(0, 'wrong answer');
+  f.type(1, f.qs[1].accepted[0]);
+  f.submit.click();
+  f.submit.click();
+  if (EGL.data.global.answered !== 2 || EGL.data.sessions.length !== 1) throw new Error('重复交卷导致二次累计');
+  if (EGL.data.wrongBook[0].times !== 1) throw new Error('重复交卷导致错误次数二次累计');
+});
+check('未答完交卷后修改或清空答案，退出时按当前输入落库', () => {
+  const confirmBox = EGL.u.confirmBox;
+  EGL.u.confirmBox = () => ({ then: fn => fn(true) });
+  try {
+    const f = sheetFixture();
+    f.type(0, 'wrong answer');
+    f.submit.click();
+    f.type(0, f.qs[0].accepted[0]);
+    EGL.quiz.askExit();
+    if (EGL.data.global.answered !== 1 || EGL.data.global.correct !== 1) throw new Error('退出时仍使用旧答案');
+    const f2 = sheetFixture();
+    f2.type(0, f2.qs[0].accepted[0]);
+    f2.submit.click();
+    f2.type(0, '');
+    EGL.quiz.askExit();
+    if (EGL.data.global.answered !== 0) throw new Error('退出时仍统计已清空答案');
+  } finally {
+    EGL.u.confirmBox = confirmBox;
+  }
+});
+check('过期或重复的退出确认不会再次结算或关闭新练习', () => {
+  const confirmBox = EGL.u.confirmBox;
+  const pending = [];
+  EGL.u.confirmBox = () => ({ then: fn => pending.push(fn) });
+  try {
+    let f = sheetFixture();
+    f.type(0, f.qs[0].accepted[0]);
+    EGL.quiz.askExit();
+    EGL.quiz.askExit();
+    pending.shift()(true);
+    pending.shift()(true);
+    if (EGL.data.global.answered !== 1) throw new Error('重复退出导致二次统计');
+    f = sheetFixture();
+    EGL.quiz.askExit();
+    sheetFixture();
+    pending.shift()(true);
+    if (!EGL.ui.quizActive || EGL.data.global.answered) throw new Error('旧确认影响了新练习');
+  } finally {
+    EGL.u.confirmBox = confirmBox;
+  }
 });
 
 console.log('[dom] localStorage 持久化');
