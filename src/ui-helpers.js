@@ -240,12 +240,61 @@
     setTimeout(function () { t.remove(); }, 2600);
   }
 
-  /* ---------- 右上角"已自动保存"提示（节流：短时间内多次保存只更新一次） ---------- */
+  // 直接从当前内存导出，不依赖存储写入成功；保存失败时也能找回本次修改。
+  function exportBackup() {
+    try {
+      var blob = new Blob([window.EGL.exportData()], { type: 'application/json' });
+      var a = document.createElement('a');
+      var url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = 'EGL-备份-' + window.EGL.util.todayStr() + '.json';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      toast('已导出备份', 'ok');
+      return true;
+    } catch (e) {
+      toast('导出失败，请保留此页面并重试', 'bad');
+      return false;
+    }
+  }
+
+  /* ---------- 保存结果：成功短暂提示，失败保留导出 / 重试入口 ---------- */
   var _saveTimer = null;
   var _saveEl = null;
+  var _saveErrorEl = null;
+  var _saveFailed = false;
   function raf(fn) { if (typeof requestAnimationFrame === 'function') requestAnimationFrame(fn); else fn(); }
-  function savedNotice() {
+  function savedNotice(saved) {
     if (!document || !document.body) return;
+    if (saved === false) {
+      _saveFailed = true;
+      if (_saveTimer) clearTimeout(_saveTimer);
+      if (_saveEl) _saveEl.style.opacity = '0';
+      if (!_saveErrorEl) {
+        _saveErrorEl = el('div', 'fb bad');
+        _saveErrorEl.id = 'saveFailureNotice';
+        _saveErrorEl.setAttribute('role', 'alert');
+        _saveErrorEl.style.cssText = 'position:fixed;top:12px;right:14px;z-index:120;max-width:min(360px,calc(100vw - 28px));box-shadow:var(--shadow)';
+        _saveErrorEl.appendChild(el('div', '', '<b>保存失败</b><br>本次修改尚未保存。请先导出备份，释放浏览器存储空间后重试；暂时保留此页面。'));
+        var exp = el('button', 'btn ghost sm');
+        exp.textContent = '导出当前数据';
+        exp.type = 'button';
+        exp.addEventListener('click', exportBackup);
+        var retry = el('button', 'btn ghost sm');
+        retry.textContent = '重试保存';
+        retry.type = 'button';
+        retry.addEventListener('click', function () { window.EGL.save(); });
+        _saveErrorEl.appendChild(exp);
+        _saveErrorEl.appendChild(retry);
+        document.body.appendChild(_saveErrorEl);
+        toast('保存失败，请导出当前数据或重试保存', 'bad');
+      }
+      return;
+    }
+    // AI 题池等调用不带结果，不能覆盖核心学习数据尚未保存的失败状态。
+    if (_saveFailed && saved !== true) return;
+    _saveFailed = false;
+    if (_saveErrorEl) { _saveErrorEl.remove(); _saveErrorEl = null; }
     if (!_saveEl) {
       _saveEl = el('div', 'save-notice',
         '<span style="display:inline-flex;align-items:center;gap:6px"><b>已自动保存</b></span>');
@@ -255,6 +304,7 @@
     }
     if (_saveTimer) clearTimeout(_saveTimer);
     raf(function () {
+      if (_saveFailed) return;
       _saveEl.style.opacity = '1';
       _saveEl.style.transform = 'translateY(0)';
     });
@@ -271,6 +321,6 @@
     explanationHTML: explanationHTML, chainHTML: chainHTML, knowledgeCardHTML: knowledgeCardHTML,
     passagePanelHTML: passagePanelHTML,
     progressBar: progressBar, modal: modal, confirmBox: confirmBox, toast: toast,
-    savedNotice: savedNotice
+    savedNotice: savedNotice, exportBackup: exportBackup
   };
 })();

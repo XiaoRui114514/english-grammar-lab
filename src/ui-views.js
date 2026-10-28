@@ -1095,16 +1095,10 @@
     v.appendChild(mg);
 
     $('[data-exp]', mg).addEventListener('click', function () {
-      var blob = new Blob([E.exportData()], { type: 'application/json' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'EGL-备份-' + E.util.todayStr() + '.json';
-      a.click();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      if (!U.exportBackup()) return;
       var p = prefsGet();
       p.lastBackupAt = Date.now();
       prefsSet(p);
-      U.toast('已导出备份', 'ok');
       records();
     });
     $('[data-imp]', mg).addEventListener('click', function () {

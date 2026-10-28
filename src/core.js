@@ -182,12 +182,14 @@
   }
   var data = loadData();
   var saveListener = null;
-  // 任意一次自动保存后回调（右上角"已保存"提示由 UI 注册；无 UI 环境不注册即可）
+  // 回调和返回值均报告是否成功，失败时保留内存数据，供用户导出或重试。
   function save() {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch (e) {}
+    var saved = false;
+    try { localStorage.setItem(LS_KEY, JSON.stringify(data)); saved = true; } catch (e) {}
     if (typeof saveListener === 'function') {
-      try { saveListener(); } catch (e2) {}
+      try { saveListener(saved); } catch (e2) {}
     }
+    return saved;
   }
   function setSaveListener(fn) { saveListener = fn; }
 

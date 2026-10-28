@@ -519,5 +519,50 @@ check('save/load roundtrip', () => {
   const parsed = JSON.parse(raw);
   if (parsed.global.answered !== 7) throw new Error('roundtrip 不一致');
 });
+check('存储空间不足时显示失败，保留数据并支持导出和重试', () => {
+  const setItem = sb.localStorage.setItem;
+  const Blob = sb.Blob;
+  const states = [];
+  let backup = null;
+  EGL.setSaveListener(saved => { states.push(saved); EGL.u.savedNotice(saved); });
+  const previous = sb.localStorage.getItem('EGL_LAB_DATA_v1');
+  const current = EGL.data;
+  EGL.data.global.answered = 8;
+  sb.localStorage.setItem = () => {
+    const err = new Error('Storage quota exceeded');
+    err.name = 'QuotaExceededError';
+    throw err;
+  };
+  try {
+    if (EGL.save() !== false || states[states.length - 1] !== false) throw new Error('未暴露保存失败');
+    if (sb.localStorage.getItem('EGL_LAB_DATA_v1') !== previous) throw new Error('保存失败破坏了旧数据');
+    if (EGL.data !== current || EGL.data.global.answered !== 8) throw new Error('保存失败重置了内存数据');
+    const notice = document.body.children.find(n => n.id === 'saveFailureNotice');
+    if (!notice) throw new Error('没有持久显示保存失败');
+    const savedNotice = document.body.children.find(n => n.className === 'save-notice');
+    if (savedNotice && savedNotice.style.opacity !== '0') throw new Error('失败时仍显示已保存');
+    EGL.u.savedNotice();
+    if (!document.body.children.includes(notice) || (savedNotice && savedNotice.style.opacity !== '0')) throw new Error('无结果通知覆盖了学习数据保存失败');
+    EGL.save();
+    if (document.body.children.filter(n => n.id === 'saveFailureNotice').length !== 1) throw new Error('失败提示重复堆积');
+    sb.Blob = function (parts) { backup = parts.join(''); };
+    const exp = notice.children.find(n => n.tagName === 'BUTTON' && n.textContent === '导出当前数据');
+    if (!exp) throw new Error('没有导出恢复入口');
+    exp.click();
+    if (!backup || JSON.parse(backup).global.answered !== 8) throw new Error('备份未包含尚未保存的内存数据');
+    if (!document.body.children.includes(notice)) throw new Error('导出后错误消失，误导为已保存');
+    sb.localStorage.setItem = setItem;
+    const retry = notice.children.find(n => n.tagName === 'BUTTON' && n.textContent === '重试保存');
+    if (!retry) throw new Error('没有重试入口');
+    retry.click();
+    if (states[states.length - 1] !== true) throw new Error('恢复后未通知保存成功');
+    if (JSON.parse(sb.localStorage.getItem('EGL_LAB_DATA_v1')).global.answered !== 8) throw new Error('重试没有保存内存数据');
+    if (document.body.children.includes(notice)) throw new Error('成功后未清除失败提示');
+  } finally {
+    sb.localStorage.setItem = setItem;
+    sb.Blob = Blob;
+    EGL.setSaveListener(EGL.u.savedNotice);
+  }
+});
 
 process.exit(process.exitCode || 0);
