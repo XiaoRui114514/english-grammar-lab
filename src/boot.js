@@ -34,6 +34,7 @@
       case 'method': (E.ui && E.ui.methodPage) ? E.ui.methodPage() : E.ui.home(); break;
       default: E.ui.home(); break;
     }
+    if (E.quiz && E.quiz.showResumeBanner) E.quiz.showResumeBanner();
     window.scrollTo(0, 0);
   }
 

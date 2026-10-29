@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'codex/features-*']
   pull_request:
 
 permissions:
@@ -30,3 +30,8 @@ jobs:
 
       - name: 产物完整性检查
         run: npm run test:build
+
+      - name: 安装浏览器交互测试依赖
+        run: npm ci && npx playwright install --with-deps chromium
+      - name: 验证刷新恢复与完整备份
+        run: npm run test:interaction

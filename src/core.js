@@ -83,6 +83,11 @@
   function stripApostrophes(s) { return s.replace(/'/g, ''); }
 
   function checkInputAnswer(userInput, accepted) {
+    var strict = false;
+    try { strict = localStorage.getItem('EGL_STRICT_ANSWER_v1') === 'true'; } catch(e) {}
+    if (strict) return (accepted || []).some(function(answer) {
+      return String(answer).trim().toLowerCase().replace(/’/g,"'") === String(userInput).trim().toLowerCase().replace(/’/g,"'");
+    });
     var u = normalizeAnswer(userInput);
     if (!u) return false;
     var plainU = stripApostrophes(u);
@@ -1034,7 +1039,7 @@
 
   // 数据导入导出（防丢数据）
   function exportData() {
-    var out = data;
+    var out = deepClone(data);
     try {
       var b = window.EGL_BRAND || (window.EGL && window.EGL.brand);
       var st = (b && b.stamp) ? b.stamp() : null;
@@ -1046,6 +1051,18 @@
           + ' 抖音 ' + st.douyin + ' · 小红书 ' + st.xhs;
       }
     } catch (e) { out = data; }
+    var storage = {};
+    ['EGL_AI_POOL_v1','EGL_UI_PREFS_v1','EGL_AI_CFG_v1','EGL_AI_EXPLAIN_v1','EGL_QUIZ_DRAFT_v1','EGL_STRICT_ANSWER_v1'].forEach(function(key) {
+      try { var value=localStorage.getItem(key); if (value !== null) {
+        if (key === 'EGL_AI_CFG_v1') {
+          var cfg=JSON.parse(value), safe={};
+          ['topicId','count','customCount','qtype','structure','focus','providerId','baseUrl','modelId'].forEach(function(field){ if(cfg[field]!==undefined)safe[field]=cfg[field]; });
+          value=JSON.stringify(safe);
+        }
+        storage[key]=value;
+      } } catch(e) {}
+    });
+    out._applicationBackup={version:1,storage:storage};
     return JSON.stringify(out, null, 1);
   }
   /* 用新数据替换当前数据对象（保持 EGL.data 这个外部引用仍然有效） */
@@ -1059,14 +1076,33 @@
     try {
       var d = JSON.parse(json);
       if (!d || !d.global) return false;
+      var extra=d._applicationBackup; delete d._applicationBackup;
+      if (extra && (extra.version !== 1 || !extra.storage || typeof extra.storage !== 'object' || Array.isArray(extra.storage))) return false;
       delete d._brand; delete d._notice;
       var next = migrateData(d);
       if (!next) return false;
+      var previous={};
+      try {
+        if (extra) Object.keys(extra.storage).forEach(function(key) {
+          if (['EGL_AI_POOL_v1','EGL_UI_PREFS_v1','EGL_AI_CFG_v1','EGL_AI_EXPLAIN_v1','EGL_QUIZ_DRAFT_v1','EGL_STRICT_ANSWER_v1'].indexOf(key)<0 || typeof extra.storage[key] !== 'string') throw new Error('Invalid backup field');
+          JSON.parse(extra.storage[key]);
+          previous[key]=localStorage.getItem(key);
+          localStorage.setItem(key,extra.storage[key]);
+        });
+      } catch(e) {
+        Object.keys(previous).forEach(function(key){ try { if(previous[key]===null) localStorage.removeItem(key); else localStorage.setItem(key,previous[key]); }catch(ignore){} });
+        return false;
+      }
       replaceData(next);
+      if (window.EGL.quiz && window.EGL.quiz.resetActiveSession) window.EGL.quiz.resetActiveSession();
       return true;
     } catch (e) { return false; }
   }
-  function resetData() { replaceData(emptyData()); }
+  function resetData() {
+    if (window.EGL.quiz && window.EGL.quiz.resetActiveSession) window.EGL.quiz.resetActiveSession();
+    try { localStorage.removeItem('EGL_QUIZ_DRAFT_v1'); } catch(e) {}
+    replaceData(emptyData());
+  }
 
   /* ---------- 对外 API ---------- */
   EGL.DATA_VERSION = DATA_VERSION;

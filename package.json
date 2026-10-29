@@ -21,6 +21,10 @@
     "test": "node validate/check.js && node validate/smoke.js && node validate/flow-test.js && node validate/features-test.js && node validate/dom-smoke.js && node validate/ai-flow-test.js && node validate/build-smoke.js",
     "test:build": "node validate/verify-build.js",
     "test:browser": "node validate/browser-smoke.js",
-    "probe": "node validate/probe.js"
+    "probe": "node validate/probe.js",
+    "test:interaction": "node --test validate/interaction.test.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
   }
 }

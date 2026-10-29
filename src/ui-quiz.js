@@ -8,6 +8,41 @@
 
   var LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
   var S = null; // session
+  var DRAFT_KEY = 'EGL_QUIZ_DRAFT_v1';
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch(e) {} }
+  function saveDraft() {
+    if (!S || S._finished) return;
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({version:1, savedAt:Date.now(), session:S}, function(k,v) {
+      return k === '_timerId' || k === '_blankStart' ? undefined : v;
+    })); } catch(e) { if (!S._draftWarned) { S._draftWarned=true; U.toast('练习草稿未能保存，请保留页面', 'bad'); } }
+  }
+  function readDraft() {
+    try {
+      var d = JSON.parse(localStorage.getItem(DRAFT_KEY));
+      var v = d && d.session;
+      if (d.version !== 1 || !v || v._finished || !Array.isArray(v.questions) || !v.questions.length || v.questions.length > 500 || !Array.isArray(v.answers) || !Number.isInteger(v.idx) || v.idx < 0 || v.idx >= v.questions.length || !Number.isFinite(v.startTs)) return null;
+      return d;
+    } catch(e) { return null; }
+  }
+  function resumeDraft() {
+    var d = readDraft(); if (!d) return false;
+    clearTimer(); S=d.session;
+    if (!S.limitSec && Number.isFinite(d.savedAt)) S.startTs += Math.max(0,Date.now()-d.savedAt);
+    S._timerId=0; S._draftWarned=false;
+    E.ui.quizActive=true; renderPractice();
+    if (S.limitSec) { if (Date.now()-S.startTs >= S.limitSec*1000) autoSubmit(); else startTimer(); }
+    return true;
+  }
+  function showResumeBanner() {
+    if (E.ui.quizActive || !readDraft()) return;
+    var v=appView(); if (!v) return;
+    var box=el('div','glass'); box.style.padding='14px';
+    box.appendChild(el('p','','有未完成练习。限时练习离开页面后仍继续计时。'));
+    var resume=el('button','btn primary'); resume.textContent='继续上次练习'; resume.addEventListener('click',resumeDraft);
+    var discard=el('button','btn ghost'); discard.textContent='丢弃草稿'; discard.addEventListener('click',function(){clearDraft(); box.remove();});
+    box.appendChild(resume); box.appendChild(discard); v.appendChild(box);
+  }
+  if (window.addEventListener) window.addEventListener('pagehide',saveDraft);
   var LIMIT_SEC = 600;   // 限时模拟考：10 分钟
 
   function appView() { return E.ui && E.ui.app ? E.ui.app.view : null; }
@@ -269,6 +304,7 @@
 
   /* ---------- 练习主屏 ---------- */
   function renderPractice() {
+    saveDraft();
     var v = appView();
     if (!v || !S) return;
     // AI 语篇题 / 真题语篇 / 我的专卷：整篇一次展示、全部空一起作答（不要一空一空翻）
@@ -360,7 +396,7 @@
     var v = appView();
     if (!v || !S) return;
     S._sheetMode = true;
-    S._typed = [];
+    S._typed = S._typed || [];
     S._blankStart = {};
     v.innerHTML = '';
 
@@ -394,9 +430,11 @@
     });
 
     function bindSheetInput(inp, qidx) {
+      inp.value = S._typed[qidx] || "";
       inp.addEventListener('input', function () {
         if (!S._blankStart[qidx]) S._blankStart[qidx] = E.util.nowTs();
         S._typed[qidx] = inp.value;
+        saveDraft();
         updateSheetMeta();
       });
       inp.addEventListener('keydown', function (e) {
@@ -564,6 +602,7 @@
         x.classList.toggle('sel', Number(x.dataset.idx) === oi);
       });
     }
+    saveDraft();
     updateSheetMeta();
   }
   function updateSheetMeta() {
@@ -689,6 +728,9 @@
       + (hasHint ? '' : ' style="color:var(--warn)"')
       + ' placeholder="' + (hasHint ? '输入变形后的答案，如 was working' : '直接填介/连/冠词等') + '">';
     var inp = $('input', ai);
+    S._singleTyped = S._singleTyped || {};
+    inp.value = S._singleTyped[S.idx] || '';
+    inp.addEventListener('input',function(){ S._singleTyped[S.idx]=inp.value; saveDraft(); });
     row.appendChild(ai);
     if (hasHint) {
       // 提示词字卡：置于输入框右侧
@@ -747,6 +789,7 @@
     var sec = (S._qStart && (E.util.nowTs() - S._qStart) > 400) ? Math.round((E.util.nowTs() - S._qStart) / 1000) : 0;
     var entry = { qid: q.id, q: q, userText: userText, ok: ok, answerIndex: answerIndex, sec: sec };
     S.answers[S.idx] = entry;
+    saveDraft();
     commitStats(q, entry, sec);
 
     // 复习题：给一句“下次什么时候再见”，比单纯对错更有用
@@ -889,6 +932,12 @@
   /* 已答题的回显（返回/重绘时用） */
   function renderAnswered(qbox, q) {
     var entry = S.answers[S.idx];
+    if (entry && !entry.ok && entry.userText && q.accepted) {
+      try {
+        if (localStorage.getItem('EGL_STRICT_ANSWER_v1')==='true') qbox.appendChild(el('p','fb bad','严格拼写：请对照答案检查词形、空格与撇号。你的输入：'+esc(entry.userText)+'；可接受答案：'+esc(q.accepted.join(' / '))));
+      } catch(e) {}
+    }
+
     if (!entry) return;
     if (q.type === 'choice') markOptionsRightWrong(qbox, q, entry.answerIndex, entry.ok);
     var fb = el('div', 'fb ' + (entry.ok ? 'ok' : 'bad'));
@@ -964,6 +1013,7 @@
     if (!S || S._finished) return;
     clearTimer();
     S._finished = true;
+    clearDraft();
     var seconds = Math.round((E.util.nowTs() - S.startTs) / 1000);
     var correct = 0, total = S.questions.length, unanswered = 0;
     S.answers.forEach(function (a) {
@@ -1355,6 +1405,7 @@
         });
       }
       clearTimer();
+      clearDraft();
       S = null;
       E.ui.quizActive = false;
       if (kind === 'ai') E.ui.go('ai', true);
@@ -1391,6 +1442,8 @@
   }
 
   E.quiz = {
+    resetActiveSession: function(){clearTimer();S=null;E.ui.quizActive=false;},
+    resumeDraft: resumeDraft, showResumeBanner: showResumeBanner, readDraft: readDraft,
     startCore: startCore, startChallenge: startChallenge, startRetrain: startRetrain,
     startWrongRetrain: startWrongRetrain, startMixed: startMixed, mixedGate: mixedGate,
     startAI: startAI, startPaper: startPaper, askExit: askExit,

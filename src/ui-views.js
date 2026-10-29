@@ -1109,8 +1109,11 @@
         if (!f) return;
         var rd = new FileReader();
         rd.onload = function () {
-          if (E.importData(rd.result)) { U.toast('导入成功', 'ok'); E.ui.render(); }
-          else U.toast('导入失败：文件格式不对', 'bad');
+          U.confirmBox('导入完整备份', '将覆盖学习记录、错题和成绩；同时恢复备份中包含的 AI 题池、偏好、配置和未完成草稿，不导入 API Key。确定继续？', '导入', true).then(function(ok){
+            if (!ok) return;
+            if (E.importData(rd.result)) { U.toast('导入成功', 'ok'); E.ui.render(); }
+            else U.toast('导入失败：格式不兼容或存储空间不足', 'bad');
+          });
         };
         rd.readAsText(f);
       };
@@ -1500,6 +1503,12 @@
 
     // —— 学习 ——
     v.appendChild(U.el('div', 'sec-title', '学习'));
+    var strictRow=U.el('div','form-row');
+    var strictLabel=U.el('label','','严格拼写（检查空格和撇号；仅影响之后作答）');
+    var strictInput=U.el('input'); strictInput.type='checkbox';
+    try { strictInput.checked=localStorage.getItem('EGL_STRICT_ANSWER_v1')==='true'; }catch(e){}
+    strictInput.addEventListener('change',function(){ try { localStorage.setItem('EGL_STRICT_ANSWER_v1',String(strictInput.checked)); U.toast('判分模式已更新'); }catch(e){ U.toast('设置未能保存','bad'); } });
+    strictLabel.appendChild(strictInput); strictRow.appendChild(strictLabel); v.appendChild(strictRow);
     var goalNow = E.dailyGoal();
     var study = U.el('div', 'glass', '');
     study.style.padding = '14px 16px';
