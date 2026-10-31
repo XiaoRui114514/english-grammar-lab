@@ -156,12 +156,12 @@
   function clearKey(providerId) { saveKey('', false, providerId); }
 
   function cacheSession(obj) {
-    try { sessionStorage.setItem(LAST_SESSION_LS, JSON.stringify(obj)); } catch (e) {}
+    try { sessionStorage.setItem(LAST_SESSION_LS, JSON.stringify(obj)); if (E.cloudLocalSaved) E.cloudLocalSaved(); } catch (e) {}
   }
   function readCachedSession() {
     try { var r = sessionStorage.getItem(LAST_SESSION_LS); return r ? JSON.parse(r) : null; } catch (e) { return null; }
   }
-  function clearCachedSession() { try { sessionStorage.removeItem(LAST_SESSION_LS); } catch (e) {} }
+  function clearCachedSession() { try { sessionStorage.removeItem(LAST_SESSION_LS); if (E.cloudLocalSaved) E.cloudLocalSaved(); } catch (e) {} }
 
   /* ---------- AI 生成记录池（持久保存，未做完也可继续；可删除/清空） ---------- */
   var POOL_LS = 'EGL_AI_POOL_v1';
@@ -210,17 +210,17 @@
         list.pop();
         raw = JSON.stringify(list);
       }
-      localStorage.setItem(POOL_LS, raw);
+      localStorage.setItem(POOL_LS, raw); if (E.cloudLocalSaved) E.cloudLocalSaved();
       ok = true;
     } catch (e) { ok = false; }
     return ok ? entry : null;
   }
   function removeFromPool(id) {
     var list = getPool().filter(function (e) { return e.id !== id; });
-    try { localStorage.setItem(POOL_LS, JSON.stringify(list)); } catch (e) {}
+    try { localStorage.setItem(POOL_LS, JSON.stringify(list)); if (E.cloudLocalSaved) E.cloudLocalSaved(); } catch (e) {}
     return list;
   }
-  function clearPool() { try { localStorage.removeItem(POOL_LS); } catch (e) {} }
+  function clearPool() { try { localStorage.removeItem(POOL_LS); if (E.cloudLocalSaved) E.cloudLocalSaved(); } catch (e) {} }
   var _idSeq = 0;
   function nowId() {
     _idSeq = (_idSeq + 1) % 100000;
@@ -890,7 +890,7 @@
     } catch (e) { return {}; }
   }
   function writeExplainAll(o) {
-    try { localStorage.setItem(EXPLAIN_LS, JSON.stringify(o || {})); } catch (e) {}
+    try { localStorage.setItem(EXPLAIN_LS, JSON.stringify(o || {})); if (E.cloudLocalSaved) E.cloudLocalSaved(); } catch (e) {}
   }
   function getExplainCache(qid) {
     var all = readExplainAll();
@@ -907,7 +907,7 @@
     }
     writeExplainAll(all);
   }
-  function clearExplainCache() { try { localStorage.removeItem(EXPLAIN_LS); } catch (e) {} }
+  function clearExplainCache() { try { localStorage.removeItem(EXPLAIN_LS); if (E.cloudLocalSaved) E.cloudLocalSaved(); } catch (e) {} }
   /* 读取当前 AI 配置（含 Key），供“AI 讲解”等轻量功能直接调用 */
   function quickCfg() {
     var d = defaultConfig();

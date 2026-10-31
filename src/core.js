@@ -194,6 +194,9 @@
     if (typeof saveListener === 'function') {
       try { saveListener(saved); } catch (e2) {}
     }
+    if (saved && window.dispatchEvent && typeof window.CustomEvent === 'function') {
+      window.dispatchEvent(new window.CustomEvent('egl:data-saved'));
+    }
     return saved;
   }
   function setSaveListener(fn) { saveListener = fn; }
@@ -1113,6 +1116,7 @@
   EGL.save = save;
   EGL.setSaveListener = setSaveListener;
   EGL.loadData = loadData;
+  EGL.emptyData = emptyData;
   EGL.migrateData = migrateData;
   EGL.bank = bank;
   EGL.roadmap = roadmap;
