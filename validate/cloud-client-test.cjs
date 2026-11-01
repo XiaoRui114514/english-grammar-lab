@@ -17,6 +17,7 @@ const engine = fs.readFileSync(
   });
   const cloud = new Map();
   const testPassword = "  Synthetic MixedCase Password9!  ";
+  const newPassword = "Abc123";
   let requestDelay = 0,
     onPut;
   const pageErrors = [];
@@ -57,7 +58,7 @@ const engine = fs.readFileSync(
           out = { user: active };
         }
         else {
-          assert.equal(data.password, testPassword, "custom password preserves case and whitespace");
+          assert.equal(data.password, newPassword, "new password accepts six letters/digits");
           out = {
             user: active,
             recoveryCode: "c".repeat(48),
@@ -104,7 +105,7 @@ const engine = fs.readFileSync(
       .click();
     await page.getByLabel("用户名", { exact: true }).fill(user);
     await page.getByLabel("密码", { exact: true }).fill(testPassword);
-    await page.getByRole("button", { name: "继续", exact: true }).click();
+    await page.locator("form button[type=submit]").click();
     await page.waitForFunction(() => engine.getState().user !== null);
   }
   async function backupIsolation() {
@@ -148,7 +149,7 @@ const engine = fs.readFileSync(
     await p.waitForFunction(() => engine.getState().user === null);
     await p.getByLabel('用户名', {exact: true}).fill('backup_beta');
     await p.getByLabel('密码', {exact: true}).fill(testPassword);
-    await p.getByRole('button', {name: '继续', exact: true}).click();
+    await p.locator('form button[type=submit]').click();
     await p.waitForFunction(() => engine.getState().user?.id === 'backup_beta');
     await p.waitForFunction(() => document.querySelector('.learning-cloud-state').textContent === '已同步');
     await p.evaluate(() => { study.canary = 'RAW_STALE_ALPHA_CURRENT'; rawExtras = {canary: 'RAW_STALE_ALPHA_EXTRAS'}; });
@@ -257,7 +258,7 @@ const engine = fs.readFileSync(
   );
   await a.getByLabel("用户名", { exact: true }).fill("bob");
   await a.getByLabel("密码", { exact: true }).fill(testPassword);
-  await a.getByRole("button", { name: "继续", exact: true }).click();
+  await a.locator("form button[type=submit]").click();
   await a.waitForFunction(() => engine.getState().user?.id === "bob");
   assert.equal(
     await a.evaluate(() => study.count),
@@ -302,7 +303,7 @@ const engine = fs.readFileSync(
   await c.getByRole("button", { name: "账号 · 云同步", exact: true }).click();
   await c.getByLabel("用户名", { exact: true }).fill("charlie");
   await c.getByLabel("密码", { exact: true }).fill(testPassword);
-  await c.getByRole("button", { name: "继续", exact: true }).click();
+  await c.locator("form button[type=submit]").click();
   await c.waitForTimeout(500);
   assert.equal(
     await c.evaluate(() => study.count),
@@ -312,14 +313,25 @@ const engine = fs.readFileSync(
   assert.equal(cloud.has("charlie"), false, "quota failure never uploads");
   const d = await device();
   await d.getByRole("button", { name: "账号 · 云同步", exact: true }).click();
-  await d.getByLabel("账号操作").selectOption("register");
+  assert.equal(await d.locator('.learning-cloud-entry').innerText(), '', 'header contains only an icon');
+  assert.equal(await d.locator('.learning-cloud-entry svg').count(), 1);
+  assert.equal(await d.locator('.learning-cloud-entry .learning-cloud-state').count(), 0);
+  await d.getByRole('tab', {name: '注册', exact: true}).click();
   await d.getByLabel("用户名", { exact: true }).fill("echo");
   assert.equal(
     await d.getByLabel("密码", { exact: true }).isVisible(),
     true,
   );
-  await d.getByLabel("密码", { exact: true }).fill(testPassword);
-  await d.getByRole("button", { name: "继续", exact: true }).click();
+  for (const [value, valid] of [['abc12',false], ['abcdef',true], ['123456',true], ['ab@123',false]]) {
+    await d.getByLabel('密码', {exact:true}).fill(value);
+    assert.equal(await d.locator('form').evaluate(f => f.checkValidity()), valid, 'new password rule: ' + value);
+  }
+  await d.getByLabel('密码', {exact:true}).fill(newPassword);
+  await d.getByRole('button', {name:'显示密码',exact:true}).click();
+  assert.equal(await d.getByLabel('密码',{exact:true}).getAttribute('type'),'text');
+  await d.getByRole('button', {name:'隐藏密码',exact:true}).click();
+  assert.equal(await d.getByLabel('密码',{exact:true}).getAttribute('type'),'password');
+  await d.locator("form button[type=submit]").click();
   await d.waitForFunction(() => engine.getState().user?.id === "echo");
   assert.ok((await d.locator("dialog").innerText()).includes("c".repeat(48)));
   const stored = await d.evaluate(() =>
@@ -328,7 +340,7 @@ const engine = fs.readFileSync(
     ),
   );
   assert.equal(
-    stored.includes(testPassword),
+    stored.includes(newPassword),
     false,
     "password never persisted",
   );
@@ -346,15 +358,15 @@ const engine = fs.readFileSync(
   );
   await d.getByRole("button", { name: "退出账号", exact: true }).click();
   await d.waitForFunction(() => engine.getState().user === null);
-  await d.getByLabel("账号操作").selectOption("recover");
+  await d.getByRole("button", {name: "忘记密码？", exact: true}).click();
   await d.getByLabel("用户名", { exact: true }).fill("echo");
   await d.getByLabel("恢复码", { exact: true }).fill("c".repeat(48));
   assert.equal(
     await d.getByLabel("密码", { exact: true }).isVisible(),
     true,
   );
-  await d.getByLabel("密码", { exact: true }).fill(testPassword);
-  await d.getByRole("button", { name: "继续", exact: true }).click();
+  await d.getByLabel("密码", { exact: true }).fill(newPassword);
+  await d.locator("form button[type=submit]").click();
   await d.waitForFunction(() => engine.getState().user?.id === "echo");
   await d
     .getByRole("button", { name: "我已保存恢复码", exact: true })
