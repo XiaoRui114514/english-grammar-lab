@@ -16,6 +16,7 @@ const engine = fs.readFileSync(
     args: ["--no-sandbox"],
   });
   const cloud = new Map();
+  const testPassword = "  Synthetic MixedCase Password9!  ";
   let requestDelay = 0,
     onPut;
   const pageErrors = [];
@@ -49,16 +50,14 @@ const engine = fs.readFileSync(
       ) {
         const data = req.postDataJSON();
         active = { id: data.username, username: data.username };
-        if (url.pathname === "/api/auth/login") out = { user: active };
+        if (url.pathname === "/api/auth/login") {
+          assert.equal(data.password, testPassword, "login password preserves case and whitespace");
+          out = { user: active };
+        }
         else {
-          assert.equal(
-            Object.hasOwn(data, "password"),
-            false,
-            "registration/recovery never sends custom password",
-          );
+          assert.equal(data.password, testPassword, "custom password preserves case and whitespace");
           out = {
             user: active,
-            loginCode: "b".repeat(48),
             recoveryCode: "c".repeat(48),
           };
         }
@@ -102,7 +101,7 @@ const engine = fs.readFileSync(
       .getByRole("button", { name: "账号 · 云同步", exact: true })
       .click();
     await page.getByLabel("用户名", { exact: true }).fill(user);
-    await page.getByLabel("登录码", { exact: true }).fill("a".repeat(48));
+    await page.getByLabel("密码", { exact: true }).fill(testPassword);
     await page.getByRole("button", { name: "继续", exact: true }).click();
     await page.waitForFunction(() => engine.getState().user !== null);
   }
@@ -162,7 +161,15 @@ const engine = fs.readFileSync(
     study.count = 8;
     saved();
   });
-  await putStarted;
+  await Promise.race([
+    putStarted,
+    new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error("PUT did not begin during mutation regression")),
+        8000,
+      ),
+    ),
+  ]);
   await a.evaluate(() => {
     study.count = 9;
     saved();
@@ -175,6 +182,10 @@ const engine = fs.readFileSync(
     9,
     "edit during PUT is retained and retried",
   );
+  await a.waitForFunction(
+    () =>
+      document.querySelector(".learning-cloud-state").textContent === "已同步",
+  );
   await a.getByRole("button", { name: "退出账号", exact: true }).click();
   await a.waitForFunction(() => engine.getState().user === null);
   assert.equal(
@@ -183,7 +194,7 @@ const engine = fs.readFileSync(
     "logout restores original anonymous copy",
   );
   await a.getByLabel("用户名", { exact: true }).fill("bob");
-  await a.getByLabel("登录码", { exact: true }).fill("a".repeat(48));
+  await a.getByLabel("密码", { exact: true }).fill(testPassword);
   await a.getByRole("button", { name: "继续", exact: true }).click();
   await a.waitForFunction(() => engine.getState().user?.id === "bob");
   assert.equal(
@@ -228,7 +239,7 @@ const engine = fs.readFileSync(
   });
   await c.getByRole("button", { name: "账号 · 云同步", exact: true }).click();
   await c.getByLabel("用户名", { exact: true }).fill("charlie");
-  await c.getByLabel("登录码", { exact: true }).fill("a".repeat(48));
+  await c.getByLabel("密码", { exact: true }).fill(testPassword);
   await c.getByRole("button", { name: "继续", exact: true }).click();
   await c.waitForTimeout(500);
   assert.equal(
@@ -242,12 +253,12 @@ const engine = fs.readFileSync(
   await d.getByLabel("账号操作").selectOption("register");
   await d.getByLabel("用户名", { exact: true }).fill("echo");
   assert.equal(
-    await d.getByLabel("登录码", { exact: true }).isVisible(),
-    false,
+    await d.getByLabel("密码", { exact: true }).isVisible(),
+    true,
   );
+  await d.getByLabel("密码", { exact: true }).fill(testPassword);
   await d.getByRole("button", { name: "继续", exact: true }).click();
   await d.waitForFunction(() => engine.getState().user?.id === "echo");
-  assert.ok((await d.locator("dialog").innerText()).includes("b".repeat(48)));
   assert.ok((await d.locator("dialog").innerText()).includes("c".repeat(48)));
   const stored = await d.evaluate(() =>
     JSON.stringify(
@@ -255,9 +266,9 @@ const engine = fs.readFileSync(
     ),
   );
   assert.equal(
-    stored.includes("b".repeat(48)),
+    stored.includes(testPassword),
     false,
-    "login code never persisted",
+    "password never persisted",
   );
   assert.equal(
     stored.includes("c".repeat(48)),
@@ -265,7 +276,26 @@ const engine = fs.readFileSync(
     "recovery code never persisted",
   );
   await d
-    .getByRole("button", { name: "我已保存登录码与恢复码", exact: true })
+    .getByRole("button", { name: "我已保存恢复码", exact: true })
+    .click();
+  await d.waitForFunction(
+    () =>
+      document.querySelector(".learning-cloud-state").textContent === "已同步",
+  );
+  await d.getByRole("button", { name: "退出账号", exact: true }).click();
+  await d.waitForFunction(() => engine.getState().user === null);
+  await d.getByLabel("账号操作").selectOption("recover");
+  await d.getByLabel("用户名", { exact: true }).fill("echo");
+  await d.getByLabel("恢复码", { exact: true }).fill("c".repeat(48));
+  assert.equal(
+    await d.getByLabel("密码", { exact: true }).isVisible(),
+    true,
+  );
+  await d.getByLabel("密码", { exact: true }).fill(testPassword);
+  await d.getByRole("button", { name: "继续", exact: true }).click();
+  await d.waitForFunction(() => engine.getState().user?.id === "echo");
+  await d
+    .getByRole("button", { name: "我已保存恢复码", exact: true })
     .click();
   assert.deepEqual(pageErrors, [], "no uncaught browser exceptions");
   console.log(

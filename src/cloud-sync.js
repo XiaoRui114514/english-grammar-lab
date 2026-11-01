@@ -6,7 +6,7 @@
     if (!document.head || !root.addEventListener || !root.fetch) return;
     var key = 'learning-cloud-' + a.app + '-v1', backupPrefix = key + '-backup-';
     var meta, user = null, blocked = false, applying = false, busy = false, timer, generation = 0, conflict = null, recoveryCode = '';
-    var dialog, statusNode, errorNode, accountButton, controls, migration, recoveryNode, loginCodeNode, recoveryCodeNode;
+    var dialog, statusNode, errorNode, accountButton, controls, migration, recoveryNode, recoveryCodeNode;
     function clone(v) { return JSON.parse(JSON.stringify(v)); }
     function serial(v) { return JSON.stringify(v); }
     function extras() { return a.localExtras ? a.localExtras.read() : null; }
@@ -129,7 +129,7 @@
       await reconcile(typeof target.revision !== 'number');
     }
     async function logout() {
-      if (recoveryCode) throw new Error('请先确认已保存登录码与恢复码');
+      if (recoveryCode) throw new Error('请先确认已保存恢复码');
       if (busy) throw new Error('请等待当前同步完成');
       assertOwner(); saveOwned(); backup(snapshot(), null);
       await api('auth/logout', 'POST', {});
@@ -196,45 +196,43 @@
       statusNode = el('span', '本机学习', host); statusNode.className = 'learning-cloud-state'; statusNode.setAttribute('aria-live', 'polite');
       dialog = el('dialog', '', document.body); dialog.className = 'learning-cloud-dialog';
       el('h2', a.label + ' · 共用账号', dialog);
-      el('p', '古诗文与英语使用同一用户名和登录码。注册时系统生成 48 位随机登录码，请用密码管理器保存；无需登录也可继续本机学习。', dialog);
+      el('p', '古诗文与英语使用同一用户名和密码；无需登录也可继续本机学习。', dialog);
       var form = el('form', '', dialog); form.id = 'learning-cloud-form-' + a.app;
       var mode = el('select', '', form); mode.setAttribute('aria-label', '账号操作');
-      [['login','登录'],['register','注册并生成登录码'],['recover','恢复账号']].forEach(function (x) { var o = el('option', x[1], mode); o.value = x[0]; });
+      [['login','登录'],['register','注册'],['recover','恢复账号']].forEach(function (x) { var o = el('option', x[1], mode); o.value = x[0]; });
       var name = el('input', '', form); name.placeholder = '用户名：3–32 位字母、数字、_ 或 -'; name.autocomplete = 'username'; name.required = true; name.pattern = '[A-Za-z0-9_-]{3,32}'; name.setAttribute('aria-label','用户名');
-      var password = el('input', '', form); password.type = 'password'; password.placeholder = '系统生成的 48 位登录码'; password.minLength = 48; password.maxLength = 48; password.pattern = '[a-fA-F0-9]{48}'; password.autocomplete = 'current-password'; password.required = true; password.setAttribute('aria-label','登录码');
+      var password = el('input', '', form); password.type = 'password'; password.placeholder = '密码：10–128 个字符'; password.minLength = 10; password.maxLength = 128; password.autocomplete = 'current-password'; password.required = true; password.setAttribute('aria-label','密码');
       var recovery = el('input', '', form); recovery.placeholder = '恢复码'; recovery.autocomplete = 'off'; recovery.hidden = true; recovery.setAttribute('aria-label','恢复码');
-      mode.addEventListener('change', function () { password.value = ''; recovery.value = ''; recovery.hidden = mode.value !== 'recover'; recovery.required = mode.value === 'recover'; password.hidden = mode.value !== 'login'; password.required = mode.value === 'login'; });
+      mode.addEventListener('change', function () { password.value = ''; recovery.value = ''; recovery.hidden = mode.value !== 'recover'; recovery.required = mode.value === 'recover'; password.autocomplete = mode.value === 'login' ? 'current-password' : 'new-password'; password.placeholder = mode.value === 'recover' ? '新密码：10–128 个字符' : '密码：10–128 个字符'; });
       var submit = el('button', '继续', form); submit.type = 'submit';
-      el('p', '不能自行设置短密码。请将系统生成的登录码存入密码管理器，并另行保管恢复码。不使用邮箱；两者同时丢失后无法恢复账号。', form);
+      el('p', '请使用独立密码并保存恢复码。不使用邮箱，无法通过邮件找回密码；密码和恢复码同时丢失后无法恢复账号。', form);
       form.addEventListener('submit', function (ev) {
         ev.preventDefault(); if (busy || submit.disabled) return;
         submit.disabled = true; errorNode.textContent = '';
         Promise.resolve().then(function () {
           assertOwner(); saveOwned();
-          var payload = { username: name.value.trim() };
-          if (mode.value === 'login') payload.password = password.value.trim().toLowerCase();
+          var payload = { username: name.value.trim(), password: password.value };
           if (mode.value === 'recover') payload.recoveryCode = recovery.value.trim();
           return api('auth/' + mode.value, 'POST', payload);
         }).then(async function (out) {
           password.value = ''; recovery.value = '';
-          if (out.recoveryCode || out.loginCode) {
-            recoveryCode = out.recoveryCode || out.loginCode; recoveryNode.hidden = false;
-            loginCodeNode.textContent = out.loginCode || ''; recoveryCodeNode.textContent = out.recoveryCode || '';
+          if (out.recoveryCode) {
+            recoveryCode = out.recoveryCode; recoveryNode.hidden = false;
+            recoveryCodeNode.textContent = out.recoveryCode;
           }
           blocked = false; await enter(out.user);
         }).catch(fail).finally(function () { submit.disabled = false; });
       });
       recoveryNode = el('section', '', dialog); recoveryNode.hidden = true;
-      el('p', '以下登录码与恢复码只显示一次，请立即分别保存。恢复账号会使旧登录码失效并生成新码。', recoveryNode);
-      el('p', '登录码（两个网站共用）', recoveryNode); loginCodeNode = el('code', '', recoveryNode);
-      el('p', '恢复码（忘记登录码时使用）', recoveryNode); recoveryCodeNode = el('code', '', recoveryNode);
-      action(recoveryNode, '下载账号凭据', function () {
-        var text = '用户名：' + name.value.trim() + '\n登录码：' + loginCodeNode.textContent + '\n恢复码：' + recoveryCodeNode.textContent + '\n请保存在安全位置，不要上传至 GitHub 或发送给他人。\n';
+      el('p', '恢复码只显示一次，请立即保存。用恢复码设置新密码后会生成新的恢复码。', recoveryNode);
+      el('p', '恢复码（忘记密码时使用）', recoveryNode); recoveryCodeNode = el('code', '', recoveryNode);
+      action(recoveryNode, '下载恢复码', function () {
+        var text = '用户名：' + name.value.trim() + '\n恢复码：' + recoveryCodeNode.textContent + '\n请保存在安全位置，不要上传至 GitHub 或发送给他人。\n';
         var url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
-        var link = document.createElement('a'); link.href = url; link.download = 'learning-account-private.txt'; link.click();
+        var link = document.createElement('a'); link.href = url; link.download = 'learning-account-recovery-private.txt'; link.click();
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
       });
-      action(recoveryNode, '我已保存登录码与恢复码', function () { recoveryCode = ''; recoveryNode.hidden = true; loginCodeNode.textContent = ''; recoveryCodeNode.textContent = ''; });
+      action(recoveryNode, '我已保存恢复码', function () { recoveryCode = ''; recoveryNode.hidden = true; recoveryCodeNode.textContent = ''; });
       controls = el('div', '', dialog); controls.hidden = true;
       action(controls, '立即同步', function () { return reconcile(false); }); action(controls, '退出账号', logout);
       migration = el('section', '', dialog); migration.hidden = true; el('p', '', migration);
@@ -244,7 +242,7 @@
       action(migration, '下载云端学习记录', function () { if (conflict) downloadData(conflict.data, 'cloud'); });
       el('p', '关闭此窗口可继续学习；作出选择前暂停自动同步。下载的单份学习记录可通过原数据导入功能恢复。', migration);
       action(dialog, '下载同步备份', downloadBackups);
-      action(dialog, '关闭', function () { if (recoveryCode) throw new Error('请先确认已保存登录码与恢复码'); dialog.close(); });
+      action(dialog, '关闭', function () { if (recoveryCode) throw new Error('请先确认已保存恢复码'); dialog.close(); });
       dialog.addEventListener('cancel', function (ev) { if (recoveryCode) ev.preventDefault(); });
       errorNode = el('p', '', dialog); errorNode.className = 'learning-cloud-error'; errorNode.setAttribute('role', 'alert');
     }
