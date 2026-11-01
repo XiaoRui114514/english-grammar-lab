@@ -9,12 +9,12 @@
   var LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
   var S = null; // session
   var DRAFT_KEY = 'EGL_QUIZ_DRAFT_v1';
-  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch(e) {} }
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); if (E.cloudLocalSaved) E.cloudLocalSaved(); } catch(e) {} }
   function saveDraft() {
     if (!S || S._finished) return;
     try { localStorage.setItem(DRAFT_KEY, JSON.stringify({version:1, savedAt:Date.now(), session:S}, function(k,v) {
       return k === '_timerId' || k === '_blankStart' ? undefined : v;
-    })); } catch(e) { if (!S._draftWarned) { S._draftWarned=true; U.toast('练习草稿未能保存，请保留页面', 'bad'); } }
+    })); if (E.cloudLocalSaved) E.cloudLocalSaved(); } catch(e) { if (!S._draftWarned) { S._draftWarned=true; U.toast('练习草稿未能保存，请保留页面', 'bad'); } }
   }
   function readDraft() {
     try {

@@ -59,7 +59,7 @@ try {
   if (pkg.version) appVer = 'v' + pkg.version;
 } catch (e) { /* package.json 缺失时用兜底版本，不阻断构建 */ }
 
-const appParts = ['brand.js', 'core.js', 'ui-helpers.js', 'print.js', 'ai.js', 'ui-views.js', 'ui-quiz.js', 'ui-ai.js', 'boot.js']
+const appParts = ['brand.js', 'core.js', 'ui-helpers.js', 'print.js', 'ai.js', 'ui-views.js', 'ui-quiz.js', 'ui-ai.js', 'boot.js', 'cloud-data.js', 'cloud-sync.js', 'cloud.js']
   .map(f => read(f))
   .map(code => code.indexOf('"/*__BRAND_CSS__*/"') < 0
     ? code
