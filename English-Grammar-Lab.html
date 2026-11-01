@@ -16977,9 +16977,9 @@ html[data-font="xl"] .answer-input input { font-size: 20px; }
       } else meta.anonymous = s;
       writeMeta();
     }
-    function backup(local, remote) {
+    function backup(local, remote, quarantined) {
       // Throw on quota/storage errors before any destructive replacement.
-      localStorage.setItem(backupPrefix + Date.now() + '-' + Math.random().toString(36).slice(2), serial({ savedAt: new Date().toISOString(), local: local, cloud: remote || null }));
+      localStorage.setItem(backupPrefix + Date.now() + '-' + Math.random().toString(36).slice(2), serial({ owner: meta.owner, quarantined: quarantined === true, savedAt: new Date().toISOString(), local: local, cloud: remote || null }));
     }
     function apply(s, reason) {
       applying = true;
@@ -17122,11 +17122,20 @@ html[data-font="xl"] .answer-input input { font-size: 20px; }
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     }
     function downloadBackups() {
+      assertOwner();
       var all = [];
       for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i); if (k.indexOf(backupPrefix) === 0) all.push(JSON.parse(localStorage.getItem(k)));
+        var k = localStorage.key(i);
+        if (k.indexOf(backupPrefix) !== 0) continue;
+        var record;
+        try { record = JSON.parse(localStorage.getItem(k)); } catch (e) { continue; }
+        // Legacy and quarantined records stay intact, but their owner is uncertain.
+        if (record && Object.prototype.hasOwnProperty.call(record, 'owner') && record.owner === meta.owner && record.quarantined !== true) all.push(record);
       }
-      var url = URL.createObjectURL(new Blob([serial({ application: a.app, backups: all, current: snapshot() })], { type: 'application/json' }));
+      var current = meta.owner ? meta.accounts[meta.owner] : meta.anonymous;
+      if (meta.owner && !current) throw new Error('账号备份归属无法确认，请刷新后重试');
+      current = current ? clone(current) : snapshot();
+      var url = URL.createObjectURL(new Blob([serial({ application: a.app, backups: all, current: current })], { type: 'application/json' }));
       var link = document.createElement('a'); link.href = url; link.download = a.app + '-cloud-backups.json'; link.click();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     }
@@ -17202,7 +17211,7 @@ html[data-font="xl"] .answer-input input { font-size: 20px; }
     try {
       var canonical = meta.owner ? meta.accounts[meta.owner] : null;
       if (canonical && (serial(canonical.data) !== serial(a.getData()) || serial(canonical.extras || null) !== serial(extras() || null))) {
-        backup(snapshot(), { ownerSnapshot: canonical });
+        backup(snapshot(), { ownerSnapshot: canonical }, true);
         apply(canonical, 'startup');
         errorNode.textContent = '检测到其他标签页或旧版本写入，已备份并恢复此账号最近保存的记录。';
       }

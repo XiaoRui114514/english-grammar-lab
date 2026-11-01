@@ -20,7 +20,7 @@ const engine = fs.readFileSync(
   let requestDelay = 0,
     onPut;
   const pageErrors = [];
-  async function device(seed = { count: 0 }) {
+  async function device(seed = { count: 0 }, withExtras = false) {
     const context = await browser.newContext();
     const page = await context.newPage();
     page.on("pageerror", (e) => pageErrors.push(e.message));
@@ -36,7 +36,9 @@ const engine = fs.readFileSync(
             engine +
             '</script><script>window.study=JSON.parse(localStorage.getItem("audit-study")||' +
             JSON.stringify(JSON.stringify(seed)) +
-            ');window.engine=LearningCloud.start({app:"english",label:"测试",mount:document.getElementById("mount"),getData:()=>study,setData:d=>{study=d;localStorage.setItem("audit-study",JSON.stringify(d))},defaults:()=>({count:0}),isEmpty:d=>d.count===0,subscribe:fn=>{window.saved=()=>{localStorage.setItem("audit-study",JSON.stringify(study));fn()}}});</script></body></html>',
+            ');window.rawExtras={};window.engine=LearningCloud.start({app:"english",label:"测试",mount:document.getElementById("mount"),getData:()=>study,setData:d=>{study=d;localStorage.setItem("audit-study",JSON.stringify(d))},defaults:()=>({count:0}),isEmpty:d=>d.count===0,subscribe:fn=>{window.saved=()=>{localStorage.setItem("audit-study",JSON.stringify(study));fn()}}' +
+            (withExtras ? ',localExtras:{read:()=>rawExtras,apply:x=>{rawExtras=x||{}}}' : '') +
+            '});</script></body></html>',
         });
       if (!url.pathname.startsWith("/api/"))
         return route.fulfill({ status: 404, body: "" });
@@ -104,6 +106,66 @@ const engine = fs.readFileSync(
     await page.getByLabel("密码", { exact: true }).fill(testPassword);
     await page.getByRole("button", { name: "继续", exact: true }).click();
     await page.waitForFunction(() => engine.getState().user !== null);
+  }
+  async function backupIsolation() {
+    const p = await device({count: 0}, true);
+    const prefix = 'learning-cloud-english-v1-backup-';
+    await p.evaluate((prefix) => {
+      const record = (owner, canary, extra = {}) => ({
+        owner, local: {data: {count: 0, canary}}, cloud: null, ...extra,
+      });
+      localStorage.setItem(prefix + 'anon', JSON.stringify(record(null, 'ANONYMOUS_ONLY')));
+      localStorage.setItem(prefix + 'alpha', JSON.stringify(record('backup_alpha', 'ALPHA_ONLY')));
+      localStorage.setItem(prefix + 'beta', JSON.stringify(record('backup_beta', 'BETA_ONLY')));
+      localStorage.setItem(prefix + 'quarantine', JSON.stringify(record('backup_beta', 'QUARANTINED_OLD_ALPHA', {quarantined: true})));
+      localStorage.setItem(prefix + 'legacy', JSON.stringify({local: {data: {count: 0, canary: 'UNTAGGED_LEGACY'}}}));
+      localStorage.setItem(prefix + 'malformed', '{synthetic-malformed');
+      window.auditDownloads = [];
+      const create = URL.createObjectURL;
+      URL.createObjectURL = function (blob) {
+        blob.text().then(text => window.auditDownloads.push(JSON.parse(text)));
+        return create.call(URL, blob);
+      };
+    }, prefix);
+    let downloads = 0;
+    async function exported(owner, allowed, forbidden) {
+      await p.getByRole('button', {name: '下载同步备份', exact: true}).click();
+      downloads++;
+      await p.waitForFunction(n => auditDownloads.length === n, downloads);
+      const out = await p.evaluate(() => auditDownloads[auditDownloads.length - 1]);
+      assert(out.backups.some(b => b.local?.data?.canary === allowed), 'own backup remains downloadable');
+      assert(out.backups.every(b => Object.hasOwn(b, 'owner') && b.owner === owner && !b.quarantined), 'every exported backup belongs to the active owner');
+      const text = JSON.stringify(out);
+      forbidden.forEach(canary => assert.equal(text.includes(canary), false, 'other-owner or ambiguous backup excluded: ' + canary));
+    }
+    await p.getByRole('button', {name: '账号 · 云同步', exact: true}).click();
+    await exported(null, 'ANONYMOUS_ONLY', ['ALPHA_ONLY', 'BETA_ONLY', 'QUARANTINED_OLD_ALPHA', 'UNTAGGED_LEGACY']);
+    await p.getByRole('button', {name: '关闭', exact: true}).click();
+    await login(p, 'backup_alpha');
+    await p.waitForFunction(() => document.querySelector('.learning-cloud-state').textContent === '已同步');
+    await exported('backup_alpha', 'ALPHA_ONLY', ['ANONYMOUS_ONLY', 'BETA_ONLY', 'QUARANTINED_OLD_ALPHA', 'UNTAGGED_LEGACY']);
+    await p.getByRole('button', {name: '退出账号', exact: true}).click();
+    await p.waitForFunction(() => engine.getState().user === null);
+    await p.getByLabel('用户名', {exact: true}).fill('backup_beta');
+    await p.getByLabel('密码', {exact: true}).fill(testPassword);
+    await p.getByRole('button', {name: '继续', exact: true}).click();
+    await p.waitForFunction(() => engine.getState().user?.id === 'backup_beta');
+    await p.waitForFunction(() => document.querySelector('.learning-cloud-state').textContent === '已同步');
+    await p.evaluate(() => { study.canary = 'RAW_STALE_ALPHA_CURRENT'; rawExtras = {canary: 'RAW_STALE_ALPHA_EXTRAS'}; });
+    await exported('backup_beta', 'BETA_ONLY', ['ANONYMOUS_ONLY', 'ALPHA_ONLY', 'QUARANTINED_OLD_ALPHA', 'UNTAGGED_LEGACY', 'RAW_STALE_ALPHA_CURRENT', 'RAW_STALE_ALPHA_EXTRAS']);
+    await p.evaluate(() => { delete study.canary; rawExtras = {}; });
+    await p.getByRole('button', {name: '退出账号', exact: true}).click();
+    await p.waitForFunction(() => engine.getState().user === null);
+    await exported(null, 'ANONYMOUS_ONLY', ['ALPHA_ONLY', 'BETA_ONLY', 'QUARANTINED_OLD_ALPHA', 'UNTAGGED_LEGACY']);
+    assert.equal(await p.evaluate(prefix => localStorage.getItem(prefix + 'legacy') !== null && localStorage.getItem(prefix + 'malformed') !== null && localStorage.getItem(prefix + 'quarantine') !== null, prefix), true, 'excluded historical backups are preserved locally');
+    await p.context().close();
+    console.log('Chromium backup export isolation PASSED: anonymous, account A and account B receive only their own backups; legacy, malformed and quarantined backups remain stored and are excluded.');
+  }
+  if (process.argv.includes('--backup-only')) {
+    await backupIsolation();
+    assert.deepEqual(pageErrors, [], 'no uncaught browser exceptions');
+    await browser.close();
+    return;
   }
   const a = await device({ count: 4 });
   await login(a, "alice");
@@ -297,6 +359,7 @@ const engine = fs.readFileSync(
   await d
     .getByRole("button", { name: "我已保存恢复码", exact: true })
     .click();
+  await backupIsolation();
   assert.deepEqual(pageErrors, [], "no uncaught browser exceptions");
   console.log(
     "Chromium client regression PASSED: first-login choice, two devices, conflict, offline retry, account isolation, stale-tab canonical restore, in-flight mutation, backup quota fail-closed. Mock API; real shared engine.",
