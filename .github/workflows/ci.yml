@@ -35,3 +35,5 @@ jobs:
         run: npm ci && npx playwright install --with-deps chromium
       - name: 验证刷新恢复与完整备份
         run: npm run test:interaction
+      - name: 验证账号切换、同步冲突与本机数据隔离
+        run: npm run test:cloud:browser
