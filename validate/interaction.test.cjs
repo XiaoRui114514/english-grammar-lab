@@ -13,6 +13,7 @@ test('草稿跨刷新恢复、最终答案判分和完整备份',async t=>{
  t.after(async()=>{await browser.close();await new Promise(r=>server.close(r));});
  const page=await browser.newPage(); const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:'+server.address().port);
+ await page.locator('#eglLicense [data-egl-ok]').click();
  await page.evaluate(()=>{let qs=EGL.paperToQuestions(EGL.paperById('paper01')).slice(0,2);EGL.quiz.startAI(qs,{title:'恢复回归'});});
  const values=await page.evaluate(()=>EGL.quiz.readDraft().session.questions.map(q=>q.accepted[0]));
  await page.locator('.sq-card input[type=text]').nth(0).fill('unfinished answer');
@@ -35,5 +36,25 @@ test('草稿跨刷新恢复、最终答案判分和完整备份',async t=>{
   return {restored,pool:localStorage.getItem('EGL_AI_POOL_v1'),leaked:backup.includes('do-not-export'),strict,loose};
  });
  assert.deepEqual(checks,{restored:true,pool:'[]',leaked:false,strict:false,loose:true});
+ assert.deepEqual(errors,[]);
+});
+
+test('专卷的不同错题在提交、刷新和备份恢复后保持独立',async t=>{
+ const html=fs.readFileSync(path.join(__dirname,'../English-Grammar-Lab.html'));
+ const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(html);});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
+ t.after(async()=>{await browser.close();await new Promise(r=>server.close(r));});
+ const page=await browser.newPage(); const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:'+server.address().port);
+ await page.locator('#eglLicense [data-egl-ok]').click();
+ const ids=await page.evaluate(()=>{EGL.buildCustomPaper();EGL.data.custom.items=EGL.data.custom.items.filter(q=>q.type==='input').slice(0,2);const ids=EGL.customToQuestions().map(q=>q.id);EGL.quiz.startCustom();return ids;});
+ assert.equal(ids.length,2);
+ for(const input of await page.locator('.sq-card input[type=text]').all())await input.fill('synthetic wrong answer');
+ await page.locator('#sheetSubmit').click();
+ assert.deepEqual((await page.evaluate(()=>EGL.data.wrongBook.map(w=>w.qid))).sort(),ids.slice().sort());
+ await page.reload();
+ const restored=await page.evaluate(()=>{const backup=EGL.exportData();EGL.resetData();const ok=EGL.importData(backup);return {ok,ids:EGL.data.wrongBook.map(w=>w.qid),review:EGL.data.wrongBook.map(w=>EGL.resolveWrongQuestion(w).id)}});
+ assert.equal(restored.ok,true);assert.deepEqual(restored.ids.sort(),ids.slice().sort());assert.deepEqual(restored.review.sort(),ids.slice().sort());
  assert.deepEqual(errors,[]);
 });

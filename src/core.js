@@ -129,6 +129,32 @@
     };
   }
 
+  // 已有 id 保持不变。旧专卷只保存题目内容，使用稳定指纹补齐身份，
+  // 不依赖组卷时间/顺序，也不猜测或合并已经丢失的历史错题。
+  function hasQuestionId(id) {
+    return typeof id === 'string' && id.trim() !== '' && id !== 'undefined' && id !== 'null';
+  }
+  function legacyCustomId(q) {
+    var choice = q.type === 'choice';
+    var accepted = q.accepted && q.accepted.length ? q.accepted.slice() : [q.answerText || ''];
+    var signature = JSON.stringify([
+      choice ? 'choice' : 'input', q.question || '', q.hint || '',
+      choice ? null : accepted.sort(), choice ? (q.options || null) : null,
+      choice ? (typeof q.answerIndex === 'number' ? q.answerIndex : 0) : null
+    ]);
+    var a = 2166136261, b = 5381;
+    for (var i = 0; i < signature.length; i++) {
+      var code = signature.charCodeAt(i);
+      a = Math.imul(a ^ code, 16777619);
+      b = Math.imul(b, 33) ^ code;
+    }
+    return 'custom_legacy_' + (a >>> 0).toString(16) + '_' + (b >>> 0).toString(16);
+  }
+  function customItemId(q) {
+    if (!hasQuestionId(q.id)) q.id = legacyCustomId(q);
+    return q.id;
+  }
+
   /* 老错题补齐 v3 字段（不丢原数据，只补默认值） */
   function normalizeWrongEntry(w) {
     if (!w || typeof w !== 'object') return w;
@@ -139,6 +165,10 @@
     if (!w.notes) w.notes = '';
     if (!w.catId) w.catId = catOfTopicId(w.topicId || '');
     if (!('snapshot' in w)) w.snapshot = null;
+    if (w.source === 'custom' && !hasQuestionId(w.qid) && w.snapshot && w.snapshot.question) {
+      w.qid = customItemId(w.snapshot);
+      if (!w.id || w.id === 'wb_undefined' || w.id === 'wb_null' || w.id === 'wb_') w.id = 'wb_' + w.qid;
+    }
     return w;
   }
   function ensureDataShape(d) {
@@ -163,6 +193,9 @@
     if (typeof d.agg.timeCount !== 'number') d.agg.timeCount = 0;
     if (!('custom' in d)) d.custom = null;
     d.wrongBook.forEach(normalizeWrongEntry);
+    if (d.custom && Array.isArray(d.custom.items)) d.custom.items.forEach(function (it) {
+      if (it && typeof it === 'object') customItemId(it);
+    });
     return d;
   }
   /* v1 / v2 → v3：只补字段，不删任何历史记录 */
@@ -355,6 +388,7 @@
     if (!q) return null;
     q = q || {};
     return {
+      id: hasQuestionId(q.id) ? q.id : legacyCustomId(q),
       type: q.type === 'choice' ? 'choice' : 'input',
       question: q.question || '',
       hint: q.hint || '',
@@ -380,6 +414,7 @@
     };
   }
   function addWrong(item) {
+    if (item.source === 'custom' && !hasQuestionId(item.qid)) item.qid = customItemId(item.snapshot || item);
     var found = findWrongEntry(item.qid);
     if (found) {
       // 又错了：错误次数累加，并把复习计划打回第一阶（当天再到期）
@@ -491,6 +526,7 @@
      4) 都不行返回 null（老数据只做"看解析"） */
   function resolveWrongQuestion(w) {
     if (!w) return null;
+    normalizeWrongEntry(w);
     var q = null;
     if (w.snapshot && w.snapshot.question) {
       var s = w.snapshot;
@@ -957,7 +993,7 @@
     return cust.items.map(function (it, i) {
       var isChoice = it.type === 'choice' && it.options && it.options.length >= 2;
       return {
-        id: it.id,
+        id: customItemId(it),
         source: 'custom',
         isCustom: true,
         type: isChoice ? 'choice' : 'input',
