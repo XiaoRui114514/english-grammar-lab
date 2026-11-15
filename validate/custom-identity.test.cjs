@@ -63,3 +63,18 @@ test('existing identifiers are retained and old identical items deduplicate cons
   mistake(E,E.customToQuestions({items:[q]})[0]); mistake(E,E.customToQuestions({items:[copy]})[0]);
   assert.equal(E.data.wrongBook.length,1); assert.equal(E.data.wrongBook[0].times,2);
 });
+
+
+test('legacy stored items and their expanded snapshots resolve to the same identity',()=>{
+  const E=app();
+  const input={type:'input',question:'She ___ daily.',accepted:['reads'],answerIndex:null,answerText:''};
+  const inputSnapshot={...input,answerIndex:0};
+  const choice={type:'choice',question:'He ___ here.',options:['live','lives'],answerIndex:1,accepted:[],answerText:'lives'};
+  const choiceSnapshot={...choice,accepted:['lives']};
+  const data=E.emptyData();data.custom={items:[input,choice]};
+  data.wrongBook=[inputSnapshot,choiceSnapshot].map(snapshot=>({source:'custom',id:'wb_undefined',snapshot}));
+  assert.equal(E.importData(JSON.stringify(data)),true);
+  const ids=E.customToQuestions().map(q=>q.id);
+  assert.deepEqual(plain(E.data.wrongBook.map(w=>w.qid)),plain(ids));
+  assert.notEqual(ids[0],ids[1]);
+});

@@ -135,10 +135,12 @@
     return typeof id === 'string' && id.trim() !== '' && id !== 'undefined' && id !== 'null';
   }
   function legacyCustomId(q) {
+    var choice = q.type === 'choice';
+    var accepted = q.accepted && q.accepted.length ? q.accepted.slice() : [q.answerText || ''];
     var signature = JSON.stringify([
-      q.type === 'choice' ? 'choice' : 'input', q.question || '', q.hint || '',
-      q.accepted || [], q.options || null,
-      typeof q.answerIndex === 'number' ? q.answerIndex : null, q.answerText || ''
+      choice ? 'choice' : 'input', q.question || '', q.hint || '',
+      choice ? null : accepted.sort(), choice ? (q.options || null) : null,
+      choice ? (typeof q.answerIndex === 'number' ? q.answerIndex : 0) : null
     ]);
     var a = 2166136261, b = 5381;
     for (var i = 0; i < signature.length; i++) {
